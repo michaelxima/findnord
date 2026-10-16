@@ -5100,14 +5100,14 @@ function resizeImageFile(file) {
 function addSellPhoto() {
   if (sellPhotos.length >= MAX_LISTING_PHOTOS) return;
   const input = document.getElementById("sell-photo-input");
-  if (input) input.click();
+  if (input) {
+    input.value = "";
+    input.click();
+  }
 }
 
-async function handleSellPhotoFilesSelected(event) {
-  const input = event.target;
-  const files = Array.from(input.files || []);
-  input.value = "";
-  if (!files.length) return;
+async function processPhotoFiles(files) {
+  if (!files || !files.length) return;
   const remainingSlots = MAX_LISTING_PHOTOS - sellPhotos.length;
   for (const file of files.slice(0, Math.max(0, remainingSlots))) {
     try {
@@ -5119,6 +5119,14 @@ async function handleSellPhotoFilesSelected(event) {
       showToast(t("photo.uploadFailed"));
     }
   }
+}
+
+async function handleSellPhotoFilesSelected(event) {
+  const input = event.target;
+  const files = Array.from(input.files || []);
+  input.value = "";
+  if (!files.length) return;
+  await processPhotoFiles(files);
 }
 
 function removeSellPhoto(index) {
@@ -5156,6 +5164,13 @@ function renderSellPhotos() {
       ? `<button type="button" class="add-photo-tile" id="add-sell-photo" aria-label="Add a photo">+ Add photo</button>`
       : "";
   grid.innerHTML = tiles + addTile;
+  const addBtn = document.getElementById("add-sell-photo");
+  if (addBtn) {
+    addBtn.onclick = (e) => {
+      e.preventDefault();
+      addSellPhoto();
+    };
+  }
 }
 
 // NM-A19: `price` is now stored as a plain numeric string (or the "Free"
@@ -5538,6 +5553,39 @@ function bindEvents() {
   document.getElementById("sell-form").addEventListener("change", handleSellFormChange);
   document.getElementById("generate-ai-photo").addEventListener("click", generateAiPhoto);
   document.getElementById("sell-photo-input").addEventListener("change", handleSellPhotoFilesSelected);
+
+  const photoGrid = document.getElementById("sell-photo-grid");
+  if (photoGrid) {
+    ["dragenter", "dragover"].forEach((eventName) => {
+      photoGrid.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        photoGrid.classList.add("drag-active");
+      });
+    });
+    ["dragleave", "dragend"].forEach((eventName) => {
+      photoGrid.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        photoGrid.classList.remove("drag-active");
+      });
+    });
+    photoGrid.addEventListener("drop", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      photoGrid.classList.remove("drag-active");
+      const files = Array.from(e.dataTransfer?.files || []);
+      if (files.length) processPhotoFiles(files);
+    });
+  }
+
+  const photosLabel = document.getElementById("sell-photos-label");
+  if (photosLabel) {
+    photosLabel.style.cursor = "pointer";
+    photosLabel.addEventListener("click", () => {
+      if (sellPhotos.length < MAX_LISTING_PHOTOS) addSellPhoto();
+    });
+  }
 
   document.getElementById("login-form").addEventListener("submit", handleLoginPageFormSubmit);
   document.getElementById("login-guest-button").addEventListener("click", handleLoginPageGuestClick);

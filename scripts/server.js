@@ -857,7 +857,7 @@ ${base}/openapi.json
 function startServer(options = {}) {
   const db = openDatabase(options.dbPath, { uploadsDir: options.uploadsDir });
   const app = createApp(db, options.uploadsDir);
-  const server = app.listen(options.port ?? port, () => {
+  const server = app.listen(options.port ?? port, "0.0.0.0", () => {
     if (!options.silent) {
       console.log(`FindNord running at http://127.0.0.1:${server.address().port}`);
       if (!process.env.OPENAI_API_KEY) {

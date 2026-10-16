@@ -1,6 +1,11 @@
-node_modules/
-data/findnord.db
-data/findnord.db-wal
-data/findnord.db-shm
+# Local runtime output
+server.log
+data/
 uploads/*
 !uploads/.gitkeep
+
+# Installed dependencies
+node_modules/
+
+# Browser automation scratch data
+.playwright-mcp/
