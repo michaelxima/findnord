@@ -1059,7 +1059,7 @@ assert.match(
 // anywhere documenting the (already-safe-by-default) real env vars this app
 // reads -- an operator had to read source to discover the list.
 const envExample = fs.readFileSync(path.join(root, ".env.example"), "utf8");
-["PORT", "NODE_ENV", "DB_PATH", "SEED_DEMO_DATA", "ADMIN_EMAIL", "GOOGLE_CLIENT_ID", "OPENAI_API_KEY", "BOOST_PAYMENTS_ENABLED", "STRIPE_SECRET_KEY", "STRIPE_WEBHOOK_SECRET"].forEach((name) => {
+["PORT", "NODE_ENV", "DB_PATH", "UPLOADS_DIR", "SEED_DEMO_DATA", "ADMIN_EMAIL", "GOOGLE_CLIENT_ID", "OPENAI_API_KEY", "BOOST_PAYMENTS_ENABLED", "STRIPE_SECRET_KEY", "STRIPE_WEBHOOK_SECRET"].forEach((name) => {
   assert.match(envExample, new RegExp(`${name}=`), `.env.example must document ${name}`);
 });
 const readmeMd = fs.readFileSync(path.join(root, "README.md"), "utf8");

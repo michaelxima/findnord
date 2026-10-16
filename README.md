@@ -25,10 +25,12 @@ Runs `tests/e2e.js` — a ~5,100-line suite with 1,478+ real assertions against 
 
 See `.env.example` for the full list with explanations. Nothing is required for local dev — every variable has a safe fallback or a clear runtime error if left unset. For a real production deploy, see `DEPLOYMENT_READINESS_PLAN.md`, particularly:
 - `NODE_ENV=production` (enables the session cookie's `Secure` flag and disables demo-data seeding)
-- `DB_PATH` (point this at a real persistent volume — the default local path does not survive a redeploy on most PaaS hosting)
+- `DB_PATH` and `UPLOADS_DIR` (both must point at persistent storage — the local defaults do not survive a redeploy on most PaaS hosting)
 - `ADMIN_EMAIL`, `GOOGLE_CLIENT_ID`, `OPENAI_API_KEY`, `BOOST_PAYMENTS_ENABLED` + `STRIPE_SECRET_KEY`/`STRIPE_WEBHOOK_SECRET` as needed for those optional features
 - `AWS_REGION`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `SES_FROM_EMAIL` (for real password-reset emails via AWS SES)
 - `SENTRY_DSN` (for error tracking in production)
+
+On Railway, add one service volume in the dashboard, mount it at `/app/storage`, set `DB_PATH=/app/storage/findnord.db`, and set `UPLOADS_DIR=/app/storage/uploads`. Railway injects `PORT` automatically.
 
 ## Deployment readiness
 

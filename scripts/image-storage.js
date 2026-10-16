@@ -34,7 +34,10 @@ const INLINE_DATA_URL_PATTERN = /^url\(data:([\w./+-]+);base64,([^)]+)\)(.*)$/;
 const LOCAL_FILE_URL_PATTERN = /^url\(\/uploads\/([^)]+)\)/;
 
 function createImageStorage(uploadsDir) {
-  const resolvedDir = uploadsDir || DEFAULT_UPLOADS_DIR;
+  // Explicit caller options win for tests and embedding. Production can
+  // point this at the same persistent-volume root as DB_PATH without
+  // changing the local-development default.
+  const resolvedDir = uploadsDir || process.env.UPLOADS_DIR || DEFAULT_UPLOADS_DIR;
 
   function ensureUploadsDir() {
     fs.mkdirSync(resolvedDir, { recursive: true });

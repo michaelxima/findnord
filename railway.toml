@@ -1,43 +1,31 @@
-# Railway configuration for FindNord
-# This file configures the deployment on Railway with persistent volumes
+# Railway runtime configuration for FindNord.
+# Persistent volumes cannot be provisioned by railway.toml. In the Railway
+# dashboard, add ONE volume to this service and mount it at /app/storage.
+# Node 22 LTS is pinned in package.json/.nvmrc so better-sqlite3 can use its
+# supported prebuilt binary instead of attempting a toolchain build on Node 24.
 
 [build]
-  builder = "nixpacks"
-  buildCommand = "npm ci"
+  builder = "RAILPACK"
 
 [deploy]
   startCommand = "node scripts/server.js"
   healthcheckPath = "/"
   healthcheckTimeout = 300
-  restartPolicyType = "on_failure"
+  restartPolicyType = "ON_FAILURE"
   restartPolicyMaxRetries = 10
 
-# Persistent volumes for SQLite database and uploaded images
-# These directories will survive redeploys and container restarts
-[[volumes]]
-  name = "findnord-data"
-  mountPath = "/app/data"
-
-[[volumes]]
-  name = "findnord-uploads"
-  mountPath = "/app/uploads"
-
 # Environment variables (set these in Railway dashboard, not here)
-# Required:
+# Required for a production deployment:
 # - NODE_ENV=production
-# - PORT (provided by Railway)
-# - OPENAI_API_KEY (for AI photo generation)
-# - GOOGLE_CLIENT_ID (for Google OAuth)
-# - GOOGLE_CLIENT_SECRET (for Google OAuth)
-# - ADMIN_EMAIL (for admin access)
-# - JWT_SECRET (for session signing)
-# - AWS_REGION (for SES)
-# - AWS_ACCESS_KEY_ID (for SES)
-# - AWS_SECRET_ACCESS_KEY (for SES)
-# - SES_FROM_EMAIL (verified sender in SES)
-# - SENTRY_DSN (for error tracking)
-# - STRIPE_SECRET_KEY (for Boost payments, test mode)
-# - STRIPE_WEBHOOK_SECRET (for Stripe webhooks)
-# - BOOST_PAYMENTS_ENABLED=false (keep off until ready)
-# - SEED_DEMO_DATA=false (don't seed demo data in production)
-# - DATABASE_URL (if using managed Postgres instead of SQLite volume)
+# - DB_PATH=/app/storage/findnord.db
+# - UPLOADS_DIR=/app/storage/uploads
+# Railway injects PORT automatically; do not hard-code it.
+#
+# Optional features:
+# - OPENAI_API_KEY (AI photo generation)
+# - GOOGLE_CLIENT_ID (Google sign-in; no client secret is used)
+# - ADMIN_EMAIL (admin access)
+# - AWS_REGION, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, SES_FROM_EMAIL (email)
+# - SENTRY_DSN (error tracking)
+# - STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, BOOST_PAYMENTS_ENABLED=true (Boost payments)
+# - SEED_DEMO_DATA=true (sample data; leave unset in production)
