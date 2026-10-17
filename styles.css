@@ -100,7 +100,6 @@ input:focus-visible {
 .brand {
   display: flex;
   align-items: center;
-  gap: 10px;
   border: 0;
   margin: 0;
   padding: 0;
@@ -110,8 +109,37 @@ input:focus-visible {
   cursor: pointer;
 }
 
-.brand-mark {
-  flex-shrink: 0;
+.brand h1 {
+  margin: 0;
+  line-height: 0.9;
+}
+
+.brand-wordmark {
+  display: inline-flex;
+  align-items: baseline;
+  color: var(--ink);
+  font-size: clamp(1.55rem, 2.7vw, 2.05rem);
+  font-weight: 850;
+  letter-spacing: -0.085em;
+  line-height: 0.9;
+  text-rendering: geometricPrecision;
+}
+
+.brand-wordmark strong {
+  position: relative;
+  color: var(--country-primary);
+  font-weight: 950;
+}
+
+.brand-wordmark strong::after {
+  position: absolute;
+  right: -0.06em;
+  bottom: -0.2em;
+  width: 72%;
+  height: 0.11em;
+  border-radius: 999px;
+  background: var(--country-accent, #ff6542);
+  content: "";
 }
 
 .brand-compact {
@@ -2205,14 +2233,9 @@ dd {
   }
 
   .brand-compact {
-    display: inline;
-    font-size: 1.18rem;
-    letter-spacing: 0;
-  }
-
-  .brand-mark {
-    width: 32px;
-    height: 32px;
+    display: inline-flex;
+    font-size: 1.42rem;
+    letter-spacing: -0.08em;
   }
 
   .location-strip {
@@ -2237,11 +2260,6 @@ dd {
   .icon-button {
     width: 40px;
     height: 40px;
-  }
-
-  .brand-mark {
-    width: 30px;
-    height: 30px;
   }
 
   #location-button {
@@ -2294,6 +2312,19 @@ dd {
   gap: 10px;
   margin-bottom: 10px;
   font-size: 1.2rem;
+}
+
+.footer-wordmark {
+  color: #fff;
+  font-size: 1.55rem;
+}
+
+.footer-wordmark span {
+  color: #fff;
+}
+
+.footer-wordmark strong {
+  color: #65c8ff;
 }
 
 .footer-tagline {

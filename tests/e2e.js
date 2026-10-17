@@ -26,11 +26,36 @@ const seedDataJs = fs.readFileSync(path.join(root, "db", "seed-data.js"), "utf8"
 const combinedJs = `${dataServiceJs}\n${js}`;
 
 assert.match(html, /FindNord/);
-assert.match(html, /class="brand-mark"/, "the FindNord logo mark must be present in the topbar");
-assert.match(html, /fill="var\(--country-primary\)"/, "the logo mark's color must be tied to the live country theme");
-assert.match(html, /class="brand-full">FindNord<\/span>/, "the full FindNord wordmark must remain available on larger screens");
-assert.match(html, /class="brand-compact" aria-hidden="true">FN<\/span>/, "small screens must use a compact FN wordmark beside the logo mark");
+assert.doesNotMatch(html, /class="brand-mark"/, "the text-only FindNord identity must not ship an extra symbol mark");
+assert.match(html, /class="brand-wordmark brand-full"><span>Find<\/span><strong>Nord<\/strong><\/span>/, "the full text-only FindNord wordmark must remain available on larger screens");
+assert.match(html, /class="brand-wordmark brand-compact" aria-hidden="true"><span>F<\/span><strong>N<\/strong><\/span>/, "small screens must use a compact text-only FN wordmark");
+assert.match(css, /\.brand-wordmark\s*{[\s\S]*?letter-spacing: -0\.085em;/, "the wordmark must use a deliberate custom typographic treatment");
 assert.doesNotMatch(html, /NordicMarket/, "the old working-title brand name must not linger anywhere in the shipped markup");
+
+// Production icon assets must exist at the exact root-relative URLs used by
+// index.html, be real PNGs at their declared dimensions, and stay lightweight.
+const expectedIconDimensions = new Map([
+  ["favicon-16.png", [16, 16]],
+  ["favicon-32.png", [32, 32]],
+  ["apple-touch-icon.png", [180, 180]],
+  ["icon-192.png", [192, 192]]
+]);
+for (const [fileName, [expectedWidth, expectedHeight]] of expectedIconDimensions) {
+  const iconPath = path.join(root, fileName);
+  assert.equal(fs.existsSync(iconPath), true, `${fileName} must exist at the public repository root`);
+  const icon = fs.readFileSync(iconPath);
+  assert.deepEqual([...icon.subarray(0, 8)], [137, 80, 78, 71, 13, 10, 26, 10], `${fileName} must be a valid PNG`);
+  assert.equal(icon.readUInt32BE(16), expectedWidth, `${fileName} must be ${expectedWidth}px wide`);
+  assert.equal(icon.readUInt32BE(20), expectedHeight, `${fileName} must be ${expectedHeight}px tall`);
+  assert.ok(icon.length < 10_000, `${fileName} must remain below 10KB`);
+  if (fileName !== "icon-192.png") {
+    assert.match(html, new RegExp(`href="/${fileName.replace(".", "\\.")}"`), `${fileName} must be referenced by its real public URL`);
+  }
+}
+const webManifest = JSON.parse(fs.readFileSync(path.join(root, "site.webmanifest"), "utf8"));
+assert.equal(webManifest.name, "FindNord");
+assert.equal(webManifest.icons[0].src, "/icon-192.png");
+assert.equal(webManifest.icons[0].sizes, "192x192");
 assert.match(html, /Browse/);
 assert.match(html, /Categories/);
 assert.match(html, /Sell/);
@@ -280,7 +305,7 @@ assert.match(css, /--country-primary: #006aa7;/);
 assert.match(css, /--country-accent: #fecc02;/);
 assert.match(css, /\.brand-compact\s*{\s*display: none;\s*}/, "the compact wordmark must be hidden until the small-screen breakpoint");
 assert.match(css, /@media \(max-width: 430px\)[\s\S]*?\.brand-full\s*{\s*display: none;/, "small screens must hide the full wordmark");
-assert.match(css, /@media \(max-width: 430px\)[\s\S]*?\.brand-compact\s*{[\s\S]*?display: inline;/, "small screens must show FN instead of cramped lettering");
+assert.match(css, /@media \(max-width: 430px\)[\s\S]*?\.brand-compact\s*{[\s\S]*?display: inline-flex;/, "small screens must show the compact text-only FN wordmark instead of cramped lettering");
 assert.match(css, /\.nav-item\.active\s*{[^}]*color: var\(--country-primary\);/);
 assert.match(css, /\.sell-tab\s*{[^}]*background: var\(--country-primary\);/);
 // The topbar's accent border was removed per direct feedback comparing
