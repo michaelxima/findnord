@@ -140,6 +140,8 @@ const translations = {
     "filter.distanceLabel": "Distance",
     "filter.categoryLabel": "Category",
     "filter.subtypeLabel": "Type",
+    "sell.subtypeCustomLabel": "Custom label",
+    "sell.subtypeCustomPlaceholder": "Max 10 characters",
     "filter.categoryAll": "All categories",
     "distance.any": "Any distance",
     "distance.within5": "Within 5 km",
@@ -442,6 +444,8 @@ const translations = {
     "filter.distanceLabel": "Avstånd",
     "filter.categoryLabel": "Kategori",
     "filter.subtypeLabel": "Typ",
+    "sell.subtypeCustomLabel": "Egen etikett",
+    "sell.subtypeCustomPlaceholder": "Högst 10 tecken",
     "filter.categoryAll": "Alla kategorier",
     "distance.any": "Alla avstånd",
     "distance.within5": "Inom 5 km",
@@ -746,6 +750,8 @@ const translations = {
     "filter.distanceLabel": "Avstand",
     "filter.categoryLabel": "Kategori",
     "filter.subtypeLabel": "Type",
+    "sell.subtypeCustomLabel": "Egen etikett",
+    "sell.subtypeCustomPlaceholder": "Maks 10 tegn",
     "filter.categoryAll": "Alle kategorier",
     "distance.any": "Alle avstander",
     "distance.within5": "Innen 5 km",
@@ -1048,6 +1054,8 @@ const translations = {
     "filter.distanceLabel": "Afstand",
     "filter.categoryLabel": "Kategori",
     "filter.subtypeLabel": "Type",
+    "sell.subtypeCustomLabel": "Egen etiket",
+    "sell.subtypeCustomPlaceholder": "Maks 10 tegn",
     "filter.categoryAll": "Alle kategorier",
     "distance.any": "Enhver afstand",
     "distance.within5": "Inden for 5 km",
@@ -1350,6 +1358,8 @@ const translations = {
     "filter.distanceLabel": "Etäisyys",
     "filter.categoryLabel": "Kategoria",
     "filter.subtypeLabel": "Tyyppi",
+    "sell.subtypeCustomLabel": "Oma nimike",
+    "sell.subtypeCustomPlaceholder": "Enintään 10 merkkiä",
     "filter.categoryAll": "Kaikki kategoriat",
     "distance.any": "Mikä tahansa etäisyys",
     "distance.within5": "5 km sisällä",
@@ -1652,6 +1662,8 @@ const translations = {
     "filter.distanceLabel": "Fjarlægð",
     "filter.categoryLabel": "Flokkur",
     "filter.subtypeLabel": "Tegund",
+    "sell.subtypeCustomLabel": "Sérstakt merki",
+    "sell.subtypeCustomPlaceholder": "Hámark 10 stafir",
     "filter.categoryAll": "Allir flokkar",
     "distance.any": "Hvaða fjarlægð sem er",
     "distance.within5": "Innan 5 km",
@@ -4477,6 +4489,8 @@ const CATEGORY_ICONS = {
     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="15" r="5"/><path d="M9 10c0-2.2 1.3-4 3-4s3 1 3 2.2"/><circle cx="12" cy="6" r="1.6"/></svg>',
   "Sports & Outdoor":
     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M7 12h10"/><rect x="4" y="9" width="3" height="6" rx="1"/><rect x="17" y="9" width="3" height="6" rx="1"/><path d="M2 10.5v3M22 10.5v3"/></svg>',
+  "Health & Wellness":
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><path d="M12 8v8M8 12h8"/></svg>',
   Jobs:
     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="7" width="18" height="12" rx="1.5"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M3 12h18"/></svg>',
   Services:
@@ -4484,7 +4498,9 @@ const CATEGORY_ICONS = {
   "Agriculture & Garden":
     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 4C10 4 4 10 4 18c8 0 14-6 14-14z"/><path d="M4 20c3-3 6-6 12-12"/></svg>',
   "Free Items":
-    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="9" width="18" height="4" rx="1"/><rect x="4" y="13" width="16" height="8" rx="1"/><path d="M12 9v12"/><path d="M12 9c-1.5-3-6-3-6 0h6zM12 9c1.5-3 6-3 6 0h-6z"/></svg>'
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="9" width="18" height="4" rx="1"/><rect x="4" y="13" width="16" height="8" rx="1"/><path d="M12 9v12"/><path d="M12 9c-1.5-3-6-3-6 0h6zM12 9c1.5-3 6-3 6 0h-6z"/></svg>',
+  "Other Items":
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="4.5" width="18" height="15" rx="3"/><circle cx="8" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="16" cy="12" r="1"/></svg>'
 };
 
 // BL-A04: localized display labels per category id -- `id` stays the
@@ -4501,10 +4517,12 @@ const CATEGORY_LABELS = {
   Fashion: { en: "Fashion", sv: "Mode", no: "Mote", da: "Mode", fi: "Muoti", is: "Tíska" },
   "Baby & Kids": { en: "Baby & Kids", sv: "Barn & Baby", no: "Barn & Baby", da: "Børn & Baby", fi: "Lapset & Vauvat", is: "Börn & Ungbörn" },
   "Sports & Outdoor": { en: "Sports & Outdoor", sv: "Sport & Fritid", no: "Sport & Friluft", da: "Sport & Fritid", fi: "Urheilu & Ulkoilu", is: "Íþróttir & Útivist" },
+  "Health & Wellness": { en: "Health & Wellness", sv: "Hälsa & Välbefinnande", no: "Helse & Velvære", da: "Sundhed & Velvære", fi: "Terveys & Hyvinvointi", is: "Heilsa & Vellíðan" },
   Jobs: { en: "Jobs", sv: "Jobb", no: "Jobb", da: "Job", fi: "Työpaikat", is: "Atvinna" },
   Services: { en: "Services", sv: "Tjänster", no: "Tjenester", da: "Tjenester", fi: "Palvelut", is: "Þjónusta" },
   "Agriculture & Garden": { en: "Agriculture & Garden", sv: "Jordbruk & Trädgård", no: "Landbruk & Hage", da: "Landbrug & Have", fi: "Maatalous & Puutarha", is: "Landbúnaður & Garðyrkja" },
-  "Free Items": { en: "Free Items", sv: "Gratis", no: "Gratis", da: "Gratis", fi: "Ilmaiset", is: "Ókeypis" }
+  "Free Items": { en: "Free Items", sv: "Gratis", no: "Gratis", da: "Gratis", fi: "Ilmaiset", is: "Ókeypis" },
+  "Other Items": { en: "Other Items", sv: "Övrigt", no: "Annet", da: "Andet", fi: "Muut", is: "Annað" }
 };
 
 function categoryLabel(id) {
@@ -4528,10 +4546,14 @@ const CATEGORY_SEARCH_SYNONYMS = {
   Fashion: { sv: ["kläder", "skor", "väska", "mode"], no: ["klær", "sko", "veske", "mote"], da: ["tøj", "sko", "taske", "mode"], fi: ["vaatteet", "kengät", "laukku", "muoti"], is: ["föt", "skór", "taska", "tíska"] },
   "Baby & Kids": { sv: ["barnvagn", "babykläder", "leksaker"], no: ["barnevogn", "babyklær", "leker"], da: ["barnevogn", "babytøj", "legetøj"], fi: ["lastenvaunut", "vauvanvaatteet", "lelut"], is: ["kerra", "barnaföt", "leikföng"] },
   "Sports & Outdoor": { sv: ["sport", "cykel", "skidor", "gym", "friluftsliv"], no: ["sport", "sykkel", "ski", "trening", "friluftsliv"], da: ["sport", "cykel", "ski", "træning", "friluftsliv"], fi: ["urheilu", "pyörä", "sukset", "kuntosali", "ulkoilu"], is: ["íþróttir", "hjól", "skíði", "útivist"] },
+  "Health & Wellness": { sv: ["hälsa", "wellness", "kosttillskott", "yoga", "massage"], no: ["helse", "velvære", "kosttilskudd", "yoga", "massasje"], da: ["sundhed", "velvære", "kosttilskud", "yoga", "massage"], fi: ["terveys", "hyvinvointi", "lisäravinteet", "jooga", "hieronta"], is: ["heilsa", "vellíðan", "fæðubótarefni", "jóga", "nudd"] },
   Jobs: { sv: ["jobb", "arbete", "anställning", "lediga jobb"], no: ["jobb", "arbeid", "stilling", "ledige stillinger"], da: ["job", "arbejde", "stilling", "ledige stillinger"], fi: ["työ", "työpaikka", "työpaikat", "avoimet työpaikat"], is: ["vinna", "starf", "laus störf"] },
   Services: { sv: ["tjänst", "hantverkare", "flytthjälp", "städning"], no: ["tjeneste", "håndverker", "flyttehjelp", "rengjøring"], da: ["tjeneste", "håndværker", "flyttehjælp", "rengøring"], fi: ["palvelu", "remontti", "muuttoapu", "siivous"], is: ["þjónusta", "iðnaðarmaður", "þrif"] },
   "Agriculture & Garden": { sv: ["trädgård", "jordbruk", "traktor", "växter"], no: ["hage", "landbruk", "traktor", "planter"], da: ["have", "landbrug", "traktor", "planter"], fi: ["puutarha", "maatalous", "traktori", "kasvit"], is: ["garður", "landbúnaður", "traktor", "plöntur"] },
-  "Free Items": { sv: ["gratis", "skänkes"], no: ["gratis", "gis bort"], da: ["gratis", "gives væk"], fi: ["ilmainen", "annetaan"], is: ["ókeypis", "gefins"] }
+  "Free Items": { sv: ["gratis", "skänkes"], no: ["gratis", "gis bort"], da: ["gratis", "gives væk"], fi: ["ilmainen", "annetaan"], is: ["ókeypis", "gefins"] },
+  // Exact-word matches only (see categorySynonymMatches), so these stay
+  // deliberately short rather than risking substring collisions.
+  "Other Items": { sv: ["övrigt", "diverse"], no: ["annet", "diverse"], da: ["andet", "diverse"], fi: ["muut", "muu"], is: ["annað", "ýmislegt"] }
 };
 
 // Only an exact normalized-word match against a synonym counts (not a
@@ -4647,10 +4669,50 @@ function renderCategorySelectOptions() {
   updateSubtypeVisibility();
 }
 
+// "Other Items" is the one category where a seller writes their own short
+// label instead of choosing a fixed subtype. It's stored in the existing
+// listings.subtype column (so no schema change) and surfaces on the listing
+// detail page as "Other Items · <label>". The cap is enforced for real in
+// scripts/api.js -- maxlength here is only the typing affordance.
+const CUSTOM_SUBTYPE_CATEGORY = "Other Items";
+const CUSTOM_SUBTYPE_MAX_LENGTH = 10;
+
+function isCustomSubtypeCategory(categoryId) {
+  return categoryId === CUSTOM_SUBTYPE_CATEGORY;
+}
+
 function updateSubtypeVisibility() {
   const categoryId = document.getElementById("sell-category-select").value;
   const field = document.getElementById("sell-subtype-field");
   const select = document.getElementById("sell-subtype-select");
+  const selectLabel = document.getElementById("sell-subtype-label");
+  const customInput = document.getElementById("sell-subtype-custom");
+  const customLabel = document.getElementById("sell-subtype-custom-label");
+
+  if (isCustomSubtypeCategory(categoryId)) {
+    // Swapping controls, not just visibility: the fixed-option select is
+    // emptied so a subtype picked under an earlier category can never be
+    // submitted alongside the typed label.
+    field.hidden = false;
+    select.hidden = true;
+    select.innerHTML = "";
+    if (selectLabel) selectLabel.hidden = true;
+    if (customLabel) {
+      customLabel.hidden = false;
+      customLabel.textContent = t("sell.subtypeCustomLabel");
+    }
+    if (customInput) {
+      customInput.hidden = false;
+      customInput.setAttribute("maxlength", String(CUSTOM_SUBTYPE_MAX_LENGTH));
+      customInput.setAttribute("placeholder", t("sell.subtypeCustomPlaceholder"));
+    }
+    return;
+  }
+
+  select.hidden = false;
+  if (selectLabel) selectLabel.hidden = false;
+  if (customLabel) customLabel.hidden = true;
+  if (customInput) customInput.hidden = true;
   field.hidden = !populateSubtypeSelect(select, categoryId);
 }
 
@@ -4836,7 +4898,7 @@ function openListing(id) {
       <h2 id="detail-title">${escapeHtml(listing.title)}</h2>
       ${listing.status && listing.status !== "active" ? `<span class="status-badge status-${listing.status}">${t(`status.${listing.status}`)}</span>` : ""}
       <strong class="detail-price">${formatListingPrice(listing)}</strong>
-      <p class="detail-meta">${listing.condition} · ${listing.category}${listing.subtype ? " · " + listing.subtype : ""}</p>
+      <p class="detail-meta">${escapeHtml(listing.condition)} · ${escapeHtml(listing.category)}${listing.subtype ? " · " + escapeHtml(listing.subtype) : ""}</p>
       <div class="detail-actions">
         <button type="button" class="secondary-action${saved ? " saved" : ""}" data-save-listing="${listing.id}" aria-pressed="${saved}" aria-label="${saved ? `Remove ${escapeHtml(listing.title)} from saved items` : `Save ${escapeHtml(listing.title)} for later`}">${saved ? HEART_ICON_FILLED : HEART_ICON_OUTLINE}${saved ? "Saved" : "Save"}</button>
         <button type="button" class="secondary-action" data-share-listing="${listing.id}" aria-label="Share ${escapeHtml(listing.title)}">${SHARE_ICON}Share</button>
@@ -5238,6 +5300,16 @@ function formatListingPrice(listing) {
   return isMonthlyRental(listing) ? `${formatted}${t("price.perMonthSuffix")}` : formatted;
 }
 
+// One place that decides where a listing's subtype value comes from: the
+// fixed select for normal categories, the typed label under "Other Items".
+// Used by both publish and edit so the two paths can never disagree.
+function getSellSubtypeValue() {
+  if (isCustomSubtypeCategory(document.getElementById("sell-category-select").value)) {
+    return document.getElementById("sell-subtype-custom").value.trim();
+  }
+  return document.getElementById("sell-subtype-select").value;
+}
+
 function getSellFormValues() {
   const isFree = document.getElementById("sell-free-toggle").checked;
   const subtypeField = document.getElementById("sell-subtype-field");
@@ -5246,7 +5318,7 @@ function getSellFormValues() {
     isFree,
     rawPrice: document.getElementById("sell-price-input").value.trim(),
     category: document.getElementById("sell-category-select").value,
-    subtype: subtypeField.hidden ? "" : document.getElementById("sell-subtype-select").value,
+    subtype: subtypeField.hidden ? "" : getSellSubtypeValue(),
     condition: document.getElementById("sell-condition-select").value,
     location: document.getElementById("sell-location-input").value.trim(),
     region: document.getElementById("sell-region-input").value.trim(),
@@ -5261,6 +5333,12 @@ function validateSellForm(values) {
   if (!values.title) errors.push("Add a title.");
   if (!values.isFree && !values.rawPrice) errors.push("Set a price, or toggle Free.");
   if (!values.category) errors.push("Choose a category.");
+  // maxlength already stops normal typing at the cap; this catches paste,
+  // autofill and any other path so an over-long label is rejected before it
+  // ever reaches the server (which enforces the same rule again).
+  if (isCustomSubtypeCategory(values.category) && values.subtype.length > CUSTOM_SUBTYPE_MAX_LENGTH) {
+    errors.push(`Keep the custom label to ${CUSTOM_SUBTYPE_MAX_LENGTH} characters.`);
+  }
   if (!values.condition) errors.push("Choose a condition.");
   if (!values.location) errors.push("Add an approximate location.");
   if (!values.description) errors.push("Add a short description.");
@@ -5409,7 +5487,12 @@ function startEditListing(id) {
   document.getElementById("sell-price-input").disabled = isFree;
   document.getElementById("sell-category-select").value = listing.category;
   updateSubtypeVisibility();
-  if (listing.subtype) document.getElementById("sell-subtype-select").value = listing.subtype;
+  if (listing.subtype) {
+    // Same rule as publish: where the value lives depends on whether this
+    // category takes a fixed option or the seller's own typed label.
+    const target = isCustomSubtypeCategory(listing.category) ? "sell-subtype-custom" : "sell-subtype-select";
+    document.getElementById(target).value = listing.subtype;
+  }
   document.getElementById("sell-condition-select").value = listing.condition;
   document.getElementById("sell-location-input").value = listing.locality;
   document.getElementById("sell-region-input").value = listing.region || "";

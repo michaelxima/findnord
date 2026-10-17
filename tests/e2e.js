@@ -122,10 +122,12 @@ assert.match(js, /const CATEGORY_ICONS = {/);
   "Fashion",
   "Baby & Kids",
   "Sports & Outdoor",
+  "Health & Wellness",
   "Jobs",
   "Services",
   "Agriculture & Garden",
-  "Free Items"
+  "Free Items",
+  "Other Items"
 ].forEach((category) => {
   assert.match(js, new RegExp(`["']?${category.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}["']?:\\s*\\n\\s*'<svg`), `${category} must have its own hand-authored icon, not fall through to the default`);
 });
@@ -244,10 +246,12 @@ assert.match(seedDataJs, /id: "Real Estate", label: "Real Estate", featured: tru
   "Fashion",
   "Baby & Kids",
   "Sports & Outdoor",
+  "Health & Wellness",
   "Jobs",
   "Services",
   "Agriculture & Garden",
-  "Free Items"
+  "Free Items",
+  "Other Items"
 ].forEach((category) => {
   assert.match(seedDataJs, new RegExp(`id: "${category.replace(/[.*+?^${}()|[\\]\\\\]/g, "\\\\$&")}"`));
 });
@@ -1287,7 +1291,10 @@ function makeElementMap() {
     "sell-free-toggle",
     "sell-category-select",
     "sell-subtype-field",
+    "sell-subtype-label",
     "sell-subtype-select",
+    "sell-subtype-custom-label",
+    "sell-subtype-custom",
     "sell-condition-select",
     "sell-location-input",
     "sell-region-input",
@@ -1705,7 +1712,7 @@ assert.match(elements["listing-grid"].innerHTML, /Volvo V60/);
 assert.match(elements["listing-grid"].innerHTML, /2-room apartment near Slussen/);
 assert.match(elements["category-chips"].innerHTML, /class="chip featured" data-category="Vehicles"/);
 assert.match(elements["category-chips"].innerHTML, /class="chip featured" data-category="Real Estate"/);
-assert.equal((elements["category-chips"].innerHTML.match(/class="chip/g) || []).length, 14);
+assert.equal((elements["category-chips"].innerHTML.match(/class="chip/g) || []).length, 16);
 
 // Card accessible names must carry sponsored/freshness/price state, since the
 // button's own aria-label overrides all descendant text for screen readers.
@@ -3835,12 +3842,14 @@ context.renderSidebarCategories();
 const sidebarCategoriesHtml = elements["sidebar-categories-list"].innerHTML;
 assert.equal(
   (sidebarCategoriesHtml.match(/class="sidebar-category-item"/g) || []).length,
-  13,
-  "the sidebar must list all 13 real categories, not a hardcoded subset"
+  15,
+  "the sidebar must list all 15 real categories, not a hardcoded subset"
 );
 assert.match(sidebarCategoriesHtml, /data-category-jump="Vehicles"/);
 assert.match(sidebarCategoriesHtml, /data-category-jump="Real Estate"/);
 assert.match(sidebarCategoriesHtml, /data-category-jump="Books & Media"/);
+assert.match(sidebarCategoriesHtml, /data-category-jump="Health & Wellness"/);
+assert.match(sidebarCategoriesHtml, /data-category-jump="Other Items"/);
 assert.match(sidebarCategoriesHtml, /<svg viewBox="0 0 24 24"/, "each sidebar category row must render its own icon");
 
 // Sidebar location text mirrors the existing #active-location + current
@@ -5219,6 +5228,135 @@ console.log("PASS: NM-A25 fresh page loads -- a real, direct (non-client-side-na
   assert.match(pageHtml, /class="app-shell"/);
 
   console.log("PASS: NM-A25 backend routing -- a raw HTTP GET of /listing/:id serves real, genuinely per-listing og:*/twitter:* meta tags (proven distinct across two different real listings), a nonexistent id is a real 404 (not a crash), and /profile/:id + /page/:slug both serve real HTML.");
+}
+
+// --- Two new categories, plus "Other Items"' seller-typed label ---
+// Every other subtype in this app comes from a fixed <select>, so it could be
+// trusted as pre-bounded. A typed label cannot: it is arbitrary user text
+// hitting a column that gets rendered into HTML. That makes this input need
+// two independent defenses -- a server-enforced 10-character cap (the client's
+// maxlength is only a typing affordance, trivially bypassed) and escapeHtml at
+// render time. Both are asserted below against the real server and the real
+// render path rather than taken on trust.
+{
+  // The two categories must exist in the taxonomy the SERVER serves, not just
+  // in app.js's client-side copy -- otherwise they'd only ever appear after a
+  // client-side re-render and a fresh guest would never see them.
+  const taxonomy = await (await fetch(`${serverOrigin}/api/categories`)).json();
+  const taxonomyIds = taxonomy.map((category) => category.id);
+  assert.ok(taxonomyIds.includes("Health & Wellness"), "Health & Wellness must be served by GET /api/categories");
+  assert.ok(taxonomyIds.includes("Other Items"), "Other Items must be served by GET /api/categories");
+  assert.equal(taxonomyIds.length, 15, "the served taxonomy must now carry all 15 categories");
+
+  // --- Sell form control swap, both directions ---
+  elements["sell-category-select"].value = "Other Items";
+  context.updateSubtypeVisibility();
+  assert.equal(elements["sell-subtype-field"].hidden, false, "Other Items must expose the type field");
+  assert.equal(elements["sell-subtype-custom"].hidden, false, "Other Items must show the seller's own typed-label input");
+  assert.equal(elements["sell-subtype-select"].hidden, true, "the fixed-option select must be hidden under Other Items");
+  assert.equal(elements["sell-subtype-select"].innerHTML, "", "no stale fixed option may survive into Other Items");
+  assert.equal(elements["sell-subtype-custom"].getAttribute("maxlength"), "10", "the typed input must cap at exactly 10 characters");
+  assert.equal(elements["sell-subtype-label"].hidden, true, "the 'Type' caption must yield to the typed-label caption");
+  assert.equal(elements["sell-subtype-custom-label"].hidden, false, "the typed-label caption must be shown under Other Items");
+  assert.equal(elements["sell-subtype-custom-label"].textContent, "Custom label", "that caption must be real English copy, not blank");
+
+  elements["sell-category-select"].value = "Vehicles";
+  context.updateSubtypeVisibility();
+  assert.equal(elements["sell-subtype-custom"].hidden, true, "leaving Other Items must hide the typed input again");
+  assert.equal(elements["sell-subtype-label"].hidden, false, "...and bring the 'Type' caption back");
+  assert.equal(elements["sell-subtype-select"].hidden, false, "...and the fixed-option select back");
+  assert.match(elements["sell-subtype-select"].innerHTML, /<option value="Cars">Cars<\/option>/, "Vehicles must repopulate its real fixed options");
+  assert.equal(elements["sell-subtype-field"].hidden, false, "a category with subtypes must keep the field visible");
+
+  // The typed-label copy is localized like everything else, and a language
+  // switch re-applies it (setLanguage re-renders the category select, which
+  // re-runs updateSubtypeVisibility).
+  elements["sell-category-select"].value = "Other Items";
+  context.setLanguage("sv");
+  context.updateSubtypeVisibility();
+  assert.equal(elements["sell-subtype-custom-label"].textContent, "Egen etikett", "the typed-label caption must be translated");
+  assert.equal(elements["sell-subtype-custom"].getAttribute("placeholder"), "Högst 10 tecken", "the helper placeholder must be translated");
+  context.setLanguage("en");
+
+  // --- What the form actually submits ---
+  elements["sell-category-select"].value = "Other Items";
+  context.updateSubtypeVisibility();
+  elements["sell-subtype-custom"].value = "  Yoga mats!  "; // 14 raw, 10 after trim
+  const typedValues = context.getSellFormValues();
+  assert.equal(typedValues.subtype, "Yoga mats!", "the typed label must be read from the text input and trimmed");
+  assert.equal(
+    context.validateSellForm(typedValues).includes("Keep the custom label to 10 characters."),
+    false,
+    "a 10-character label (the exact cap) must be accepted"
+  );
+
+  elements["sell-subtype-custom"].value = "Twelve chars"; // 12 > 10
+  const overlongValues = context.getSellFormValues();
+  assert.ok(
+    context.validateSellForm(overlongValues).includes("Keep the custom label to 10 characters."),
+    "an over-long label must be blocked before it ever reaches the server"
+  );
+
+  // --- The same rules, enforced for real against the API ---
+  resetRateLimiterState(); // register/create limits are otherwise spent by earlier blocks
+  const categoryOwner = await registerRealUserDirectly("Category Tester", "category-tester@example.com", DEFAULT_TEST_PASSWORD);
+  const newListing = (subtype) =>
+    fetch(`${serverOrigin}/api/listings`, {
+      method: "POST",
+      headers: { "content-type": "application/json", cookie: categoryOwner.cookie },
+      body: JSON.stringify({
+        title: "Vintage yoga mat",
+        category: "Other Items",
+        price: "100",
+        country: "Sweden",
+        subtype,
+        images: [{ css: "linear-gradient(135deg, #b48762, #f2d9b7)", aiGenerated: false }]
+      })
+    });
+
+  const accepted = await newListing("Yoga mats!");
+  assert.equal(accepted.status, 200, "a 10-character typed label must be accepted by the real server");
+  assert.equal((await accepted.json()).subtype, "Yoga mats!", "and stored verbatim");
+
+  const overlongRes = await newListing("Twelve chars");
+  assert.equal(overlongRes.status, 400, "an 11+ character label must be refused server-side, regardless of what the client allows");
+  assert.equal((await overlongRes.json()).code, "SUBTYPE_TOO_LONG", "...with a specific, recoverable error code");
+
+  const newlineRes = await newListing("Yoga\nmats"); // 9 chars, one of them a newline
+  assert.equal(newlineRes.status, 200, "a label containing a control character is within the length cap");
+  assert.equal((await newlineRes.json()).subtype, "Yogamats", "control characters must be stripped so a label can never break the one-line detail row");
+
+  // A fixed-option category must reject a value that isn't one of its options.
+  const bogusSubtypeRes = await fetch(`${serverOrigin}/api/listings`, {
+    method: "POST",
+    headers: { "content-type": "application/json", cookie: categoryOwner.cookie },
+    body: JSON.stringify({ title: "Odd car", category: "Vehicles", price: "500", country: "Sweden", subtype: "Submarine" })
+  });
+  assert.equal(bogusSubtypeRes.status, 400, "a subtype outside the category's fixed option list must be rejected");
+  assert.equal((await bogusSubtypeRes.json()).code, "INVALID_SUBTYPE");
+  const realSubtypeRes = await fetch(`${serverOrigin}/api/listings`, {
+    method: "POST",
+    headers: { "content-type": "application/json", cookie: categoryOwner.cookie },
+    body: JSON.stringify({ title: "Normal car", category: "Vehicles", price: "500", country: "Sweden", subtype: "Cars" })
+  });
+  assert.equal(realSubtypeRes.status, 200, "...while a genuine option for that same category still publishes normally");
+
+  // --- Escaping: the cap is a LENGTH rule, not a content filter, so markup
+  // in a label is legal to STORE and must therefore render as visible text,
+  // never as a live tag. This is the assertion that the detail page's
+  // escapeHtml(listing.subtype) is doing real work. ---
+  const xssRes = await newListing("<b>xss</b>"); // exactly 10 characters
+  assert.equal(xssRes.status, 200, "a 10-character markup-shaped label fits the cap, so it WILL be stored");
+  const xssListing = await xssRes.json();
+  assert.equal(xssListing.subtype, "<b>xss</b>", "stored verbatim -- proving the render path is what has to neutralize it");
+
+  await context.refreshListingsCache();
+  context.openListing(xssListing.id);
+  const detailHtml = elements["listing-detail"].innerHTML;
+  assert.match(detailHtml, /Other Items · &lt;b&gt;xss&lt;\/b&gt;/, "the typed label must render as real, visible, escaped text on the detail page");
+  assert.doesNotMatch(detailHtml, /<b>xss<\/b>/, "it must never reach the detail page as a live tag");
+
+  console.log("PASS: two new categories served by the real API (15 total), the Other Items typed label swapping the Sell form's select for a real 10-character input in both directions across languages, the 10-character cap enforced server-side with control characters stripped and non-option subtypes rejected, and a markup-shaped stored label rendering as escaped text rather than a live tag.");
 }
 }
 

@@ -221,8 +221,13 @@
               <select id="sell-category-select"></select>
             </div>
             <div class="sell-field" id="sell-subtype-field" hidden>
-              <label class="field-label" for="sell-subtype-select">Type</label>
+              <label class="field-label" id="sell-subtype-label" for="sell-subtype-select">Type</label>
               <select id="sell-subtype-select"></select>
+              <!-- "Other Items" only: the seller types their own short label.
+                   maxlength is a UX guard, not the rule -- scripts/api.js
+                   enforces the same 10-char cap server-side. -->
+              <label class="field-label" id="sell-subtype-custom-label" for="sell-subtype-custom" hidden>Custom label</label>
+              <input type="text" id="sell-subtype-custom" maxlength="10" autocomplete="off" hidden />
             </div>
           </div>
 

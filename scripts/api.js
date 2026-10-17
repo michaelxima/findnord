@@ -27,6 +27,46 @@ const {
 // second value that could drift out of sync with the first.
 const VALID_COUNTRIES = new Set(["Sweden", "Norway", "Denmark", "Finland", "Iceland"]);
 const VALID_CATEGORIES = new Set(categories.map((category) => category.id));
+
+// "Other Items" is the single category where the seller supplies their own
+// subtype label instead of picking one of the category's fixed options.
+const CUSTOM_SUBTYPE_CATEGORY = "Other Items";
+const CUSTOM_SUBTYPE_MAX_LENGTH = 10;
+// Non-custom subtypes come from a fixed option list, so this ceiling is
+// pure defense-in-depth rather than a rule a normal seller can hit.
+const GENERIC_SUBTYPE_MAX_LENGTH = 64;
+
+// The authoritative subtype rule. The client mirrors this (maxlength + a
+// validateSellForm() error), but neither can be trusted on its own: without
+// this check a raw PATCH could store an arbitrarily long value, and because
+// the detail page renders subtype as text, anything stored here is
+// user-controlled input that gets escaped at render time (escapeHtml in
+// app.js) rather than assumed safe.
+//
+// Control characters (including newlines) are stripped so a label can never
+// break the single-line "Category · Type" detail row, and the value is
+// trimmed to keep "  Yoga  " and "Yoga" from being two different filters.
+function normalizeSubtype(category, rawSubtype) {
+  if (rawSubtype === undefined || rawSubtype === null) return { value: null };
+  const cleaned = String(rawSubtype)
+    // eslint-disable-next-line no-control-regex
+    .replace(/[\u0000-\u001f\u007f]/g, "")
+    .trim();
+  if (!cleaned) return { value: null };
+
+  const isCustom = category === CUSTOM_SUBTYPE_CATEGORY;
+  const max = isCustom ? CUSTOM_SUBTYPE_MAX_LENGTH : GENERIC_SUBTYPE_MAX_LENGTH;
+  if (cleaned.length > max) {
+    return {
+      value: null,
+      error: {
+        error: isCustom ? `Keep the custom label to ${max} characters.` : "That type is too long.",
+        code: "SUBTYPE_TOO_LONG"
+      }
+    };
+  }
+  return { value: cleaned };
+}
 const CURRENCY_BY_COUNTRY = {
   Sweden: "SEK",
   Norway: "NOK",
@@ -727,6 +767,20 @@ function createApiRouter(db, options = {}) {
       return;
     }
 
+    const normalizedSubtype = normalizeSubtype(fields.category, fields.subtype);
+    if (normalizedSubtype.error) {
+      res.status(400).json(normalizedSubtype.error);
+      return;
+    }
+    if (normalizedSubtype.value && fields.category !== CUSTOM_SUBTYPE_CATEGORY) {
+      const entry = categories.find((category) => category.id === fields.category);
+      const allowed = entry ? entry.subtypes : [];
+      if (!allowed.includes(normalizedSubtype.value)) {
+        res.status(400).json({ error: "Choose a valid type.", code: "INVALID_SUBTYPE" });
+        return;
+      }
+    }
+
     // NM-A25 (Phase 1 item 4): lightweight prohibited-item keyword check --
     // server-side gate that meaningfully reduces exposure while matching the
     // ToS claim "Prohibited, stolen, counterfeit, or illegal items are never
@@ -792,7 +846,7 @@ function createApiRouter(db, options = {}) {
       id,
       title: fields.title || "",
       category: fields.category || null,
-      subtype: fields.subtype || null,
+      subtype: normalizedSubtype.value,
       price: fields.price || "",
       locality: fields.locality || "",
       region: fields.region || "",
@@ -850,6 +904,32 @@ function createApiRouter(db, options = {}) {
     if (Object.prototype.hasOwnProperty.call(columnFields, "category") && !VALID_CATEGORIES.has(columnFields.category)) {
       res.status(400).json({ error: "Choose a valid category.", code: "INVALID_CATEGORY" });
       return;
+    }
+
+    // Subtype re-validation on edit: the category a subtype has to satisfy is
+    // whichever one this PATCH is ending up with, not whatever it had before,
+    // so a client can't dodge the create-path rule by setting them one at a
+    // time. Three legal shapes only -- a fixed option of the target category,
+    // the seller's own <=10 char label under "Other Items", or no subtype at
+    // all for a category that defines none.
+    if (Object.prototype.hasOwnProperty.call(columnFields, "subtype")) {
+      const effectiveCategory = Object.prototype.hasOwnProperty.call(columnFields, "category")
+        ? columnFields.category
+        : existing.category;
+      const normalized = normalizeSubtype(effectiveCategory, columnFields.subtype);
+      if (normalized.error) {
+        res.status(400).json(normalized.error);
+        return;
+      }
+      if (normalized.value && effectiveCategory !== CUSTOM_SUBTYPE_CATEGORY) {
+        const entry = categories.find((category) => category.id === effectiveCategory);
+        const allowed = entry ? entry.subtypes : [];
+        if (!allowed.includes(normalized.value)) {
+          res.status(400).json({ error: "Choose a valid type.", code: "INVALID_SUBTYPE" });
+          return;
+        }
+      }
+      columnFields.subtype = normalized.value;
     }
 
     // Editing photos replaces the whole set: new inline (uploaded/AI) photos

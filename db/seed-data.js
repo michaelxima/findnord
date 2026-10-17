@@ -14,10 +14,16 @@ const categories = [
   { id: "Fashion", label: "Fashion", featured: false, subtypes: [] },
   { id: "Baby & Kids", label: "Baby & Kids", featured: false, subtypes: [] },
   { id: "Sports & Outdoor", label: "Sports & Outdoor", featured: false, subtypes: [] },
+  { id: "Health & Wellness", label: "Health & Wellness", featured: false, subtypes: [] },
   { id: "Jobs", label: "Jobs", featured: false, subtypes: [] },
   { id: "Services", label: "Services", featured: false, subtypes: [] },
   { id: "Agriculture & Garden", label: "Agriculture & Garden", featured: false, subtypes: [] },
-  { id: "Free Items", label: "Free Items", featured: false, subtypes: [] }
+  { id: "Free Items", label: "Free Items", featured: false, subtypes: [] },
+  // The catch-all category: unlike every other row, `Other Items` is where a
+  // seller may type their own short label (max 10 chars, stored in
+  // listings.subtype) -- see CUSTOM_SUBTYPE_CATEGORY in app.js and the
+  // server-side rule in scripts/api.js.
+  { id: "Other Items", label: "Other Items", featured: false, subtypes: [] }
 ];
 
 const MINUTES_AGO = (minutes) => Date.now() - minutes * 60000;
