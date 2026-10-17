@@ -214,3 +214,15 @@ CREATE TABLE IF NOT EXISTS password_reset_tokens (
 );
 
 CREATE INDEX IF NOT EXISTS idx_password_reset_tokens_user_id ON password_reset_tokens(user_id);
+
+-- Small key/value store for deployer-level facts that must survive restarts
+-- and deploys. Today it holds exactly one key: `boost_free_until`, the moment
+-- the free-boost launch window closes. It has to be PERSISTED rather than
+-- recomputed as "six months from this process start", because that would
+-- silently re-extend the promotion on every deploy/restart -- the deadline
+-- would keep moving and never actually arrive. `CREATE TABLE IF NOT EXISTS`
+-- is the whole migration, exactly as for password_reset_tokens above.
+CREATE TABLE IF NOT EXISTS app_settings (
+  key TEXT PRIMARY KEY,
+  value TEXT NOT NULL
+);

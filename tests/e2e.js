@@ -696,7 +696,24 @@ assert.match(boostJs, /const BOOST_PACKAGES = \[/);
 ["24h", "7d", "30d", "6m", "12m"].forEach((packageId) => {
   assert.match(boostJs, new RegExp(`id: "${packageId}"`), `the PRD's ${packageId} package must be a real, defined package`);
 });
-assert.match(boostJs, /function isBoostPaymentsEnabled\(\) \{\s*\n\s*return process\.env\.BOOST_PAYMENTS_ENABLED === "true";/, "the payments flag must be a real env var, defaulting OFF for any unset deployment");
+// The payments gate is no longer a plain flag. An EXPLICIT deployer value
+// still wins immediately in both directions; when it is left unset, the PRD's
+// 6-month free launch window decides instead -- payments stay frozen (and
+// boosting stays free) until the window closes, then open with no code change
+// and no manual flag-flip. The deadline is a PERSISTED date rather than "6
+// months from this boot", so neither a restart nor a redeploy can silently
+// re-extend the promotion and make the deadline never arrive.
+assert.match(boostJs, /const BOOST_FREE_MONTHS = 6;/, "the free window must be the PRD's 6 months");
+assert.match(boostJs, /function isBoostPaymentsEnabled\(db\)/, "the gate must take the db so it can read the persisted deadline");
+assert.match(boostJs, /const explicit = process\.env\.BOOST_PAYMENTS_ENABLED;/, "the payments flag must remain a real env var a deployer can set");
+assert.match(boostJs, /if \(explicit !== undefined\) return explicit === "true";/, "an explicit deployer choice must win immediately, in BOTH directions");
+assert.match(boostJs, /return !isBoostFreeWindowActive\(db\);/, "unset, payments must default OFF during the free window and open only once it closes");
+assert.match(boostJs, /INSERT OR REPLACE INTO app_settings/, "the free-until deadline must be persisted, not recomputed on every boot");
+assert.match(boostJs, /process\.env\.BOOST_FREE_UNTIL/, "a deployer must be able to override the deadline with an explicit date");
+assert.match(boostJs, /Number\.isNaN\(parsed\) \? null : parsed/, "an unparseable BOOST_FREE_UNTIL must be ignored, never trusted into enabling payments early");
+assert.match(apiJs, /paymentsEnabled: isBoostPaymentsEnabled\(db\)/, "the config endpoint must serve the window-aware value");
+assert.match(apiJs, /freeUntil/, "and must expose the deadline so the UI can tell sellers when free boosting ends");
+assert.match(js, /function boostFreeUntilNote\(\)/, "the boost sheet must be able to render the free-until note");
 assert.match(boostJs, /async function createBoostCheckoutSession/);
 assert.match(boostJs, /https:\/\/api\.stripe\.com\/v1\/checkout\/sessions/, "the checkout integration must target Stripe's real API, not a fake stub URL");
 assert.match(boostJs, /function verifyStripeWebhookSignature/);
@@ -1089,7 +1106,7 @@ assert.match(
 // anywhere documenting the (already-safe-by-default) real env vars this app
 // reads -- an operator had to read source to discover the list.
 const envExample = fs.readFileSync(path.join(root, ".env.example"), "utf8");
-["PORT", "NODE_ENV", "DB_PATH", "UPLOADS_DIR", "SEED_DEMO_DATA", "ADMIN_EMAIL", "GOOGLE_CLIENT_ID", "OPENAI_API_KEY", "BOOST_PAYMENTS_ENABLED", "STRIPE_SECRET_KEY", "STRIPE_WEBHOOK_SECRET"].forEach((name) => {
+["PORT", "NODE_ENV", "DB_PATH", "UPLOADS_DIR", "SEED_DEMO_DATA", "ADMIN_EMAIL", "GOOGLE_CLIENT_ID", "OPENAI_API_KEY", "BOOST_PAYMENTS_ENABLED", "BOOST_FREE_UNTIL", "STRIPE_SECRET_KEY", "STRIPE_WEBHOOK_SECRET"].forEach((name) => {
   assert.match(envExample, new RegExp(`${name}=`), `.env.example must document ${name}`);
 });
 const readmeMd = fs.readFileSync(path.join(root, "README.md"), "utf8");
@@ -1295,6 +1312,7 @@ function makeElementMap() {
     "sell-subtype-select",
     "sell-subtype-custom-label",
     "sell-subtype-custom",
+    "search-keyword-chips",
     "sell-condition-select",
     "sell-location-input",
     "sell-region-input",
@@ -5357,6 +5375,380 @@ console.log("PASS: NM-A25 fresh page loads -- a real, direct (non-client-side-na
   assert.doesNotMatch(detailHtml, /<b>xss<\/b>/, "it must never reach the detail page as a live tag");
 
   console.log("PASS: two new categories served by the real API (15 total), the Other Items typed label swapping the Sell form's select for a real 10-character input in both directions across languages, the 10-character cap enforced server-side with control characters stripped and non-option subtypes rejected, and a markup-shaped stored label rendering as escaped text rather than a live tag.");
+}
+
+// --- Blocket Phase 1: a localized paid-placement badge, plus category
+// popular-search chips. Both are asserted across ALL SIX languages on purpose:
+// an English-only version would be dead weight for most of this app's
+// audience, and "the key exists in the table" is not the same claim as "the
+// user actually sees it" -- so every language is checked at the render layer.
+{
+  const sixLanguages = ["en", "sv", "no", "da", "fi", "is"];
+
+  // Normalize the state this block inherits from whatever ran before it, so
+  // "find a boosted listing" can't silently fail on leftover filters/search.
+  context.resetFilters();
+  elements["search-input"].value = "";
+  context.renderListings();
+
+  // ===== Part A: the paid-placement badge =====
+  // It used to be a hardcoded English "Sponsored" shown verbatim to every
+  // Nordic market. Each now gets its own ad-disclosure word. English is
+  // deliberately unchanged so existing copy and screen-reader wording stay
+  // stable.
+  const paidPlacementByLanguage = {
+    en: "Sponsored",
+    sv: "Annons",
+    no: "Annonse",
+    da: "Annonce",
+    fi: "Mainos",
+    is: "Auglýsing"
+  };
+  for (const lang of sixLanguages) {
+    context.setLanguage(lang);
+    assert.equal(
+      context.t("listingCard.paidPlacement"),
+      paidPlacementByLanguage[lang],
+      `${lang} must resolve the paid-placement key to its own word`
+    );
+    if (lang !== "en") {
+      assert.notEqual(context.t("listingCard.paidPlacement"), "Sponsored", `${lang} must not silently fall back to the English word`);
+    }
+  }
+  context.setLanguage("en");
+
+  // ...and that word must actually RENDER on a real boosted listing's real
+  // card, in every language -- not merely exist in the translation table.
+  const boostedListing = context.getFilteredListings().find((item) => item.sponsored);
+  assert.ok(boostedListing, "the suite needs a boosted listing to prove the badge renders");
+  for (const lang of sixLanguages) {
+    context.setLanguage(lang);
+    context.renderListings();
+    const cardHtml = findCardHtml(boostedListing.id);
+    assert.ok(
+      cardHtml.includes(`class="sponsored">${paidPlacementByLanguage[lang]}</`),
+      `${lang} browse card must show the "${paidPlacementByLanguage[lang]}" badge`
+    );
+  }
+
+  // The accessible name carries the same word, mid-sentence (lower-cased).
+  context.setLanguage("sv");
+  context.renderListings();
+  assert.match(findCardHtml(boostedListing.id), /aria-label="[^"]*, annons/i, "the Swedish accessible name must carry the Swedish word too");
+  context.setLanguage("en");
+  context.renderListings();
+  assert.match(
+    findCardHtml(boostedListing.id),
+    /aria-label="[^"]*, sponsored/,
+    "the English accessible name must keep its exact existing wording"
+  );
+
+  // The boost help page has to describe the SAME word the badge shows, or the
+  // two surfaces would contradict each other in front of the user.
+  assert.match(js, /markerar din annons med märket Annons/, "the Swedish boost help page must match the Swedish badge");
+  assert.match(js, /merker annonsen din med merket Annonse/, "the Norwegian boost help page must match the Norwegian badge");
+  assert.match(js, /markerer din annonce med mærket Annonce/, "the Danish boost help page must match the Danish badge");
+  assert.match(js, /merkitsee ilmoituksesi Mainos-merkillä/, "the Finnish boost help page must match the Finnish badge");
+  assert.match(js, /merkir auglýsinguna þína með merkinu Auglýsing/, "the Icelandic boost help page must match the Icelandic badge");
+  assert.match(js, /marks your listing as Sponsored/, "English keeps its own help page wording");
+
+  // ===== Part B: category popular-search chips =====
+  // Data completeness first: all 15 categories x 6 languages, and the five
+  // Nordic languages must genuinely differ from English rather than being
+  // English copies wearing a different key.
+  const chipsByCategory = context.getCategorySearchChips();
+  const chipCategoryIds = Object.keys(chipsByCategory);
+  assert.equal(chipCategoryIds.length, 15, "every one of the 15 categories must offer curated search terms");
+  for (const categoryId of chipCategoryIds) {
+    for (const lang of sixLanguages) {
+      const terms = chipsByCategory[categoryId][lang];
+      assert.ok(Array.isArray(terms) && terms.length > 0, `${categoryId} / ${lang} must carry at least one search term`);
+      assert.ok(
+        terms.every((term) => typeof term === "string" && term.trim().length > 0),
+        `${categoryId} / ${lang} must not carry blank terms`
+      );
+    }
+    for (const lang of ["sv", "no", "da", "fi", "is"]) {
+      assert.notEqual(
+        chipsByCategory[categoryId][lang].join("|"),
+        chipsByCategory[categoryId].en.join("|"),
+        `${categoryId} / ${lang} must not be an English copy of the chips`
+      );
+    }
+  }
+
+  // Behavior, through the real filter sheet: picking a category must surface
+  // the row with that category's terms and a translated heading.
+  context.setLanguage("en");
+  context.openFilterSheet();
+  elements["filter-category-select"].value = "Vehicles";
+  context.applyFilters();
+  const chipsHtml = elements["search-keyword-chips"].innerHTML;
+  assert.equal(elements["search-keyword-chips"].hidden, false, "a category with terms must show the popular-search row");
+  assert.ok(chipsHtml.includes(">Popular searches<"), "the row must carry its heading");
+
+  // The group's aria-labelledby must actually RESOLVE. index.html points the
+  // container at an id it does not itself contain, so that id has to come from
+  // the renderer -- otherwise the reference dangles and the group announces as
+  // unnamed to a screen reader, which no happy-path text assertion would catch.
+  const labelRef = /id="search-keyword-chips"[^>]*aria-labelledby="([^"]+)"/.exec(html);
+  assert.ok(labelRef, "the chips container must declare aria-labelledby");
+  assert.ok(
+    chipsHtml.includes(`id="${labelRef[1]}"`),
+    `the renderer must emit id="${labelRef[1]}" so the container's aria-labelledby resolves`
+  );
+  assert.equal((chipsHtml.match(/data-search-keyword=/g) || []).length, 4, "exactly the four curated terms must render");
+  for (const term of ["car", "bike", "motorcycle", "van"]) {
+    assert.ok(chipsHtml.includes(`data-search-keyword="${term}"`), `"${term}" must be offered for Vehicles in English`);
+  }
+
+  // Every OTHER language must see its own vocabulary and its own heading --
+  // the single most important assertion in this block.
+  const chipTermByLanguage = { sv: "bil", no: "bil", da: "bil", fi: "auto", is: "bíll" };
+  const chipLabelByLanguage = {
+    sv: "Vanliga sökningar",
+    no: "Populære søk",
+    da: "Populære søgninger",
+    fi: "Suositut haut",
+    is: "Vinsælar leitir"
+  };
+  for (const lang of Object.keys(chipTermByLanguage)) {
+    context.setLanguage(lang);
+    const localizedHtml = elements["search-keyword-chips"].innerHTML;
+    assert.ok(
+      localizedHtml.includes(`data-search-keyword="${chipTermByLanguage[lang]}"`),
+      `${lang} must see "${chipTermByLanguage[lang]}", not the English terms`
+    );
+    assert.ok(
+      localizedHtml.includes(`>${chipLabelByLanguage[lang]}<`),
+      `${lang} must see its own translated heading`
+    );
+  }
+  context.setLanguage("en");
+
+  // "All" has no single category, so the row must disappear entirely rather
+  // than mixing every category's terms together.
+  context.openFilterSheet();
+  elements["filter-category-select"].value = "All";
+  context.applyFilters();
+  assert.equal(elements["search-keyword-chips"].hidden, true, "the All view must not show a popular-search row");
+  assert.equal(elements["search-keyword-chips"].innerHTML, "", "and must leave nothing behind in it");
+
+  // A tap must drive the ONE real search: same input, same filtering.
+  context.openFilterSheet();
+  elements["filter-category-select"].value = "Vehicles";
+  context.applyFilters();
+  context.applySearchKeyword("volvo");
+  assert.equal(elements["search-input"].value, "volvo", "a keyword tap must fill the real search box");
+  assert.ok(
+    context.getFilteredListings().every((item) => /volvo/i.test(item.title)),
+    "and the normal search must genuinely filter on what was tapped"
+  );
+  context.applySearchKeyword("");
+  assert.equal(elements["search-input"].value, "", "clearing must restore an unfiltered browse");
+
+  // The tap itself is delegated (the DOM stub's closest() always returns null,
+  // so delegation can't be simulated here) -- asserted statically instead.
+  assert.match(js, /event\.target\.closest\("\[data-search-keyword\]"\)/, "chips must be wired into the existing delegated click handler");
+  assert.match(
+    js,
+    /if \(keywordChip\) applySearchKeyword\(keywordChip\.dataset\.searchKeyword\)/,
+    "and must route through the one real search path, not a second implementation"
+  );
+
+  // English synonym coverage: the map previously had NO English block, so
+  // English was the one language with no synonym matching -- which would have
+  // left English chip taps returning nothing.
+  assert.match(js, /Vehicles: \{ en: \["car", "bike", "motorcycle", "van"\]/, "English must have synonym coverage too");
+  assert.match(js, /"Real Estate": \{ en: \["apartment", "house", "room", "office"\]/);
+  assert.match(js, /"Phones & Tablets": \{ en: \["iphone", "mobile", "tablet", "charger"\]/);
+  assert.match(js, /"Free Items": \{ en: \["free", "giveaway", "wanted", "exchange"\]/);
+
+  // ...and it really works: "house" now resolves to the whole Real Estate
+  // category in English, exactly like "hus" already did in Swedish. The
+  // category must be reset to All first -- the tap test above deliberately
+  // left Vehicles active, which would filter Real Estate out before the
+  // synonym layer ever got a say. Driven via renderListings() rather than the
+  // debounced input listener: getFilteredListings() reads the same
+  // #search-input value, and this avoids depending on the sandbox's timer
+  // setup surviving this far into the suite.
+  context.openFilterSheet();
+  elements["filter-category-select"].value = "All";
+  context.applyFilters();
+  elements["search-input"].value = "house";
+  context.renderListings();
+  assert.match(elements["result-count"].textContent, /\d+ listings?/, "an English synonym must produce real results");
+  assert.ok(
+    context.getFilteredListings().length > 0,
+    "\"house\" must resolve to real Estate listings via the new English synonym block"
+  );
+  assert.ok(
+    context.getFilteredListings().every((item) => item.category === "Real Estate"),
+    "and it must resolve to the Real Estate CATEGORY, not a substring coincidence"
+  );
+  elements["search-input"].value = "";
+  context.renderListings();
+
+  // Leave the sandbox exactly as this block found it.
+  context.resetFilters();
+  context.setLanguage("en");
+
+  console.log("PASS: Blocket Phase 1 -- the paid-placement badge is a real translation rendered on a boosted listing's card (and carried into its accessible name and its help page) in all six languages, and category popular-search chips render localized terms for every one of the 15 categories in all six languages, vanish on All, and drive the single real search.");
+}
+
+// --- Blocket Phase 1, Part C: the 6-month free-boost window ---
+//
+// Boosting stays free and paid checkout stays BLOCKED from now until a real,
+// persisted deadline, and the boost sheet tells sellers exactly when that is.
+// Every server-side claim below goes through the REAL endpoint (same process,
+// live process.env) rather than re-implementing the logic in the test, so this
+// proves the shipped behavior. Nothing here mutates a boost: the restart test
+// after this suite requires "Analytics test bicycle" to still be sponsored.
+{
+  const boostModule = require("../scripts/boost");
+  const savedPaymentsFlag = process.env.BOOST_PAYMENTS_ENABLED;
+  const savedFreeUntil = process.env.BOOST_FREE_UNTIL;
+  const dayMs = 24 * 60 * 60 * 1000;
+
+  try {
+    // The default deployment: no flag, no explicit deadline.
+    delete process.env.BOOST_PAYMENTS_ENABLED;
+    delete process.env.BOOST_FREE_UNTIL;
+
+    // 1. The server must expose a real ~6-month deadline and confirm the
+    //    window is open -- which is exactly why payments are frozen.
+    assert.equal(boostModule.BOOST_FREE_MONTHS, 6, "the free window must be the PRD's 6 months");
+    const liveConfig = await (await fetch(`${serverOrigin}/api/boost/config`)).json();
+    assert.equal(liveConfig.paymentsEnabled, false, "with no deployer flag set, paid boosts must be frozen while the window is open");
+    assert.equal(liveConfig.freeWindowActive, true, "and the server must know the window is still open");
+    assert.ok(Number.isFinite(liveConfig.freeUntil), "the deadline must be a real numeric timestamp");
+    const daysUntilClose = (liveConfig.freeUntil - Date.now()) / dayMs;
+    assert.ok(daysUntilClose > 150 && daysUntilClose < 220, `the deadline must be roughly 6 months out, got ${Math.round(daysUntilClose)} days`);
+
+    // 2. The deadline is PERSISTED, not recomputed per boot -- otherwise every
+    //    deploy or restart would silently push it another 6 months out and it
+    //    would never arrive. Proven by asking again with a much later "now": a
+    //    recomputing implementation would hand back a different, further value.
+    const storedRow = testDb.prepare("SELECT value FROM app_settings WHERE key = ?").get("boost_free_until");
+    assert.ok(storedRow, "the deadline must be written to the database on first use");
+    const storedMs = Number(storedRow.value);
+    assert.ok(Number.isFinite(storedMs) && storedMs > 0, "and stored as a real timestamp");
+    assert.equal(
+      boostModule.boostFreeUntil(testDb, Date.now() + 90 * dayMs),
+      storedMs,
+      "a later boot must reuse the stored deadline instead of re-anchoring six months further out"
+    );
+
+    // 3. The note really renders, in every one of the 6 languages, with the
+    //    placeholder replaced by a locale-formatted date.
+    await context.loadBoostConfig();
+    await loginTestUser("ola@example.com", DEFAULT_TEST_PASSWORD);
+    context.openBoostSheet(analyticsListing.id);
+    assert.match(
+      elements["boost-sheet-body"].innerHTML,
+      /class="boost-free-until">/,
+      "the boost sheet must tell sellers when free boosting ends"
+    );
+    const renderedNote = elements["boost-sheet-body"].innerHTML.match(/class="boost-free-until">([^<]*)</);
+    assert.ok(renderedNote && renderedNote[1].trim().length > 0, "the note must contain visible text");
+    assert.ok(/\d/.test(renderedNote[1]), "the note must carry a real formatted date");
+    assert.doesNotMatch(renderedNote[1], /\{date\}/, "the {date} placeholder must actually be substituted, not shown literally");
+
+    const noteOpeningByLanguage = {
+      en: "Boosting is free until",
+      sv: "Det är gratis att boosta",
+      no: "Det er gratis å booste",
+      da: "Det er gratis at booste",
+      fi: "Nostaminen on ilmaista",
+      is: "Það er ókeypis að boosta"
+    };
+    for (const [lang, opening] of Object.entries(noteOpeningByLanguage)) {
+      context.setLanguage(lang);
+      context.openBoostSheet(analyticsListing.id);
+      const localized = elements["boost-sheet-body"].innerHTML.match(/class="boost-free-until">([^<]*)</);
+      assert.ok(localized, `${lang} must render the note at all`);
+      assert.ok(
+        localized[1].startsWith(opening),
+        `${lang} must show its own "free until" sentence, not the English one (got: ${localized[1]})`
+      );
+      assert.doesNotMatch(localized[1], /\{date\}/, `${lang} must substitute the placeholder too`);
+    }
+    context.setLanguage("en");
+    context.openBoostSheet(analyticsListing.id);
+
+    // 4. Both sheet states carry the note -- already-boosted and not yet.
+    assert.equal(
+      (js.match(/\$\{boostFreeUntilNote\(\)\}/g) || []).length,
+      2,
+      "both sheet states (boosted and not-yet-boosted) must carry the free-until note"
+    );
+
+    // 5. Closing the window must genuinely open paid boosts and block the free
+    //    path -- with the deployer's flag still completely unset, so time (not
+    //    a manual flag-flip) is what unfreezes payments.
+    process.env.BOOST_FREE_UNTIL = "2020-01-01";
+    const closedConfig = await (await fetch(`${serverOrigin}/api/boost/config`)).json();
+    assert.equal(closedConfig.freeWindowActive, false, "an explicit past date must close the window");
+    assert.equal(closedConfig.paymentsEnabled, true, "and therefore open paid boosts with the flag still unset");
+
+    const blockedFreeBoost = await fetch(`${serverOrigin}/api/listings/${analyticsListing.id}/boost`, {
+      method: "POST",
+      headers: { "content-type": "application/json", cookie: testCookieJar },
+      body: JSON.stringify({ packageId: "24h" })
+    });
+    assert.equal(blockedFreeBoost.status, 402, "free activation must be refused once the window has closed");
+    assert.equal((await blockedFreeBoost.json()).code, "PAYMENT_REQUIRED");
+
+    // Refresh the CLIENT's cached config too -- the sheet renders from that
+    // cache, not from a fresh request, so asserting on it without reloading
+    // would be testing a stale value.
+    await context.loadBoostConfig();
+    context.openBoostSheet(analyticsListing.id);
+    assert.doesNotMatch(
+      elements["boost-sheet-body"].innerHTML,
+      /boost-free-until/,
+      "the note must disappear once the window closes -- it would be untrue then"
+    );
+
+    // 6. An unparseable date must degrade to the stored deadline, never
+    //    accidentally enable payments on day one.
+    process.env.BOOST_FREE_UNTIL = "not-a-real-date";
+    assert.equal(
+      boostModule.isBoostFreeWindowActive(testDb),
+      true,
+      "an unparseable override must be ignored, never trusted into opening payments"
+    );
+    const typoConfig = await (await fetch(`${serverOrigin}/api/boost/config`)).json();
+    assert.equal(typoConfig.paymentsEnabled, false, "the server must reach the same conclusion");
+    assert.ok(typoConfig.freeUntil === storedMs, "and fall back to the stored deadline");
+
+    // 7. An explicit deployer choice keeps its exact prior meaning, in both
+    //    directions -- it wins over the window.
+    process.env.BOOST_PAYMENTS_ENABLED = "false";
+    assert.equal(
+      (await (await fetch(`${serverOrigin}/api/boost/config`)).json()).paymentsEnabled,
+      false,
+      "an explicit BOOST_PAYMENTS_ENABLED=false must force payments off regardless of the window"
+    );
+    process.env.BOOST_PAYMENTS_ENABLED = "true";
+    process.env.BOOST_FREE_UNTIL = "2020-01-01";
+    assert.equal(
+      (await (await fetch(`${serverOrigin}/api/boost/config`)).json()).paymentsEnabled,
+      true,
+      "an explicit BOOST_PAYMENTS_ENABLED=true must force payments on"
+    );
+  } finally {
+    // Leave process.env exactly as this block found it, and refresh the sheet's
+    // cached config so nothing downstream reads a stale value.
+    if (savedPaymentsFlag === undefined) delete process.env.BOOST_PAYMENTS_ENABLED;
+    else process.env.BOOST_PAYMENTS_ENABLED = savedPaymentsFlag;
+    if (savedFreeUntil === undefined) delete process.env.BOOST_FREE_UNTIL;
+    else process.env.BOOST_FREE_UNTIL = savedFreeUntil;
+    await context.loadBoostConfig();
+    await context.signOutUser();
+  }
+
+  console.log("PASS: Blocket Phase 1, Part C -- boosting is free and paid checkout is genuinely frozen behind a ~6-month deadline that is persisted (never re-anchored by a redeploy), the localized 'free until <date>' note renders in all six languages and disappears the moment the window closes, an explicit past date really opens payments and 402-blocks free activation, a typo'd date degrades safely to the stored deadline, and an explicit deployer flag still wins in both directions.");
 }
 }
 

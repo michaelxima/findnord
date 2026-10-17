@@ -14,6 +14,8 @@ const {
   BOOST_PACKAGES,
   findBoostPackage,
   boostDurationMs,
+  boostFreeUntil,
+  isBoostFreeWindowActive,
   isBoostPaymentsEnabled,
   createBoostCheckoutSession,
   stripeWebhookSecret,
@@ -512,8 +514,20 @@ function createApiRouter(db, options = {}) {
 
   // Public: the frontend needs this before a seller even signs in, to show
   // real package/pricing info and whether payments are currently required.
+  //
+  // `freeUntil`/`freeWindowActive` are what let the boost sheet tell a seller
+  // *when* free boosting ends, instead of the app's previous silent "it's free
+  // right now, no idea for how long". `paymentsEnabled` already accounts for
+  // the free window -- it is true only once the window has CLOSED (or a
+  // deployer explicitly forced it on).
   router.get("/boost/config", (req, res) => {
-    res.json({ paymentsEnabled: isBoostPaymentsEnabled(), packages: BOOST_PACKAGES });
+    const freeUntil = boostFreeUntil(db);
+    res.json({
+      paymentsEnabled: isBoostPaymentsEnabled(db),
+      freeUntil,
+      freeWindowActive: isBoostFreeWindowActive(db),
+      packages: BOOST_PACKAGES
+    });
   });
 
   // Free-path activation -- only while payments are OFF (the PRD's 6-month
@@ -535,7 +549,7 @@ function createApiRouter(db, options = {}) {
       res.status(400).json({ error: "Unknown boost package.", code: "INVALID_BOOST_PACKAGE" });
       return;
     }
-    if (isBoostPaymentsEnabled()) {
+    if (isBoostPaymentsEnabled(db)) {
       res.status(402).json({ error: "Boost payments are enabled -- use checkout instead of direct activation.", code: "PAYMENT_REQUIRED" });
       return;
     }
@@ -571,7 +585,7 @@ function createApiRouter(db, options = {}) {
   // matching the OPENAI_API_KEY/GOOGLE_CLIENT_ID "clear error, never a
   // crash" pattern already established in this project.
   router.post("/listings/:id/boost/checkout", requireSession, async (req, res) => {
-    if (!isBoostPaymentsEnabled()) {
+    if (!isBoostPaymentsEnabled(db)) {
       res.status(400).json({ error: "Boost payments are not enabled on this server.", code: "PAYMENTS_DISABLED" });
       return;
     }

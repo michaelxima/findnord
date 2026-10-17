@@ -39,12 +39,82 @@ function boostDurationMs(pkg) {
   return pkg.days * 24 * 60 * 60 * 1000;
 }
 
+// --- The free launch window ---
+//
+// Boosting is free for the first BOOST_FREE_MONTHS after launch, then the
+// paid packages become available on their own. That end point is a REAL,
+// persisted date rather than "six months from whenever this process started":
+// recomputing it per boot would quietly re-extend the promotion on every
+// deploy, so the deadline would move and never arrive. It is therefore stored
+// in app_settings the first time it is ever needed (db/schema.sql) and read
+// back on every later boot -- a restart, a redeploy, a scaling-up all keep
+// the identical deadline.
+//
+// A deployer can always override it with an explicit BOOST_FREE_UNTIL ISO
+// date (e.g. to shorten the promotion, or to set it in the past to open paid
+// boosts immediately). An unparseable value is ignored rather than trusted,
+// so a typo degrades to the stored default instead of accidentally enabling
+// payments on day one.
+const BOOST_FREE_MONTHS = 6;
+const BOOST_FREE_UNTIL_KEY = "boost_free_until";
+
+function parseIsoDateToMs(value) {
+  if (!value) return null;
+  const parsed = Date.parse(value);
+  return Number.isNaN(parsed) ? null : parsed;
+}
+
+// Calendar-aware "+6 months" (2026-10-17 -> 2027-04-17), not a flat 180
+// days, because this is a promotion boundary a human will read and compare
+// against a stated date -- unlike boost package durations, where the module
+// already documents an intentional 30-day-per-month simplification.
+function addMonths(ms, months) {
+  const date = new Date(ms);
+  date.setMonth(date.getMonth() + months);
+  return date.getTime();
+}
+
+// The moment the free window closes. Priority: explicit env override, then
+// the persisted anchor, then -- only ever on the very first call -- "now plus
+// six months", which is persisted immediately so it never drifts.
+function boostFreeUntil(db, now = Date.now()) {
+  const fromEnv = parseIsoDateToMs(process.env.BOOST_FREE_UNTIL);
+  if (fromEnv) return fromEnv;
+
+  if (db) {
+    const row = db.prepare("SELECT value FROM app_settings WHERE key = ?").get(BOOST_FREE_UNTIL_KEY);
+    if (row) {
+      const stored = Number(row.value);
+      if (Number.isFinite(stored) && stored > 0) return stored;
+    }
+    const anchored = addMonths(now, BOOST_FREE_MONTHS);
+    db.prepare("INSERT OR REPLACE INTO app_settings (key, value) VALUES (?, ?)").run(BOOST_FREE_UNTIL_KEY, String(anchored));
+    return anchored;
+  }
+
+  // No database available (a caller that only wants the shape of the window):
+  // compute it without persisting, so a read-only query can't create state.
+  return addMonths(now, BOOST_FREE_MONTHS);
+}
+
+function isBoostFreeWindowActive(db, now = Date.now()) {
+  return now < boostFreeUntil(db, now);
+}
+
 // A real env-var feature flag, not a hardcoded constant -- flippable per
 // deployment with zero code changes, exactly like OPENAI_API_KEY/
-// GOOGLE_CLIENT_ID already are in this project. Defaults OFF (free/sealed),
-// matching the PRD's 6-month launch policy.
-function isBoostPaymentsEnabled() {
-  return process.env.BOOST_PAYMENTS_ENABLED === "true";
+// GOOGLE_CLIENT_ID already are in this project.
+//
+// An EXPLICIT value always wins, in both directions: a deployer who sets
+// "true" or "false" gets exactly that, immediately. Only when it is left
+// entirely unset does the launch window decide -- payments stay frozen and
+// boosting stays free until the window closes, then become available with no
+// code change and no manual flag-flip required.
+function isBoostPaymentsEnabled(db) {
+  const explicit = process.env.BOOST_PAYMENTS_ENABLED;
+  if (explicit !== undefined) return explicit === "true";
+  if (!db) return false; // matches the pre-window default exactly
+  return !isBoostFreeWindowActive(db);
 }
 
 function stripeSecretKey() {
@@ -122,8 +192,11 @@ function verifyStripeWebhookSignature(rawBody, signatureHeader, secret) {
 
 module.exports = {
   BOOST_PACKAGES,
+  BOOST_FREE_MONTHS,
   findBoostPackage,
   boostDurationMs,
+  boostFreeUntil,
+  isBoostFreeWindowActive,
   isBoostPaymentsEnabled,
   stripeSecretKey,
   stripeWebhookSecret,

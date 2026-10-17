@@ -156,6 +156,8 @@ const translations = {
     "filter.activeFiltersLabel": "Active filters",
     "filter.priceChipPrefix": "Price",
     "ai.badge": "AI photo",
+    "listingCard.paidPlacement": "Sponsored",
+    "browse.popularSearches": "Popular searches",
     "ai.buttonLabel": "Generate with AI",
     "ai.promptLabel": "Describe your item for AI (optional)",
     "ai.promptPlaceholder": "e.g. blue vintage bicycle",
@@ -213,6 +215,7 @@ const translations = {
     "account.actionBoost": "Boost Ads",
     "boost.sheetTitle": "Boost this listing",
     "boost.introFree": "Boosting is completely free while FindNord is in its early access period. Pick a duration below.",
+    "boost.freeUntil": "Boosting is free until {date}.",
     "boost.introPaid": "Choose a boost package and complete checkout to activate it.",
     "boost.freeDuringLaunch": "Free for now",
     "boost.selectFree": "Activate free",
@@ -460,6 +463,8 @@ const translations = {
     "filter.activeFiltersLabel": "Aktiva filter",
     "filter.priceChipPrefix": "Pris",
     "ai.badge": "AI-foto",
+    "listingCard.paidPlacement": "Annons",
+    "browse.popularSearches": "Vanliga sökningar",
     "ai.buttonLabel": "Skapa med AI",
     "ai.promptLabel": "Beskriv föremålet för AI (valfritt)",
     "ai.promptPlaceholder": "t.ex. blå vintagecykel",
@@ -517,6 +522,7 @@ const translations = {
     "account.actionBoost": "Boosta annonser",
     "boost.sheetTitle": "Boosta den här annonsen",
     "boost.introFree": "Att boosta är helt gratis medan FindNord är i sin tidiga lanseringsperiod. Välj en varaktighet nedan.",
+    "boost.freeUntil": "Det är gratis att boosta till {date}.",
     "boost.introPaid": "Välj ett boost-paket och slutför betalningen för att aktivera det.",
     "boost.freeDuringLaunch": "Gratis just nu",
     "boost.selectFree": "Aktivera gratis",
@@ -766,6 +772,8 @@ const translations = {
     "filter.activeFiltersLabel": "Aktive filtre",
     "filter.priceChipPrefix": "Pris",
     "ai.badge": "AI-bilde",
+    "listingCard.paidPlacement": "Annonse",
+    "browse.popularSearches": "Populære søk",
     "ai.buttonLabel": "Generer med AI",
     "ai.promptLabel": "Beskriv varen for AI (valgfritt)",
     "ai.promptPlaceholder": "f.eks. blå vintagesykkel",
@@ -823,6 +831,7 @@ const translations = {
     "account.actionBoost": "Boost annonser",
     "boost.sheetTitle": "Boost denne annonsen",
     "boost.introFree": "Det er helt gratis å booste annonser mens FindNord er i sin tidlige lanseringsperiode. Velg en varighet under.",
+    "boost.freeUntil": "Det er gratis å booste til {date}.",
     "boost.introPaid": "Velg en boost-pakke og fullfør betalingen for å aktivere den.",
     "boost.freeDuringLaunch": "Gratis for nå",
     "boost.selectFree": "Aktiver gratis",
@@ -1070,6 +1079,8 @@ const translations = {
     "filter.activeFiltersLabel": "Aktive filtre",
     "filter.priceChipPrefix": "Pris",
     "ai.badge": "AI-foto",
+    "listingCard.paidPlacement": "Annonce",
+    "browse.popularSearches": "Populære søgninger",
     "ai.buttonLabel": "Generer med AI",
     "ai.promptLabel": "Beskriv din vare til AI (valgfrit)",
     "ai.promptPlaceholder": "f.eks. blå vintagecykel",
@@ -1127,6 +1138,7 @@ const translations = {
     "account.actionBoost": "Boost annoncer",
     "boost.sheetTitle": "Boost denne annonce",
     "boost.introFree": "Det er helt gratis at booste, mens FindNord er i sin tidlige lanceringsperiode. Vælg en varighed nedenfor.",
+    "boost.freeUntil": "Det er gratis at booste til {date}.",
     "boost.introPaid": "Vælg en boost-pakke, og gennemfør betalingen for at aktivere den.",
     "boost.freeDuringLaunch": "Gratis for nu",
     "boost.selectFree": "Aktiver gratis",
@@ -1374,6 +1386,8 @@ const translations = {
     "filter.activeFiltersLabel": "Aktiiviset suodattimet",
     "filter.priceChipPrefix": "Hinta",
     "ai.badge": "AI-kuva",
+    "listingCard.paidPlacement": "Mainos",
+    "browse.popularSearches": "Suositut haut",
     "ai.buttonLabel": "Luo AI:lla",
     "ai.promptLabel": "Kuvaile tuotettasi AI:lle (valinnainen)",
     "ai.promptPlaceholder": "esim. sininen vintage-polkupyörä",
@@ -1431,6 +1445,7 @@ const translations = {
     "account.actionBoost": "Nosta ilmoituksia",
     "boost.sheetTitle": "Nosta tätä ilmoitusta",
     "boost.introFree": "Nostaminen on täysin ilmaista, kun FindNord on varhaisen käyttöönoton vaiheessa. Valitse kesto alta.",
+    "boost.freeUntil": "Nostaminen on ilmaista {date} asti.",
     "boost.introPaid": "Valitse nostopaketti ja viimeistele maksu aktivoidaksesi sen.",
     "boost.freeDuringLaunch": "Ilmainen toistaiseksi",
     "boost.selectFree": "Aktivoi ilmaiseksi",
@@ -1678,6 +1693,8 @@ const translations = {
     "filter.activeFiltersLabel": "Virkar síur",
     "filter.priceChipPrefix": "Verð",
     "ai.badge": "AI-mynd",
+    "listingCard.paidPlacement": "Auglýsing",
+    "browse.popularSearches": "Vinsælar leitir",
     "ai.buttonLabel": "Búa til með AI",
     "ai.promptLabel": "Lýstu hlutnum fyrir AI (valkvætt)",
     "ai.promptPlaceholder": "t.d. blátt vintage reiðhjól",
@@ -1735,6 +1752,7 @@ const translations = {
     "account.actionBoost": "Efla auglýsingar",
     "boost.sheetTitle": "Efla þessa auglýsingu",
     "boost.introFree": "Það er alveg frítt að efla auglýsingar meðan FindNord er á sínu fyrsta aðgangstímabili. Veldu tímalengd hér fyrir neðan.",
+    "boost.freeUntil": "Það er ókeypis að boosta til {date}.",
     "boost.introPaid": "Veldu eflingarpakka og ljúktu greiðslu til að virkja hann.",
     "boost.freeDuringLaunch": "Frítt í bili",
     "boost.selectFree": "Virkja frítt",
@@ -3217,7 +3235,7 @@ async function loadBoostConfig() {
   try {
     boostConfig = await DataService.boost.config();
   } catch (error) {
-    boostConfig = { paymentsEnabled: false, packages: [] };
+    boostConfig = { paymentsEnabled: false, freeUntil: null, freeWindowActive: false, packages: [] };
   }
 }
 
@@ -3225,6 +3243,20 @@ function formatBoostExpiry(timestampMs) {
   if (!timestampMs) return "";
   const locale = GOOGLE_LOCALE_BY_LANGUAGE[currentLanguage] || "en";
   return new Intl.DateTimeFormat(locale, { year: "numeric", month: "short", day: "numeric" }).format(new Date(timestampMs));
+}
+
+// The "boosting is free until <date>" note. Shown only while the free launch
+// window is genuinely still open AND the deployer hasn't forced payments on.
+// The moment payments become live this sentence would be untrue, so it has to
+// disappear together with them rather than linger on a now-paid sheet.
+// Localized in all 6 languages, and the date itself is locale-formatted via
+// the same helper the "Boosted until" line already uses.
+function boostFreeUntilNote() {
+  if (boostConfig.paymentsEnabled) return "";
+  if (!boostConfig.freeWindowActive || !boostConfig.freeUntil) return "";
+  const formatted = formatBoostExpiry(boostConfig.freeUntil);
+  if (!formatted) return "";
+  return `<p class="boost-free-until">${t("boost.freeUntil").replace("{date}", escapeHtml(formatted))}</p>`;
 }
 
 function boostPackageLabel(packageId) {
@@ -3253,6 +3285,7 @@ function boostSheetBodyTemplate(listing) {
   if (listing.sponsored) {
     return `
       <p class="boost-active-status">${t("boost.activeUntil")} ${formatBoostExpiry(listing.boostExpiresAt)} (${boostPackageLabel(listing.boostPackage)})</p>
+      ${boostFreeUntilNote()}
       <button type="button" class="secondary-action" id="boost-cancel-button">${t("myListings.unboost")}</button>
       <h3 class="boost-sheet-subtitle">${t("boost.changePackage")}</h3>
       <div class="boost-package-list">${(boostConfig.packages || []).map((pkg) => boostPackageRowTemplate(pkg, listing)).join("")}</div>
@@ -3260,6 +3293,7 @@ function boostSheetBodyTemplate(listing) {
   }
   return `
     <p class="boost-sheet-intro">${boostConfig.paymentsEnabled ? t("boost.introPaid") : t("boost.introFree")}</p>
+    ${boostFreeUntilNote()}
     <div class="boost-package-list">${(boostConfig.packages || []).map((pkg) => boostPackageRowTemplate(pkg, listing)).join("")}</div>
   `;
 }
@@ -4401,11 +4435,22 @@ function listingCardTemplate(listing, options) {
   const interactive = !options || options.interactive !== false;
   const photoCount = listing.images ? listing.images.length : 0;
   const status = listing.status && listing.status !== "active" ? listing.status : null;
-  // A status badge (Reserved/Sold) takes the same corner "Sponsored" uses and
-  // takes priority over it when both would apply -- advertising a sold item
-  // isn't useful, so there's never a real need to show both at once.
+  // A status badge (Reserved/Sold) takes the same corner the paid-placement
+  // badge uses and takes priority over it when both would apply -- advertising
+  // a sold item isn't useful, so there's never a real need to show both.
+  //
+  // The paid-placement label is a real translation, replacing the hardcoded
+  // English "Sponsored" that used to appear verbatim in every Nordic
+  // language. Each of those markets expects its own ad-labelling word
+  // (Annons/Annonse/Annonce/Mainos/Auglýsing) -- and Nordic ad-disclosure
+  // rules are the whole reason that word is on the card at all.
+  const paidPlacementLabel = t("listingCard.paidPlacement");
+  // The card's screen-reader name reads mid-sentence, so the same word is
+  // lower-cased there. For English that reproduces the exact ", sponsored"
+  // wording assistive tech already gets today.
+  const paidPlacementSpoken = paidPlacementLabel.charAt(0).toLowerCase() + paidPlacementLabel.slice(1);
   const mediaBadges = `${
-    status ? `<span class="status-badge status-${status}">${t(`status.${status}`)}</span>` : listing.sponsored ? '<span class="sponsored">Sponsored</span>' : ""
+    status ? `<span class="status-badge status-${status}">${t(`status.${status}`)}</span>` : listing.sponsored ? `<span class="sponsored">${paidPlacementLabel}</span>` : ""
   }${listing.freshness ? `<span class="freshness">${listing.freshness}</span>` : ""}${
     listing.aiPhoto ? `<span class="ai-badge">${t("ai.badge")}</span>` : ""
   }${photoCount > 1 ? `<span class="photo-count-badge">1/${photoCount}</span>` : ""}`;
@@ -4425,7 +4470,7 @@ function listingCardTemplate(listing, options) {
   const saved = isSaved(listing.id);
   return `
     <article class="listing-card" data-id="${listing.id}">
-      <button type="button" class="card-button" data-open-listing="${listing.id}" aria-label="Open listing: ${escapeHtml(listing.title)}, ${formatListingPrice(listing)}${status ? ", " + t(`status.${status}`) : ""}${listing.sponsored ? ", sponsored" : ""}${listing.freshness ? ", " + listing.freshness : ""}, ${escapeHtml(listing.locality)}, ${listing.distance} away">
+      <button type="button" class="card-button" data-open-listing="${listing.id}" aria-label="Open listing: ${escapeHtml(listing.title)}, ${formatListingPrice(listing)}${status ? ", " + t(`status.${status}`) : ""}${listing.sponsored ? ", " + paidPlacementSpoken : ""}${listing.freshness ? ", " + listing.freshness : ""}, ${escapeHtml(listing.locality)}, ${listing.distance} away">
         ${body}
       </button>
       <button type="button" class="save-button${saved ? " saved" : ""}" data-save-listing="${listing.id}" aria-pressed="${saved}" aria-label="${saved ? `Remove ${escapeHtml(listing.title)} from saved items` : `Save ${escapeHtml(listing.title)} for later`}">${saved ? HEART_ICON_FILLED : HEART_ICON_OUTLINE}${saved ? "Saved" : "Save"}</button>
@@ -4453,6 +4498,18 @@ function renderListings() {
 function handleSidebarSearchInput(event) {
   const searchInput = document.getElementById("search-input");
   searchInput.value = event.target.value;
+  if (activeView !== "browse-view") showView("browse-view");
+  renderListings();
+}
+
+// The keyword chips' tap handler, kept deliberately identical to
+// handleSidebarSearchInput above: fill the real #search-input, make sure the
+// Browse view is actually visible so results can be seen, re-render. Nothing
+// about this is a separate search implementation.
+function applySearchKeyword(term) {
+  const searchInput = document.getElementById("search-input");
+  if (!searchInput) return;
+  searchInput.value = term;
   if (activeView !== "browse-view") showView("browse-view");
   renderListings();
 }
@@ -4537,23 +4594,157 @@ function categoryLabel(id) {
 // text never contains that word. Canonical category ids are the map keys;
 // values are real local vocabulary, not machine transliterations.
 const CATEGORY_SEARCH_SYNONYMS = {
-  Vehicles: { sv: ["bil", "bilar", "fordon", "motorcykel", "mc", "husbil", "släp"], no: ["bil", "biler", "kjøretøy", "motorsykkel", "mc", "bobil", "tilhenger"], da: ["bil", "biler", "køretøj", "motorcykel", "mc", "autocamper", "trailer"], fi: ["auto", "autot", "ajoneuvo", "moottoripyörä", "mopo", "asuntoauto", "perävaunu"], is: ["bíll", "bílar", "ökutæki", "mótorhjól", "fellihýsi", "kerra"] },
-  "Real Estate": { sv: ["bostad", "lägenhet", "hus", "villa", "hyra", "radhus"], no: ["bolig", "leilighet", "hus", "villa", "leie", "rekkehus"], da: ["bolig", "lejlighed", "hus", "villa", "leje", "rækkehus"], fi: ["asunto", "kerrostalo", "talo", "omakotitalo", "vuokra", "rivitalo"], is: ["íbúð", "hús", "einbýlishús", "leiga", "raðhús"] },
-  Electronics: { sv: ["elektronik", "dator", "tv", "kamera", "hörlurar"], no: ["elektronikk", "data", "tv", "kamera", "hodetelefoner"], da: ["elektronik", "computer", "tv", "kamera", "hovedtelefoner"], fi: ["elektroniikka", "tietokone", "televisio", "kamera", "kuulokkeet"], is: ["rafeindatæki", "tölva", "sjónvarp", "myndavél", "heyrnartól"] },
-  "Phones & Tablets": { sv: ["mobil", "telefon", "surfplatta", "iphone"], no: ["mobil", "telefon", "nettbrett", "iphone"], da: ["mobil", "telefon", "tablet", "iphone"], fi: ["puhelin", "kännykkä", "tabletti", "iphone"], is: ["sími", "farsími", "spjaldtölva", "iphone"] },
-  "Home & Furniture": { sv: ["möbler", "soffa", "bord", "stol", "köksinredning"], no: ["møbler", "sofa", "bord", "stol", "kjøkken"], da: ["møbler", "sofa", "bord", "stol", "køkken"], fi: ["huonekalut", "sohva", "pöytä", "tuoli", "keittiö"], is: ["húsgögn", "sófi", "borð", "stóll", "eldhús"] },
-  "Books & Media": { sv: ["bok", "böcker", "media", "film", "musik"], no: ["bok", "bøker", "medier", "film", "musikk"], da: ["bog", "bøger", "medier", "film", "musik"], fi: ["kirja", "kirjat", "media", "elokuva", "musiikki"], is: ["bók", "bækur", "miðlar", "kvikmynd", "tónlist"] },
-  Fashion: { sv: ["kläder", "skor", "väska", "mode"], no: ["klær", "sko", "veske", "mote"], da: ["tøj", "sko", "taske", "mode"], fi: ["vaatteet", "kengät", "laukku", "muoti"], is: ["föt", "skór", "taska", "tíska"] },
-  "Baby & Kids": { sv: ["barnvagn", "babykläder", "leksaker"], no: ["barnevogn", "babyklær", "leker"], da: ["barnevogn", "babytøj", "legetøj"], fi: ["lastenvaunut", "vauvanvaatteet", "lelut"], is: ["kerra", "barnaföt", "leikföng"] },
-  "Sports & Outdoor": { sv: ["sport", "cykel", "skidor", "gym", "friluftsliv"], no: ["sport", "sykkel", "ski", "trening", "friluftsliv"], da: ["sport", "cykel", "ski", "træning", "friluftsliv"], fi: ["urheilu", "pyörä", "sukset", "kuntosali", "ulkoilu"], is: ["íþróttir", "hjól", "skíði", "útivist"] },
-  "Health & Wellness": { sv: ["hälsa", "wellness", "kosttillskott", "yoga", "massage"], no: ["helse", "velvære", "kosttilskudd", "yoga", "massasje"], da: ["sundhed", "velvære", "kosttilskud", "yoga", "massage"], fi: ["terveys", "hyvinvointi", "lisäravinteet", "jooga", "hieronta"], is: ["heilsa", "vellíðan", "fæðubótarefni", "jóga", "nudd"] },
-  Jobs: { sv: ["jobb", "arbete", "anställning", "lediga jobb"], no: ["jobb", "arbeid", "stilling", "ledige stillinger"], da: ["job", "arbejde", "stilling", "ledige stillinger"], fi: ["työ", "työpaikka", "työpaikat", "avoimet työpaikat"], is: ["vinna", "starf", "laus störf"] },
-  Services: { sv: ["tjänst", "hantverkare", "flytthjälp", "städning"], no: ["tjeneste", "håndverker", "flyttehjelp", "rengjøring"], da: ["tjeneste", "håndværker", "flyttehjælp", "rengøring"], fi: ["palvelu", "remontti", "muuttoapu", "siivous"], is: ["þjónusta", "iðnaðarmaður", "þrif"] },
-  "Agriculture & Garden": { sv: ["trädgård", "jordbruk", "traktor", "växter"], no: ["hage", "landbruk", "traktor", "planter"], da: ["have", "landbrug", "traktor", "planter"], fi: ["puutarha", "maatalous", "traktori", "kasvit"], is: ["garður", "landbúnaður", "traktor", "plöntur"] },
-  "Free Items": { sv: ["gratis", "skänkes"], no: ["gratis", "gis bort"], da: ["gratis", "gives væk"], fi: ["ilmainen", "annetaan"], is: ["ókeypis", "gefins"] },
+  Vehicles: { en: ["car", "bike", "motorcycle", "van"], sv: ["bil", "bilar", "fordon", "motorcykel", "mc", "husbil", "släp"], no: ["bil", "biler", "kjøretøy", "motorsykkel", "mc", "bobil", "tilhenger"], da: ["bil", "biler", "køretøj", "motorcykel", "mc", "autocamper", "trailer"], fi: ["auto", "autot", "ajoneuvo", "moottoripyörä", "mopo", "asuntoauto", "perävaunu"], is: ["bíll", "bílar", "ökutæki", "mótorhjól", "fellihýsi", "kerra"] },
+  "Real Estate": { en: ["apartment", "house", "room", "office"], sv: ["bostad", "lägenhet", "hus", "villa", "hyra", "radhus"], no: ["bolig", "leilighet", "hus", "villa", "leie", "rekkehus"], da: ["bolig", "lejlighed", "hus", "villa", "leje", "rækkehus"], fi: ["asunto", "kerrostalo", "talo", "omakotitalo", "vuokra", "rivitalo"], is: ["íbúð", "hús", "einbýlishús", "leiga", "raðhús"] },
+  Electronics: { en: ["tv", "laptop", "camera", "sound"], sv: ["elektronik", "dator", "tv", "kamera", "hörlurar"], no: ["elektronikk", "data", "tv", "kamera", "hodetelefoner"], da: ["elektronik", "computer", "tv", "kamera", "hovedtelefoner"], fi: ["elektroniikka", "tietokone", "televisio", "kamera", "kuulokkeet"], is: ["rafeindatæki", "tölva", "sjónvarp", "myndavél", "heyrnartól"] },
+  "Phones & Tablets": { en: ["iphone", "mobile", "tablet", "charger"], sv: ["mobil", "telefon", "surfplatta", "iphone"], no: ["mobil", "telefon", "nettbrett", "iphone"], da: ["mobil", "telefon", "tablet", "iphone"], fi: ["puhelin", "kännykkä", "tabletti", "iphone"], is: ["sími", "farsími", "spjaldtölva", "iphone"] },
+  "Home & Furniture": { en: ["furniture", "sofa", "table", "chair"], sv: ["möbler", "soffa", "bord", "stol", "köksinredning"], no: ["møbler", "sofa", "bord", "stol", "kjøkken"], da: ["møbler", "sofa", "bord", "stol", "køkken"], fi: ["huonekalut", "sohva", "pöytä", "tuoli", "keittiö"], is: ["húsgögn", "sófi", "borð", "stóll", "eldhús"] },
+  "Books & Media": { en: ["books", "film", "music", "games"], sv: ["bok", "böcker", "media", "film", "musik"], no: ["bok", "bøker", "medier", "film", "musikk"], da: ["bog", "bøger", "medier", "film", "musik"], fi: ["kirja", "kirjat", "media", "elokuva", "musiikki"], is: ["bók", "bækur", "miðlar", "kvikmynd", "tónlist"] },
+  Fashion: { en: ["clothes", "shoes", "bag", "fashion"], sv: ["kläder", "skor", "väska", "mode"], no: ["klær", "sko", "veske", "mote"], da: ["tøj", "sko", "taske", "mode"], fi: ["vaatteet", "kengät", "laukku", "muoti"], is: ["föt", "skór", "taska", "tíska"] },
+  "Baby & Kids": { en: ["stroller", "toys", "clothes", "car seat"], sv: ["barnvagn", "babykläder", "leksaker"], no: ["barnevogn", "babyklær", "leker"], da: ["barnevogn", "babytøj", "legetøj"], fi: ["lastenvaunut", "vauvanvaatteet", "lelut"], is: ["kerra", "barnaföt", "leikföng"] },
+  "Sports & Outdoor": { en: ["sport", "bike", "ski", "outdoor"], sv: ["sport", "cykel", "skidor", "gym", "friluftsliv"], no: ["sport", "sykkel", "ski", "trening", "friluftsliv"], da: ["sport", "cykel", "ski", "træning", "friluftsliv"], fi: ["urheilu", "pyörä", "sukset", "kuntosali", "ulkoilu"], is: ["íþróttir", "hjól", "skíði", "útivist"] },
+  "Health & Wellness": { en: ["health", "wellness", "yoga", "massage"], sv: ["hälsa", "wellness", "kosttillskott", "yoga", "massage"], no: ["helse", "velvære", "kosttilskudd", "yoga", "massasje"], da: ["sundhed", "velvære", "kosttilskud", "yoga", "massage"], fi: ["terveys", "hyvinvointi", "lisäravinteet", "jooga", "hieronta"], is: ["heilsa", "vellíðan", "fæðubótarefni", "jóga", "nudd"] },
+  Jobs: { en: ["job", "work", "part-time", "remote"], sv: ["jobb", "arbete", "anställning", "lediga jobb"], no: ["jobb", "arbeid", "stilling", "ledige stillinger"], da: ["job", "arbejde", "stilling", "ledige stillinger"], fi: ["työ", "työpaikka", "työpaikat", "avoimet työpaikat"], is: ["vinna", "starf", "laus störf"] },
+  Services: { en: ["service", "cleaning", "moving", "repair"], sv: ["tjänst", "hantverkare", "flytthjälp", "städning"], no: ["tjeneste", "håndverker", "flyttehjelp", "rengjøring"], da: ["tjeneste", "håndværker", "flyttehjælp", "rengøring"], fi: ["palvelu", "remontti", "muuttoapu", "siivous"], is: ["þjónusta", "iðnaðarmaður", "þrif"] },
+  "Agriculture & Garden": { en: ["garden", "tractor", "plants", "tools"], sv: ["trädgård", "jordbruk", "traktor", "växter"], no: ["hage", "landbruk", "traktor", "planter"], da: ["have", "landbrug", "traktor", "planter"], fi: ["puutarha", "maatalous", "traktori", "kasvit"], is: ["garður", "landbúnaður", "traktor", "plöntur"] },
+  "Free Items": { en: ["free", "giveaway", "wanted", "exchange"], sv: ["gratis", "skänkes"], no: ["gratis", "gis bort"], da: ["gratis", "gives væk"], fi: ["ilmainen", "annetaan"], is: ["ókeypis", "gefins"] },
   // Exact-word matches only (see categorySynonymMatches), so these stay
   // deliberately short rather than risking substring collisions.
-  "Other Items": { sv: ["övrigt", "diverse"], no: ["annet", "diverse"], da: ["andet", "diverse"], fi: ["muut", "muu"], is: ["annað", "ýmislegt"] }
+  "Other Items": { en: ["other", "miscellaneous", "various", "unusual"], sv: ["övrigt", "diverse"], no: ["annet", "diverse"], da: ["andet", "diverse"], fi: ["muut", "muu"], is: ["annað", "ýmislegt"] }
+};
+
+// Popular-search chips shown under the category row on Browse (a tap fills
+// the real search box, so there is exactly ONE search feature, not a second
+// parallel one). Every category gets its own localized terms in ALL SIX
+// languages -- an English-only chip row would be useless to most of this
+// app's audience, and each Nordic market searches in its own vocabulary.
+//
+// Every language's terms reuse CATEGORY_SEARCH_SYNONYMS' vocabulary where one
+// exists. That map previously had NO English block at all, so English was the
+// one language with no synonym matching -- adding it means a chip tap is
+// guaranteed to return the whole category in all six languages, even when no
+// single listing contains the word itself.
+const CATEGORY_SEARCH_CHIPS = {
+  "Vehicles": {
+    en: ["car", "bike", "motorcycle", "van"],
+    sv: ["bil", "cykel", "motorcykel", "skåpbil"],
+    no: ["bil", "sykkel", "motorsykkel", "varebil"],
+    da: ["bil", "cykel", "motorcykel", "varevogn"],
+    fi: ["auto", "pyörä", "moottoripyörä", "pakettiauto"],
+    is: ["bíll", "hjól", "mótorhjól", "jeppi"]
+  },
+  "Real Estate": {
+    en: ["apartment", "house", "room", "office"],
+    sv: ["lägenhet", "hus", "rum", "kontor"],
+    no: ["leilighet", "hus", "rom", "kontor"],
+    da: ["lejlighed", "hus", "værelse", "kontor"],
+    fi: ["asunto", "talo", "huone", "toimisto"],
+    is: ["íbúð", "hús", "herbergi", "skrifstofa"]
+  },
+  "Electronics": {
+    en: ["tv", "laptop", "camera", "sound"],
+    sv: ["tv", "dator", "kamera", "ljud"],
+    no: ["tv", "datamaskin", "kamera", "lyd"],
+    da: ["tv", "computer", "kamera", "lyd"],
+    fi: ["tv", "kannettava", "kamera", "ääni"],
+    is: ["sjónvarp", "tölva", "myndavél", "hljóð"]
+  },
+  "Phones & Tablets": {
+    en: ["iphone", "samsung", "tablet", "charger"],
+    sv: ["iphone", "samsung", "platta", "laddare"],
+    no: ["iphone", "samsung", "nettbrett", "lader"],
+    da: ["iphone", "samsung", "tablet", "oplader"],
+    fi: ["iphone", "samsung", "tabletti", "latauslaite"],
+    is: ["iphone", "samsung", "spjaldtölva", "hleðslutæki"]
+  },
+  "Home & Furniture": {
+    en: ["sofa", "table", "chair", "lamp"],
+    sv: ["soffa", "bord", "stol", "lampa"],
+    no: ["sofa", "bord", "stol", "lampe"],
+    da: ["sofa", "bord", "stol", "lampe"],
+    fi: ["sohva", "pöytä", "tuoli", "lamppu"],
+    is: ["sófi", "borð", "stóll", "lampi"]
+  },
+  "Books & Media": {
+    en: ["books", "textbooks", "vinyl", "games"],
+    sv: ["böcker", "läroböcker", "vinyl", "spel"],
+    no: ["bøker", "lærebøker", "vinyl", "spill"],
+    da: ["bøger", "lærebøger", "vinyl", "spil"],
+    fi: ["kirjat", "oppikirjat", "vinyyli", "pelit"],
+    is: ["bækur", "námsbækur", "vinyl", "leikir"]
+  },
+  "Fashion": {
+    en: ["dress", "jacket", "shoes", "bags"],
+    sv: ["klänning", "jacka", "skor", "väskor"],
+    no: ["kjole", "jakke", "sko", "vesker"],
+    da: ["kjole", "jakke", "sko", "tasker"],
+    fi: ["mekko", "takki", "kengät", "laukut"],
+    is: ["kjóll", "jakki", "skór", "töskur"]
+  },
+  "Baby & Kids": {
+    en: ["stroller", "car seat", "clothes", "toys"],
+    sv: ["vagn", "bilstol", "kläder", "leksaker"],
+    no: ["vogn", "bilstol", "klær", "leker"],
+    da: ["vogn", "autostol", "tøj", "legetøj"],
+    fi: ["vaunu", "turvaistuin", "vaatteet", "lelut"],
+    is: ["vagn", "barnastóll", "föt", "leikföng"]
+  },
+  "Sports & Outdoor": {
+    en: ["ski", "tent", "bike", "fishing"],
+    sv: ["skidor", "tält", "cykel", "fiske"],
+    no: ["ski", "telt", "sykkel", "fiske"],
+    da: ["ski", "telt", "cykel", "fiskeri"],
+    fi: ["sukset", "teltta", "pyörä", "kalastus"],
+    is: ["skíði", "tjald", "hjól", "veiðar"]
+  },
+  "Health & Wellness": {
+    en: ["yoga", "massage", "supplements", "weights"],
+    sv: ["yoga", "massage", "kosttillskott", "hantlar"],
+    no: ["yoga", "massasje", "kosttilskudd", "vekter"],
+    da: ["yoga", "massage", "kosttilskud", "vægte"],
+    fi: ["jooga", "hieronta", "lisäravinteet", "painot"],
+    is: ["jóga", "nudd", "fæðubótarefni", "þyngdir"]
+  },
+  "Jobs": {
+    en: ["part-time", "remote", "evening", "weekend"],
+    sv: ["deltid", "distans", "kväll", "helg"],
+    no: ["deltid", "hjemmekontor", "kveld", "helg"],
+    da: ["deltid", "hjemmearbejde", "aften", "weekend"],
+    fi: ["osa-aikainen", "etätyö", "ilta", "viikonloppu"],
+    is: ["hlutastarf", "fjarvinna", "kvöld", "helgi"]
+  },
+  "Services": {
+    en: ["cleaning", "moving", "repair", "painting"],
+    sv: ["städning", "flytt", "reparation", "målning"],
+    no: ["rengjøring", "flytting", "reparasjon", "maling"],
+    da: ["rengøring", "flytning", "reparation", "maling"],
+    fi: ["siivous", "muutto", "korjaus", "maalaus"],
+    is: ["þrif", "flutningur", "viðgerðir", "málun"]
+  },
+  "Agriculture & Garden": {
+    en: ["lawn mower", "tractor", "plants", "tools"],
+    sv: ["gräsklippare", "traktor", "växter", "verktyg"],
+    no: ["gressklipper", "traktor", "planter", "verktøy"],
+    da: ["plæneklipper", "traktor", "planter", "værktøj"],
+    fi: ["ruohonleikkuri", "traktori", "kasvit", "työkalut"],
+    is: ["grasker", "traktor", "plöntur", "verkfæri"]
+  },
+  "Free Items": {
+    en: ["free", "giveaway", "wanted", "exchange"],
+    sv: ["gratis", "skänkes", "sökes", "bytes"],
+    no: ["gratis", "gis bort", "søkes", "bytte"],
+    da: ["gratis", "gives væk", "søges", "bytte"],
+    fi: ["ilmainen", "annetaan", "halutaan", "vaihto"],
+    is: ["ókeypis", "gefins", "óskast", "skipti"]
+  },
+  "Other Items": {
+    en: ["miscellaneous", "other", "various", "unusual"],
+    sv: ["övrigt", "diverse", "olika", "sällsynt"],
+    no: ["annet", "diverse", "ulike", "sjelden"],
+    da: ["andet", "diverse", "forskellige", "sjældent"],
+    fi: ["muut", "sekalaista", "harvinainen", "monipuolinen"],
+    is: ["annað", "ýmislegt", "ólíkt", "sjaldgæft"]
+  }
 };
 
 // Only an exact normalized-word match against a synonym counts (not a
@@ -4610,7 +4801,51 @@ function renderCategoryChips() {
         }" data-category="${category.id}">${category.id === "All" ? category.label : categoryLabel(category.id)}</button>`
     )
     .join("");
+  // Hung off this function (rather than wired separately) because this is
+  // already what runs on every category change AND every language switch --
+  // the chips row therefore re-labels itself in place, no extra plumbing.
+  renderKeywordChips();
   updateChipCarouselArrows();
+}
+
+// Popular-search chips for the ACTIVE category, sitting directly under the
+// category row. Hidden entirely on "All" (a generic row there would just mix
+// every category's terms together with no way to tell which is which) and for
+// any category without curated terms. Tapping one fills the real search box
+// -- the same #search-input that both the search field and the sidebar drive
+// -- then re-runs the normal listing render, so results are immediately
+// visible. It is a shortcut into the existing search, not a second search.
+// Exposed for the same reason getSponsoredRotationIds() is: a top-level
+// `const` lives in the script's lexical scope, so a bare context.X can't see
+// it -- a function declaration can. This lets the suite assert every category
+// really does carry terms in every language, rather than only spot-checking
+// whichever categories its DOM walk happens to visit.
+function getCategorySearchChips() {
+  return CATEGORY_SEARCH_CHIPS;
+}
+
+function renderKeywordChips() {
+  const container = document.getElementById("search-keyword-chips");
+  if (!container) return;
+  const terms = (CATEGORY_SEARCH_CHIPS[activeCategory] || {})[currentLanguage] || [];
+  if (!terms.length) {
+    // Fail closed: a category/language pair with no curated terms hides the
+    // whole row rather than rendering an empty labelled bar.
+    container.hidden = true;
+    container.innerHTML = "";
+    return;
+  }
+  container.hidden = false;
+  container.innerHTML =
+    // The id is what index.html's aria-labelledby actually points at -- without
+    // it the group would announce as unnamed and the reference would dangle.
+    `<span class="keyword-chips-label" id="keyword-chips-label">${escapeHtml(t("browse.popularSearches"))}</span>` +
+    terms
+      .map(
+        (term) =>
+          `<button type="button" class="chip keyword-chip" data-search-keyword="${escapeHtml(term)}">${escapeHtml(term)}</button>`
+      )
+      .join("");
 }
 
 // Desktop-only carousel arrows (see the `@media (min-width: 780px)` rule for
@@ -5723,6 +5958,7 @@ function bindEvents() {
     const listingButton = event.target.closest("[data-open-listing]");
     const chip = event.target.closest("[data-category]");
     const chipScrollButton = event.target.closest("[data-chip-scroll]");
+    const keywordChip = event.target.closest("[data-search-keyword]");
     const scope = event.target.closest("[data-scope]");
     const nav = event.target.closest("[data-view]");
     const categoryJump = event.target.closest("[data-category-jump]");
@@ -5767,6 +6003,10 @@ function bindEvents() {
       renderActiveFilterChips();
       renderListings();
     }
+    // A keyword chip deliberately does NOT clear any active filter -- it
+    // behaves exactly like typing the same word into the search box, which
+    // has never cleared filters either. Same feature, same semantics.
+    if (keywordChip) applySearchKeyword(keywordChip.dataset.searchKeyword);
     if (scope) {
       setActiveScope(scope.dataset.scope);
     }
@@ -6235,23 +6475,23 @@ const STATIC_PAGES = {
   <p>Boosting is currently free while FindNord is in its early access period. See our <button type="button" class="link-button" data-static-page="pricingGuide">Pricing Guide</button>.</p>
 `},
     sv: { title: "Boosta dina annonser", body: `
-  <p>Att boosta markerar din annons som Sponsored, vilket ger den extra synlighet i Bläddra-resultaten. Du kan boosta eller ta bort boost från vilken som helst av dina egna aktiva annonser när som helst under "Mina annonser".</p>
+  <p>Att boosta markerar din annons med märket Annons, vilket ger den extra synlighet i Bläddra-resultaten. Du kan boosta eller ta bort boost från vilken som helst av dina egna aktiva annonser när som helst under "Mina annonser".</p>
   <p>Boost är för närvarande gratis under FindNords tidiga tillgångsperiod. Se vår <button type="button" class="link-button" data-static-page="pricingGuide">Prisguide</button>.</p>
 `},
     no: { title: "Boost annonsene dine", body: `
-  <p>Å booste markerer annonsen din som Sponsored, noe som gir den ekstra synlighet i Bla gjennom-resultatene. Du kan booste eller fjerne boost fra hvilken som helst av dine egne aktive annonser når som helst fra «Mine annonser».</p>
+  <p>Å booste merker annonsen din med merket Annonse, noe som gir den ekstra synlighet i Bla gjennom-resultatene. Du kan booste eller fjerne boost fra hvilken som helst av dine egne aktive annonser når som helst fra «Mine annonser».</p>
   <p>Boost er for øyeblikket gratis mens FindNord er i sin tidlige tilgangsperiode. Se vår <button type="button" class="link-button" data-static-page="pricingGuide">Prisguide</button>.</p>
 `},
     da: { title: "Boost dine annoncer", body: `
-  <p>At booste markerer din annonce som Sponsored, hvilket giver den ekstra synlighed i Gennemse-resultaterne. Du kan booste eller fjerne boost fra en hvilken som helst af dine egne aktive annoncer når som helst fra "Mine annoncer".</p>
+  <p>At booste markerer din annonce med mærket Annonce, hvilket giver den ekstra synlighed i Gennemse-resultaterne. Du kan booste eller fjerne boost fra en hvilken som helst af dine egne aktive annoncer når som helst fra "Mine annoncer".</p>
   <p>Boost er i øjeblikket gratis, mens FindNord er i sin tidlige adgangsperiode. Se vores <button type="button" class="link-button" data-static-page="pricingGuide">Prisguide</button>.</p>
 `},
     fi: { title: "Boosta ilmoituksiasi", body: `
-  <p>Boostaaminen merkitsee ilmoituksesi Sponsored-ilmoitukseksi, mikä antaa sille lisänäkyvyyttä Selaa-tuloksissa. Voit boostata tai poistaa boostin miltä tahansa omalta aktiiviselta ilmoitukseltasi milloin tahansa kohdasta "Omat ilmoitukset".</p>
+  <p>Boostaaminen merkitsee ilmoituksesi Mainos-merkillä, mikä antaa sille lisänäkyvyyttä Selaa-tuloksissa. Voit boostata tai poistaa boostin miltä tahansa omalta aktiiviselta ilmoitukseltasi milloin tahansa kohdasta "Omat ilmoitukset".</p>
   <p>Boostaus on tällä hetkellä ilmaista FindNordin varhaisen käyttöönoton aikana. Katso <button type="button" class="link-button" data-static-page="pricingGuide">Hinnoitteluopas</button>.</p>
 `},
     is: { title: "Boostaðu auglýsingarnar þínar", body: `
-  <p>Að boosta merkir auglýsinguna þína sem Sponsored, sem gefur henni aukinn sýnileika í niðurstöðum flettingar. Þú getur boostað eða fjarlægt boost af hvaða virku auglýsingu sem er hjá þér, hvenær sem er, undir „Mínar auglýsingar“.</p>
+  <p>Að boosta merkir auglýsinguna þína með merkinu Auglýsing, sem gefur henni aukinn sýnileika í niðurstöðum flettingar. Þú getur boostað eða fjarlægt boost af hvaða virku auglýsingu sem er hjá þér, hvenær sem er, undir „Mínar auglýsingar“.</p>
   <p>Boost er sem stendur ókeypis á meðan FindNord er á sínu snemmaðgangstímabili. Skoðaðu <button type="button" class="link-button" data-static-page="pricingGuide">Verðlagsleiðbeiningar</button> okkar.</p>
 `}
   },

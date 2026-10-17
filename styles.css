@@ -615,6 +615,48 @@ h3 {
   color: #fff;
 }
 
+/* Secondary chip row: the popular-search terms for the active category.
+   Deliberately quieter and smaller than the category row above so the
+   hierarchy reads category-first, term-second. It reuses the exact same .chip
+   base (same pill radius, same hover language) so it stays one visual system
+   rather than looking like a second, unrelated widget -- and it is declared
+   after .chip so these overrides win on source order, not on specificity. */
+.search-keyword-chips {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 10px 0 2px;
+}
+
+/* The container is [hidden] by default in index.html and only unhidden once
+   the active category actually has terms, so this rule has to beat the flex
+   display above or the "hidden" attribute would be silently ignored. */
+.search-keyword-chips[hidden] {
+  display: none;
+}
+
+.keyword-chips-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+  letter-spacing: 0.02em;
+  margin-right: 2px;
+}
+
+.keyword-chip {
+  min-height: 32px;
+  padding: 0 10px;
+  font-size: 13px;
+  font-weight: 600;
+  background: transparent;
+  border-color: var(--line);
+}
+
+.keyword-chip:hover {
+  border-color: var(--country-primary);
+}
+
 .view {
   display: none;
 }
@@ -1134,6 +1176,22 @@ dd {
   margin: 0 0 14px;
   color: var(--muted);
   font-size: 0.86rem;
+}
+
+/* The "boosting is free until <date>" note. Given the positive green
+   treatment rather than the muted grey of the intro above it: this is the
+   single most useful sentence on the sheet for a seller deciding whether to
+   boost right now, and it disappears by itself the moment payments go live
+   (see boostFreeUntilNote()). A plain hex rather than color-mix(), so it
+   renders identically on older browsers. */
+.boost-free-until {
+  margin: -6px 0 14px;
+  padding: 8px 10px;
+  border-radius: var(--control-radius);
+  background: #edf5f0;
+  color: var(--green);
+  font-size: 0.86rem;
+  font-weight: 700;
 }
 
 .boost-sheet-subtitle {
