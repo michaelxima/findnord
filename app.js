@@ -4469,6 +4469,8 @@ const CATEGORY_ICONS = {
     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="6" y="2.5" width="12" height="19" rx="2"/><path d="M11 18.5h2"/></svg>',
   "Home & Furniture":
     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12V7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v5"/><path d="M3 12h18v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4z"/><path d="M5 18v2M19 18v2"/></svg>',
+  "Books & Media":
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H11v16H6.5A2.5 2.5 0 0 0 4 21.5z"/><path d="M20 5.5A2.5 2.5 0 0 0 17.5 3H13v16h4.5a2.5 2.5 0 0 1 2.5 2.5z"/></svg>',
   Fashion:
     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M8 4l4 2 4-2 4 4-3 3v10H7V11L4 8z"/></svg>',
   "Baby & Kids":
@@ -4495,6 +4497,7 @@ const CATEGORY_LABELS = {
   Electronics: { en: "Electronics", sv: "Elektronik", no: "Elektronikk", da: "Elektronik", fi: "Elektroniikka", is: "Rafeindatæki" },
   "Phones & Tablets": { en: "Phones & Tablets", sv: "Mobiler & Surfplattor", no: "Mobiler & Nettbrett", da: "Mobiler & Tablets", fi: "Puhelimet & Tabletit", is: "Símar & Spjaldtölvur" },
   "Home & Furniture": { en: "Home & Furniture", sv: "Hem & Möbler", no: "Hjem & Møbler", da: "Hjem & Møbler", fi: "Koti & Huonekalut", is: "Heimili & Húsgögn" },
+  "Books & Media": { en: "Books & Media", sv: "Böcker & Media", no: "Bøker & Medier", da: "Bøger & Medier", fi: "Kirjat & Media", is: "Bækur & Miðlar" },
   Fashion: { en: "Fashion", sv: "Mode", no: "Mote", da: "Mode", fi: "Muoti", is: "Tíska" },
   "Baby & Kids": { en: "Baby & Kids", sv: "Barn & Baby", no: "Barn & Baby", da: "Børn & Baby", fi: "Lapset & Vauvat", is: "Börn & Ungbörn" },
   "Sports & Outdoor": { en: "Sports & Outdoor", sv: "Sport & Fritid", no: "Sport & Friluft", da: "Sport & Fritid", fi: "Urheilu & Ulkoilu", is: "Íþróttir & Útivist" },
@@ -4521,6 +4524,7 @@ const CATEGORY_SEARCH_SYNONYMS = {
   Electronics: { sv: ["elektronik", "dator", "tv", "kamera", "hörlurar"], no: ["elektronikk", "data", "tv", "kamera", "hodetelefoner"], da: ["elektronik", "computer", "tv", "kamera", "hovedtelefoner"], fi: ["elektroniikka", "tietokone", "televisio", "kamera", "kuulokkeet"], is: ["rafeindatæki", "tölva", "sjónvarp", "myndavél", "heyrnartól"] },
   "Phones & Tablets": { sv: ["mobil", "telefon", "surfplatta", "iphone"], no: ["mobil", "telefon", "nettbrett", "iphone"], da: ["mobil", "telefon", "tablet", "iphone"], fi: ["puhelin", "kännykkä", "tabletti", "iphone"], is: ["sími", "farsími", "spjaldtölva", "iphone"] },
   "Home & Furniture": { sv: ["möbler", "soffa", "bord", "stol", "köksinredning"], no: ["møbler", "sofa", "bord", "stol", "kjøkken"], da: ["møbler", "sofa", "bord", "stol", "køkken"], fi: ["huonekalut", "sohva", "pöytä", "tuoli", "keittiö"], is: ["húsgögn", "sófi", "borð", "stóll", "eldhús"] },
+  "Books & Media": { sv: ["bok", "böcker", "media", "film", "musik"], no: ["bok", "bøker", "medier", "film", "musikk"], da: ["bog", "bøger", "medier", "film", "musik"], fi: ["kirja", "kirjat", "media", "elokuva", "musiikki"], is: ["bók", "bækur", "miðlar", "kvikmynd", "tónlist"] },
   Fashion: { sv: ["kläder", "skor", "väska", "mode"], no: ["klær", "sko", "veske", "mote"], da: ["tøj", "sko", "taske", "mode"], fi: ["vaatteet", "kengät", "laukku", "muoti"], is: ["föt", "skór", "taska", "tíska"] },
   "Baby & Kids": { sv: ["barnvagn", "babykläder", "leksaker"], no: ["barnevogn", "babyklær", "leker"], da: ["barnevogn", "babytøj", "legetøj"], fi: ["lastenvaunut", "vauvanvaatteet", "lelut"], is: ["kerra", "barnaföt", "leikföng"] },
   "Sports & Outdoor": { sv: ["sport", "cykel", "skidor", "gym", "friluftsliv"], no: ["sport", "sykkel", "ski", "trening", "friluftsliv"], da: ["sport", "cykel", "ski", "træning", "friluftsliv"], fi: ["urheilu", "pyörä", "sukset", "kuntosali", "ulkoilu"], is: ["íþróttir", "hjól", "skíði", "útivist"] },

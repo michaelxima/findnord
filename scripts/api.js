@@ -26,6 +26,7 @@ const {
 // pure fact of a listing's country, so storing it separately would just be a
 // second value that could drift out of sync with the first.
 const VALID_COUNTRIES = new Set(["Sweden", "Norway", "Denmark", "Finland", "Iceland"]);
+const VALID_CATEGORIES = new Set(categories.map((category) => category.id));
 const CURRENCY_BY_COUNTRY = {
   Sweden: "SEK",
   Norway: "NOK",
@@ -721,6 +722,11 @@ function createApiRouter(db, options = {}) {
     const fields = req.body || {};
     const id = makeId("listing");
 
+    if (!VALID_CATEGORIES.has(fields.category)) {
+      res.status(400).json({ error: "Choose a valid category.", code: "INVALID_CATEGORY" });
+      return;
+    }
+
     // NM-A25 (Phase 1 item 4): lightweight prohibited-item keyword check --
     // server-side gate that meaningfully reduces exposure while matching the
     // ToS claim "Prohibited, stolen, counterfeit, or illegal items are never
@@ -839,6 +845,10 @@ function createApiRouter(db, options = {}) {
     }
     if (existing.seller_id !== req.currentUser.id) {
       res.status(403).json({ error: "You can only edit your own listings." });
+      return;
+    }
+    if (Object.prototype.hasOwnProperty.call(columnFields, "category") && !VALID_CATEGORIES.has(columnFields.category)) {
+      res.status(400).json({ error: "Choose a valid category.", code: "INVALID_CATEGORY" });
       return;
     }
 

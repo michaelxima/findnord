@@ -10,6 +10,7 @@ const categories = [
   { id: "Electronics", label: "Electronics", featured: false, subtypes: [] },
   { id: "Phones & Tablets", label: "Phones & Tablets", featured: false, subtypes: [] },
   { id: "Home & Furniture", label: "Home & Furniture", featured: false, subtypes: [] },
+  { id: "Books & Media", label: "Books & Media", featured: false, subtypes: [] },
   { id: "Fashion", label: "Fashion", featured: false, subtypes: [] },
   { id: "Baby & Kids", label: "Baby & Kids", featured: false, subtypes: [] },
   { id: "Sports & Outdoor", label: "Sports & Outdoor", featured: false, subtypes: [] },

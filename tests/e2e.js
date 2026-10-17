@@ -93,6 +93,7 @@ assert.match(js, /const CATEGORY_ICONS = {/);
   "Electronics",
   "Phones & Tablets",
   "Home & Furniture",
+  "Books & Media",
   "Fashion",
   "Baby & Kids",
   "Sports & Outdoor",
@@ -1679,7 +1680,7 @@ assert.match(elements["listing-grid"].innerHTML, /Volvo V60/);
 assert.match(elements["listing-grid"].innerHTML, /2-room apartment near Slussen/);
 assert.match(elements["category-chips"].innerHTML, /class="chip featured" data-category="Vehicles"/);
 assert.match(elements["category-chips"].innerHTML, /class="chip featured" data-category="Real Estate"/);
-assert.equal((elements["category-chips"].innerHTML.match(/class="chip/g) || []).length, 13);
+assert.equal((elements["category-chips"].innerHTML.match(/class="chip/g) || []).length, 14);
 
 // Card accessible names must carry sponsored/freshness/price state, since the
 // button's own aria-label overrides all descendant text for screen readers.
@@ -3804,11 +3805,12 @@ context.renderSidebarCategories();
 const sidebarCategoriesHtml = elements["sidebar-categories-list"].innerHTML;
 assert.equal(
   (sidebarCategoriesHtml.match(/class="sidebar-category-item"/g) || []).length,
-  12,
-  "the sidebar must list all 12 real categories, not a hardcoded subset"
+  13,
+  "the sidebar must list all 13 real categories, not a hardcoded subset"
 );
 assert.match(sidebarCategoriesHtml, /data-category-jump="Vehicles"/);
 assert.match(sidebarCategoriesHtml, /data-category-jump="Real Estate"/);
+assert.match(sidebarCategoriesHtml, /data-category-jump="Books & Media"/);
 assert.match(sidebarCategoriesHtml, /<svg viewBox="0 0 24 24"/, "each sidebar category row must render its own icon");
 
 // Sidebar location text mirrors the existing #active-location + current
