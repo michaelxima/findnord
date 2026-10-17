@@ -217,9 +217,10 @@ async function handleGenerateImage(req, res) {
 function securityHeaders(req, res, next) {
   res.setHeader(
     "Content-Security-Policy",
-    "default-src 'self'; script-src 'self' 'unsafe-inline' https://static.ads-twitter.com; " +
-      "style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://analytics.twitter.com https://t.co; " +
-      "frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+    "default-src 'self'; script-src 'self' 'unsafe-inline' https://static.ads-twitter.com https://accounts.google.com/gsi/client; " +
+      "style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: https:; " +
+      "connect-src 'self' https://analytics.twitter.com https://t.co https://accounts.google.com/gsi/; " +
+      "frame-src https://accounts.google.com/gsi/; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
   );
   res.setHeader("X-Content-Type-Options", "nosniff");
   res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");

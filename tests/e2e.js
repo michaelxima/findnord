@@ -2358,6 +2358,11 @@ await context.signOutUser();
 const googleConfigRes = await fetch(`${serverOrigin}/api/auth/google/config`);
 const googleConfig = await googleConfigRes.json();
 assert.equal(googleConfig.clientId, TEST_GOOGLE_CLIENT_ID, "the (public, non-secret) client id must be served to the frontend");
+const googleCsp = googleConfigRes.headers.get("content-security-policy") || "";
+assert.match(googleCsp, /script-src[^;]*https:\/\/accounts\.google\.com\/gsi\/client/, "CSP must allow the Google Identity Services script");
+assert.match(googleCsp, /style-src[^;]*https:\/\/accounts\.google\.com\/gsi\/style/, "CSP must allow Google Identity Services styles");
+assert.match(googleCsp, /connect-src[^;]*https:\/\/accounts\.google\.com\/gsi\//, "CSP must allow Google Identity Services connections");
+assert.match(googleCsp, /frame-src[^;]*https:\/\/accounts\.google\.com\/gsi\//, "CSP must allow the Google Identity Services iframe");
 
 // A brand-new Google account creates a real user with a real session.
 const newGoogleToken = makeFakeGoogleIdToken({ payload: { sub: "google-sub-new", email: "newgoogleuser@example.com", name: "New Googler" } });
