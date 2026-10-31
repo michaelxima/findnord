@@ -1,9 +1,12 @@
 :root {
-  --ink: #18231f;
-  --muted: #65716b;
-  --line: #dfe6e1;
+  --ink: #161b19;
+  --muted: #6a716d;
+  --line: #e2e6e4;
   --paper: #ffffff;
-  --bg: #f4f6f1;
+  /* Neutral light gray rather than the old green-tinted paper: the whole
+     Blocket-style pass is built on white cards reading cleanly against a
+     genuinely neutral page, with --green kept purely as the brand accent. */
+  --bg: #f3f4f5;
   --green: #1f7a4d;
   --sea: #006aa7;
   --sun: #fecc02;
@@ -717,15 +720,33 @@ h3 {
 .listing-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
+  gap: 16px;
 }
 
+/* Blocket-style listing card: white, hairline-bordered, gently rounded, with a
+   real hover lift so the grid reads as clickable objects instead of flat
+   tiles. The lift is suppressed on touch devices, where :hover sticks. */
 .listing-card {
   position: relative;
   overflow: hidden;
   border: 1px solid var(--line);
-  border-radius: 8px;
+  border-radius: 12px;
   background: var(--paper);
+  transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease;
+}
+
+.listing-card:hover {
+  border-color: #d3d9d6;
+  box-shadow: 0 8px 20px rgba(15, 26, 21, 0.1);
+  transform: translateY(-2px);
+}
+
+@media (hover: none) {
+  .listing-card:hover {
+    transform: none;
+    box-shadow: none;
+    border-color: var(--line);
+  }
 }
 
 .card-button {
@@ -740,6 +761,9 @@ h3 {
 .listing-photo {
   position: relative;
   aspect-ratio: 1 / 1;
+  /* Neutral placeholder behind any photo, matching the gray box an image-led
+     grid shows before a cover loads (Blocket does the same). */
+  background: #edeff0;
 }
 
 .sponsored,
@@ -748,11 +772,23 @@ h3 {
   top: 8px;
   left: 8px;
   border-radius: 999px;
-  padding: 4px 8px;
-  color: #fff;
-  background: var(--sun);
+  padding: 4px 9px;
   font-size: 0.7rem;
   font-weight: 800;
+}
+
+/* The paid-placement disclosure stays exactly where it was -- Nordic
+   ad-disclosure rules are why it exists at all -- but wears the quiet
+   Blocket-style treatment: white chip, dark text, hairline border, instead of
+   a shouting yellow pill. */
+.sponsored {
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(22, 27, 25, 0.16);
+}
+
+.freshness {
+  color: #fff;
 }
 
 .status-badge {
@@ -794,22 +830,30 @@ h3 {
   background: var(--green);
 }
 
+/* Blocket card hierarchy: TITLE first (so titles align across a row), the
+   price as the strong second line, place last and quiet. */
 .card-copy {
   display: grid;
-  gap: 3px;
-  padding: 10px;
-}
-
-.card-copy strong {
-  font-size: 1.02rem;
+  gap: 4px;
+  padding: 12px 12px 14px;
 }
 
 .card-copy h3 {
   display: -webkit-box;
   min-height: 2.4em;
+  margin: 0;
   overflow: hidden;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
+  font-size: 0.93rem;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.card-copy strong {
+  font-size: 1.14rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
 }
 
 .card-copy p {
@@ -838,6 +882,58 @@ h3 {
 .secondary-action .icon {
   width: 15px;
   height: 15px;
+}
+
+/* Outbound "view the original listing" button on the card: top-right of the
+   photo (the one photo corner no badge claims -- Reserved/Sold + Sponsored
+   take top-left, freshness takes bottom-left, save sits bottom-right on the
+   copy), as a sibling of the card button so clicking it can never be
+   swallowed by the delegated open-listing handler. */
+.card-source-link {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border: 1px solid rgba(22, 27, 25, 0.16);
+  border-radius: 999px;
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.95);
+  text-decoration: none;
+  transition: background 0.15s ease, transform 0.15s ease, border-color 0.15s ease;
+}
+
+.card-source-link:hover {
+  background: #fff;
+  border-color: var(--country-primary);
+  transform: translateY(-1px);
+}
+
+/* Detail view's own version: a full, readable call-to-action rather than an
+   icon, since by then the visitor has already decided to look closer. */
+.source-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+  padding: 11px 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--control-radius);
+  color: var(--ink);
+  background: var(--paper);
+  font-size: 0.94rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.source-cta:hover {
+  border-color: var(--country-primary);
+  box-shadow: 0 4px 12px rgba(15, 26, 21, 0.08);
 }
 
 .empty-state,
@@ -870,6 +966,46 @@ h3 {
   margin: 0 0 12px;
   color: var(--muted);
   font-size: 0.85rem;
+}
+
+.mikazan-showcase {
+  margin: 18px 0 26px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--paper) 94%, var(--country-primary) 6%);
+}
+
+.mikazan-showcase:empty {
+  display: none;
+}
+
+.mikazan-showcase-heading h2,
+.mikazan-collection h3 {
+  margin: 0;
+}
+
+.mikazan-showcase-heading > p:last-child {
+  margin: 6px 0 0;
+  color: var(--muted);
+}
+
+.mikazan-collection-list {
+  display: grid;
+  gap: 22px;
+  margin-top: 18px;
+}
+
+.mikazan-collection h3 {
+  margin-bottom: 10px;
+  font-size: 1rem;
+}
+
+@media (max-width: 479px) {
+  .mikazan-showcase {
+    margin-inline: -4px;
+    padding: 14px;
+  }
 }
 
 .back-button {
@@ -1254,15 +1390,36 @@ dd {
 .category-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
+  gap: 16px;
 }
 
+/* Blocket-style category tiles: real white cards with a hairline border and
+   their own hover lift (they were UA-default button chrome before, which is
+   exactly the "looks unfinished" feel next to the rest of the grid). */
 .category-tile {
   display: grid;
   gap: 6px;
   min-height: 96px;
   padding: 14px;
   text-align: left;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--paper);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.category-tile:hover {
+  border-color: #d3d9d6;
+  box-shadow: 0 6px 16px rgba(15, 26, 21, 0.08);
+  transform: translateY(-2px);
+}
+
+@media (hover: none) {
+  .category-tile:hover {
+    transform: none;
+    box-shadow: none;
+    border-color: var(--line);
+  }
 }
 
 .category-tile span,
@@ -1273,17 +1430,6 @@ dd {
 .category-tile.featured {
   border-color: var(--sea);
   background: linear-gradient(180deg, rgba(32, 111, 134, 0.08), rgba(32, 111, 134, 0.02));
-}
-
-.popular-badge {
-  justify-self: start;
-  padding: 2px 8px;
-  border-radius: 999px;
-  color: #fff;
-  background: var(--sea);
-  font-size: 0.66rem;
-  font-weight: 800;
-  text-transform: uppercase;
 }
 
 .bottom-nav {
@@ -1579,17 +1725,9 @@ dd {
   left: 6px;
 }
 
-.photo-count-badge {
-  position: absolute;
-  right: 8px;
-  bottom: 8px;
-  padding: 3px 7px;
-  border-radius: 999px;
-  color: #fff;
-  background: rgba(20, 25, 22, 0.62);
-  font-size: 0.62rem;
-  font-weight: 800;
-}
+/* .photo-count-badge was removed together with the "1/6" photo counter on
+   cards (Blocket-style clean cards: no counter clutter) -- dead CSS, not
+   left behind. The detail gallery still counts photos via its thumbnails. */
 
 .detail-gallery-thumbs {
   display: flex;

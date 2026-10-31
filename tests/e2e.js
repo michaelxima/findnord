@@ -11,6 +11,7 @@ const path = require("node:path");
 const vm = require("node:vm");
 const { startServer } = require("../scripts/server");
 const { resetRateLimiterState } = require("../scripts/rate-limit");
+const { openDatabase } = require("../scripts/db");
 
 const root = path.resolve(__dirname, "..");
 const html = fs.readFileSync(path.join(root, "index.html"), "utf8");
@@ -18,6 +19,118 @@ const css = fs.readFileSync(path.join(root, "styles.css"), "utf8");
 const js = fs.readFileSync(path.join(root, "app.js"), "utf8");
 const dataServiceJs = fs.readFileSync(path.join(root, "data-service.js"), "utf8");
 const seedDataJs = fs.readFileSync(path.join(root, "db", "seed-data.js"), "utf8");
+const { categories: seedCategories, listings: seedListings } = require("../db/seed-data");
+
+// Catalog expansion: every taxonomy category must be useful on first run,
+// and Mikazan products must remain traceable to their real shop listings.
+for (const category of seedCategories) {
+  assert.ok(
+    seedListings.filter((listing) => listing.category === category.id).length >= 4,
+    `${category.id} must have at least four seed listings`
+  );
+}
+assert.equal(new Set(seedListings.map((listing) => listing.id)).size, seedListings.length, "seed listing IDs must be unique");
+assert.equal(new Set(seedListings.map((listing) => listing.title)).size, seedListings.length, "seed listing titles must be unique");
+const seedCategoryIds = new Set(seedCategories.map((category) => category.id));
+assert.ok(seedListings.every((listing) => seedCategoryIds.has(listing.category)), "every seed listing must use a valid category ID");
+const mikazanSeedListings = seedListings.filter((listing) => listing.seller === "Mikazan");
+assert.ok(mikazanSeedListings.length >= 8, "the seed catalog must include at least eight Mikazan products");
+assert.ok(mikazanSeedListings.every((listing) => listing.sellerType === "Professional seller"), "Mikazan must be marked as a professional seller");
+assert.ok(
+  mikazanSeedListings.every((listing) => /^https:\/\/mikazan\.shop\/products\/[a-z0-9-]+$/.test(listing.sourceUrl)),
+  "every Mikazan listing must link to its canonical mikazan.shop product page"
+);
+const expectedMikazanProducts = [
+  ["mikazan-driveconnect", "DriveConnect Smart Car Screen", "$109.70", "https://mikazan.shop/products/10-26-inch-portable-car-central-control-smart-screen-with-wireless-carplay-android-auto-bluetooth-and-ahd-backup-camera", "https://cdn.shopify.com/s/files/1/1090/4744/7883/files/4FD8F03B4B9ADE9A5BC17B9731BC1FD0.jpg?v=1791158290"],
+  ["mikazan-drivelink", "DriveLink CarPlay Screen Kit", "$76.78", "https://mikazan.shop/products/7-inch-wireless-carplay-portable-car-bluetooth-mp5-player-multimedia-android-projection-navigation-device", "https://cdn.shopify.com/s/files/1/1090/4744/7883/files/32A2F7EC50F8AA22C8127897D35D3D5B.jpg?v=1791158297"],
+  ["mikazan-drivetune", "DriveTune Car Charging Hub", "$19.68", "https://mikazan.shop/products/kc-01-car-charger-with-one-to-two-usb-ports-intelligent-digital-display-qc3-0-fast-charging-multifunctional-car-cigarette-lighter", "https://cdn.shopify.com/s/files/1/1090/4744/7883/files/083E7F9E04723B3C79730E1D2EFBBED1.jpg?v=1791158294"],
+  ["mikazan-babyview", "BabyView Car Monitor Kit", "$60.38", "https://mikazan.shop/products/4-3-inch-private-model-hd-1080p-car-baby-monitor-car-baby-mirror", "https://cdn.shopify.com/s/files/1/1090/4744/7883/files/AC2DF1CE839B53404B1DF74F6869DA47.jpg?v=1791158307"],
+  ["mikazan-cozy-pet-bed", "Cozy Quilted Pet Bed", "$34.99", "https://mikazan.shop/products/autumn-and-winter-deep-sleep-creative-cat-litter-quilted-cotton-quilted-plush-slippers-cat-bed-dog-pad-pet-litter", "https://cdn.shopify.com/s/files/1/1090/4744/7883/files/7973A2F65D5F9BD927D938D73179D0BD.jpg?v=1791158272"],
+  ["mikazan-bunny-bed", "Bunny Ears Pet Bed", "$44.99", "https://mikazan.shop/products/cat-litter-dog-litter-rabbit-ears-pet-litter-dog-bed-winter-warm-mat-dog-mat-pet-supplies", "https://cdn.shopify.com/s/files/1/1090/4744/7883/files/0BCDDD5AEBC9AB89B883C36A44DB3AEA__E4_B8_BB_E5_9B_BE-02.jpg?v=1791158285"],
+  ["mikazan-shopify-prompts", "200 Shopify Building & Automation Prompts", "$9.99", "https://mikazan.shop/products/200-shopify-building-automation-prompts", "https://cdn.shopify.com/s/files/1/1090/4744/7883/files/image_49bf6f72-a8d4-4136-87f0-94d7253df51b.png?v=1791226741"],
+  ["mikazan-boldline-pants", "Boldline High-Waist Pants", "$69.99", "https://mikazan.shop/products/casual-pants-with-high-waist-flower-gray-broken-seam-thick-cotton-rope-wide-version-curved-knife-guard-pants", "https://cdn.shopify.com/s/files/1/1090/4744/7883/files/16A23342AFD243B030F9CFBA8FFFE651.jpg?v=1791158285"]
+];
+for (const [id, title, price, sourceUrl, imageUrl] of expectedMikazanProducts) {
+  const listing = seedListings.find((item) => item.id === id);
+  assert.ok(listing, `${id} must exist in the seed catalog`);
+  assert.equal(listing.title, title, `${id} must retain the exact Mikazan title`);
+  assert.equal(listing.price, price, `${id} must retain the exact Mikazan price`);
+  assert.equal(listing.sourceUrl, sourceUrl, `${id} must retain its canonical Mikazan product URL`);
+  assert.equal(listing.images[0].css, `url("${imageUrl}")`, `${id} must retain the exact Mikazan image URL`);
+  assert.equal(listing.seller, "Mikazan", `${id} must identify Mikazan as its seller`);
+  assert.equal(listing.sellerType, "Professional seller", `${id} must identify Mikazan as a professional seller`);
+}
+
+// Bundled catalog synchronization must upgrade an existing database without
+// replacing user data, and repeated opens must remain exactly idempotent.
+{
+  const syncDbPath = path.join(os.tmpdir(), `findnord-catalog-sync-${process.pid}-${Date.now()}.db`);
+  let syncDb;
+  try {
+    syncDb = openDatabase(syncDbPath);
+    assert.equal(
+      syncDb.prepare("SELECT COUNT(*) AS count FROM listings WHERE id LIKE 'mikazan-%' OR id IN (SELECT id FROM listings WHERE seller = 'FindNord community')").get().count,
+      46,
+      "a fresh database must contain each bundled catalog row exactly once"
+    );
+    const preservedId = "phone-pixel";
+    syncDb.prepare("UPDATE listings SET title = ? WHERE id = ?").run("User-preserved custom title", preservedId);
+    syncDb.prepare("DELETE FROM listing_images WHERE listing_id = ?").run("mikazan-driveconnect");
+    syncDb.prepare("DELETE FROM listings WHERE id = ?").run("mikazan-driveconnect");
+    syncDb.close();
+
+    syncDb = openDatabase(syncDbPath);
+    assert.equal(syncDb.prepare("SELECT COUNT(*) AS count FROM listings WHERE id = ?").get("mikazan-driveconnect").count, 1, "an existing database must gain a missing bundled catalog row");
+    assert.equal(syncDb.prepare("SELECT COUNT(*) AS count FROM listing_images WHERE listing_id = ?").get("mikazan-driveconnect").count, 1, "a newly synchronized catalog row must gain its image");
+    assert.equal(syncDb.prepare("SELECT title FROM listings WHERE id = ?").get(preservedId).title, "User-preserved custom title", "catalog sync must never overwrite an existing row");
+    const listingCountAfterSync = syncDb.prepare("SELECT COUNT(*) AS count FROM listings").get().count;
+    const imageCountAfterSync = syncDb.prepare("SELECT COUNT(*) AS count FROM listing_images").get().count;
+    syncDb.close();
+
+    syncDb = openDatabase(syncDbPath);
+    assert.equal(syncDb.prepare("SELECT COUNT(*) AS count FROM listings").get().count, listingCountAfterSync, "reopening must not duplicate catalog listings");
+    assert.equal(syncDb.prepare("SELECT COUNT(*) AS count FROM listing_images").get().count, imageCountAfterSync, "reopening must not duplicate catalog images");
+  } finally {
+    if (syncDb && syncDb.open) syncDb.close();
+    for (const suffix of ["", "-wal", "-shm"]) {
+      try { fs.unlinkSync(syncDbPath + suffix); } catch (error) { /* already absent */ }
+    }
+  }
+}
+
+// A real production boot must publish only the deliberately approved
+// Mikazan catalog, never the broader local/demo fixtures. Reopening the same
+// persistent database must remain idempotent.
+{
+  const productionDbPath = path.join(os.tmpdir(), `findnord-production-catalog-${process.pid}-${Date.now()}.db`);
+  const previousNodeEnv = process.env.NODE_ENV;
+  const previousSeedDemoData = process.env.SEED_DEMO_DATA;
+  let productionDb;
+  try {
+    process.env.NODE_ENV = "production";
+    delete process.env.SEED_DEMO_DATA;
+    productionDb = openDatabase(productionDbPath);
+    const productionRows = productionDb
+      .prepare("SELECT id, source_url, image FROM listings ORDER BY id")
+      .all();
+    assert.equal(productionRows.length, 12, "an empty production database must publish exactly twelve approved products");
+    assert.ok(productionRows.every((row) => row.id.startsWith("mikazan-")), "every production catalog row must be an approved Mikazan product");
+    assert.ok(productionRows.every((row) => /^https:\/\/mikazan\.shop\/products\//.test(row.source_url)), "every production product must retain its canonical source link");
+    assert.ok(productionRows.every((row) => /^url\("https:\/\/cdn\.shopify\.com\//.test(row.image)), "every production product must retain its real image");
+    productionDb.close();
+    productionDb = openDatabase(productionDbPath);
+    assert.equal(productionDb.prepare("SELECT COUNT(*) AS count FROM listings").get().count, 12, "a second production startup must not duplicate catalog rows");
+  } finally {
+    if (productionDb && productionDb.open) productionDb.close();
+    if (previousNodeEnv === undefined) delete process.env.NODE_ENV;
+    else process.env.NODE_ENV = previousNodeEnv;
+    if (previousSeedDemoData === undefined) delete process.env.SEED_DEMO_DATA;
+    else process.env.SEED_DEMO_DATA = previousSeedDemoData;
+    for (const suffix of ["", "-wal", "-shm"]) {
+      try { fs.unlinkSync(productionDbPath + suffix); } catch (error) { /* already absent */ }
+    }
+  }
+}
 // Run as one combined script: Node's vm module does not share top-level
 // `const`/`let` bindings across separate runInContext calls even on the same
 // context object (unlike real <script> tags in one browser realm), so
@@ -259,7 +372,7 @@ assert.match(js, /let categoryTaxonomy = \[\];/, "app.js must cache, not own, th
 assert.match(js, /let listings = \[\];/, "app.js must cache, not own, the listings");
 assert.match(css, /\.chip\.featured\s*{/);
 assert.match(css, /\.category-tile\.featured\s*{/);
-assert.match(css, /\.popular-badge\s*{/);
+assert.doesNotMatch(css, /\.popular-badge/, "the Popular tag's styles are removed with the tag itself, not left behind as dead CSS");
 
 // --- Category chip row: desktop carousel arrows (a mouse user has no swipe
 // gesture, and 12 categories rarely all fit) -- mobile keeps native
@@ -467,7 +580,7 @@ assert.match(js, /function getListingImages\(listing\)/);
 assert.match(js, /function galleryTemplate\(listing, activeIndex\)/);
 assert.match(js, /function selectGalleryImage\(index\)/);
 assert.match(js, /images: photosToImageObjects\(values\.photos\)|const images = photosToImageObjects\(values\.photos\)/);
-assert.match(css, /\.photo-count-badge\s*{/);
+assert.doesNotMatch(css, /\.photo-count-badge\s*\{/, "the 1/6 photo-counter tag's CSS rule must be removed with the tag itself (Blocket-style clean cards), not left behind as dead CSS -- a comment naming it is fine");
 assert.match(css, /\.gallery-thumb\s*{/);
 assert.match(css, /\.gallery-thumb\.active\s*{[^}]*border-color: var\(--country-primary\);/, "the active thumbnail must be tied to country theming");
 assert.match(css, /\.listing-photo\s*{[^}]*aspect-ratio: 1 \/ 1;/, "cards must keep a consistent square crop for thumbnails");
@@ -793,9 +906,14 @@ assert.match(apiJs, /country: VALID_COUNTRIES\.has\(fields\.country\) \? fields\
 }
 
 assert.equal(
-  (seedDataJs.match(/country: "Sweden",/g) || []).length,
-  8,
-  "every one of the 8 seed listings must carry a real country field"
+  seedListings.filter((listing) => listing.country === "Sweden").length,
+  60,
+  "every Swedish seed listing (8 fixtures + 6 Blocket cars + 46 expanded catalog rows) must carry a real country field"
+);
+assert.equal(
+  seedListings.filter((listing) => listing.country === "Norway").length,
+  6,
+  "every FINN catalog home must carry a real country field"
 );
 
 assert.match(js, /const CURRENCY_BY_COUNTRY = \{/, "the frontend needs its own currency map for Sell-preview/filter-chip formatting before a listing round-trips through the server");
@@ -1134,7 +1252,12 @@ assert.match(js, /function formatRetryMinutesMessage\(key, retryAfterSeconds\)/)
 const rateLimitMessagesBranch = js.match(/error\.code === "RATE_LIMITED"\s*\n\s*\? formatRetryMinutesMessage\("rateLimit\.messages", error\.retryAfter\)/g) || [];
 assert.equal(rateLimitMessagesBranch.length, 2, "BOTH sendComposedMessage and sendThreadReply must surface the real rate-limit message, not just one of the two message-send paths");
 assert.match(js, /error\.code === "RATE_LIMITED" \? formatRetryMinutesMessage\("rateLimit\.reports", error\.retryAfter\)/, "submitReportModal must surface the real rate-limit message");
-assert.match(js, /error\.code === "RATE_LIMITED" \? formatRetryMinutesMessage\("rateLimit\.listings", error\.retryAfter\)/, "commitPublish must surface the real rate-limit message");
+// commitPublish/commitEdit now share ONE translator (sellErrorMessage) that
+// branches on RATE_LIMITED with the real retry-after helper -- and both
+// rejection paths must actually route through it, not just have it defined.
+assert.match(js, /if \(error\.code === "RATE_LIMITED"\) return formatRetryMinutesMessage\("rateLimit\.listings", error\.retryAfter\);/, "sellErrorMessage must surface the real rate-limit message for publish/edit");
+const sellErrorCallSites = js.match(/validation\.textContent = sellErrorMessage\(error\);/g) || [];
+assert.equal(sellErrorCallSites.length, 2, "BOTH commitPublish's and commitEdit's rejection paths must surface the shared translator (found " + sellErrorCallSites.length + ")");
 // commitPublish previously had NO error handling at all -- a real regression
 // guard that it's now wrapped, not just that the rate-limit branch exists.
 assert.match(js, /record = await commitPublishRequest\(values, images\);\s*\n\s*\} catch \(error\) \{/, "publishing a listing must now handle a server rejection instead of leaving an unhandled promise rejection");
@@ -1291,6 +1414,7 @@ function makeElementMap() {
     "empty-state",
     "empty-heading",
     "fairness-section-container",
+    "mikazan-showcase",
     "listing-detail",
     "back-to-browse",
     "category-grid",
@@ -1319,6 +1443,10 @@ function makeElementMap() {
     "sell-region-label",
     "sell-region-datalist",
     "sell-description-input",
+    "sell-source-url-field",
+    "sell-source-url-label-text",
+    "sell-source-url-hint",
+    "sell-source-url-input",
     "sell-validation",
     "sell-preview",
     "you-panel",
@@ -1720,12 +1848,14 @@ async function runBehavioralTests(testDb) {
   assert.match(elements["listing-grid"].innerHTML, /Solid oak dining table/);
 assert.match(elements["listing-grid"].innerHTML, /Sponsored/);
 assert.match(elements["listing-grid"].innerHTML, /Free/);
-assert.equal(elements["result-count"].textContent, "8 listings");
+assert.equal(elements["result-count"].textContent, "66 listings");
 assert.equal(elements["result-scope"].textContent, "Nearby");
 assert.match(elements["category-grid"].innerHTML, /Electronics/);
-assert.match(elements["category-grid"].innerHTML, /popular-badge">Popular<\/span>\s*<strong>Vehicles<\/strong>/);
-assert.match(elements["category-grid"].innerHTML, /popular-badge">Popular<\/span>\s*<strong>Real Estate<\/strong>/);
-assert.doesNotMatch(elements["category-grid"].innerHTML, /popular-badge">Popular<\/span>\s*<strong>Electronics<\/strong>/);
+// The "Popular" tag is gone from every tile (Blocket-style clean cards) --
+// the featured categories themselves still render, just without the tag.
+assert.doesNotMatch(elements["category-grid"].innerHTML, /popular-badge/, "no category tile may carry the Popular tag");
+assert.match(elements["category-grid"].innerHTML, /<strong>Vehicles<\/strong>/);
+assert.match(elements["category-grid"].innerHTML, /<strong>Real Estate<\/strong>/);
 assert.match(elements["listing-grid"].innerHTML, /Volvo V60/);
 assert.match(elements["listing-grid"].innerHTML, /2-room apartment near Slussen/);
 assert.match(elements["category-chips"].innerHTML, /class="chip featured" data-category="Vehicles"/);
@@ -1744,7 +1874,7 @@ assert.match(elements["listing-grid"].innerHTML, /class="listing-photo"[^>]*aria
 elements["search-input"].value = "iphone";
   elements["search-input"].listeners.input();
   await flushDebounce();
-  assert.equal(elements["result-count"].textContent, "1 listing");
+  assert.equal(elements["result-count"].textContent, "4 listings", "the iPhone synonym search must include all four Phones & Tablets seed listings");
   assert.match(elements["listing-grid"].innerHTML, /iPhone 14/);
 
   elements["search-input"].value = "sodermalm";
@@ -1913,7 +2043,7 @@ async function registerRealUserDirectly(name, email, password) {
 
 // Re-running the script re-initializes everything against the same shared
 // mock elements; confirms the expanded seed data renders end to end again.
-assert.equal(elements["result-count"].textContent, "8 listings");
+assert.equal(elements["result-count"].textContent, "66 listings");
 assert.match(elements["listing-grid"].innerHTML, /Volvo V60/);
 
 // --- BL-A04/BL-A05: local category names + localized/de-accented search synonyms ---
@@ -1955,14 +2085,14 @@ context.setLanguage("sv");
 elements["search-input"].value = "bil";
 elements["search-input"].listeners.input();
 await flushDebounce();
-assert.equal(elements["result-count"].textContent, "1 annons", "\"bil\" must resolve to exactly the one real Vehicles listing via the synonym map (Swedish is still the active language here)");
+assert.equal(elements["result-count"].textContent, "8 annonser", "\"bil\" must resolve to every real Vehicles listing plus the source-backed item whose searchable description contains the same substring");
 assert.match(elements["listing-grid"].innerHTML, /Volvo V60/);
 assert.doesNotMatch(elements["listing-grid"].innerHTML, /oak dining table|Brass floor lamp/i, "a Vehicles synonym must never leak into Home & Furniture results");
 
 elements["search-input"].value = "möbler";
 elements["search-input"].listeners.input();
 await flushDebounce();
-assert.equal(elements["result-count"].textContent, "2 annonser", "\"möbler\" must resolve to both real Home & Furniture listings via the synonym map");
+assert.equal(elements["result-count"].textContent, "4 annonser", "\"möbler\" must resolve to all four Home & Furniture seed listings via the synonym map");
 assert.match(elements["listing-grid"].innerHTML, /oak dining table/i);
 assert.match(elements["listing-grid"].innerHTML, /Brass floor lamp/i);
 assert.doesNotMatch(elements["listing-grid"].innerHTML, /Volvo V60/, "a Home & Furniture synonym must never leak into Vehicles results");
@@ -1973,7 +2103,7 @@ assert.doesNotMatch(elements["listing-grid"].innerHTML, /Volvo V60/, "a Home & F
 elements["search-input"].value = "mobler";
 elements["search-input"].listeners.input();
 await flushDebounce();
-assert.equal(elements["result-count"].textContent, "2 annonser", "the de-accented spelling of a synonym must match exactly like the accented one");
+assert.equal(elements["result-count"].textContent, "4 annonser", "the de-accented spelling of a synonym must match exactly like the accented one");
 
 // The pre-existing accent-insensitive SUBSTRING search (unrelated to
 // synonyms) must still work, unmodified: a de-accented "ostermalm" still
@@ -2089,7 +2219,7 @@ await context.publishListing();
 assert.match(elements["sell-validation"].textContent, /Add at least 1 photo\./);
 assert.match(elements["sell-validation"].textContent, /Add a title\./);
 assert.equal(elements["sell-validation"].classList.contains("success"), false);
-assert.equal(elements["result-count"].textContent, "8 listings", "a failed publish must not add a listing");
+assert.equal(elements["result-count"].textContent, "66 listings", "a failed publish must not add a listing");
 assert.equal(elements["auth-modal"].hidden, true, "auth gate must not fire before field validation passes");
 
 // Fill out a valid listing. As a signed-out guest, publishing must be
@@ -2112,7 +2242,7 @@ assert.match(elements["sell-preview"].innerHTML, /900 kr/);
 
 const guestPublishResult = await context.publishListing();
 assert.equal(guestPublishResult, null, "a signed-out publish must not return a listing");
-assert.equal(elements["result-count"].textContent, "8 listings", "a gated publish must not add a listing yet");
+assert.equal(elements["result-count"].textContent, "66 listings", "a gated publish must not add a listing yet");
 assert.equal(elements["auth-modal"].hidden, false, "publishing while signed out must open the auth prompt");
 
 // Completing a real registration must resume the exact pending action: the
@@ -2121,11 +2251,11 @@ assert.equal(elements["auth-modal"].hidden, false, "publishing while signed out 
 // (matching the direct-authenticated path), so the test waits for a real,
 // observable outcome rather than guessing a tick count (NM-A11 lesson).
 await registerTestUser("Test Seller", "seller@example.com", DEFAULT_TEST_PASSWORD);
-await waitFor(() => elements["result-count"].textContent === "9 listings");
+await waitFor(() => elements["result-count"].textContent === "67 listings");
 assert.equal(elements["auth-modal"].hidden, true, "sign-in must close the auth prompt");
 assert.match(elements["sell-validation"].textContent, /Listing published/);
 assert.equal(elements["sell-validation"].classList.contains("success"), true);
-assert.equal(elements["result-count"].textContent, "9 listings", "resumed publish must add exactly one listing");
+assert.equal(elements["result-count"].textContent, "67 listings", "resumed publish must add exactly one listing");
 assert.match(elements["listing-grid"].innerHTML, /Test kayak, barely used/);
 assert.match(elements["listing-detail"].innerHTML, /Test kayak, barely used/);
 // NM-A22 re-audit fix: nothing used to stop a seller from messaging
@@ -2527,7 +2657,7 @@ assert.match(elements["auth-google-signin"].innerHTML, /Google-inloggning är in
 context.setLanguage("en");
 
 // --- NM-A5: filter & sort sheet ---
-// State at this point: 9 listings (8 seed + "Test kayak, barely used",
+// State at this point: 21 listings (20 seed + "Test kayak, barely used",
 // Sports & Outdoor / Like new / Private seller / 900 kr / unparseable
 // "New listing" distance), activeCategory "All", no filters applied yet.
 
@@ -2591,7 +2721,7 @@ assert.equal(elements["result-count"].textContent, "5 listings");
 context.resetFilters();
 assert.equal(elements["active-filter-chips"].innerHTML, "");
 assert.equal(elements["sort-indicator"].hidden, true);
-assert.equal(elements["result-count"].textContent, "9 listings");
+assert.equal(elements["result-count"].textContent, "67 listings");
 
 // Category + sub-type refinement through the sheet (Vehicles/Real Estate depth).
 context.openFilterSheet();
@@ -2601,7 +2731,7 @@ assert.equal(elements["filter-subtype-field"].hidden, false);
 assert.match(elements["filter-subtype-select"].innerHTML, /<option value="Cars">Cars<\/option>/);
 elements["filter-subtype-select"].value = "Cars";
 context.applyFilters();
-assert.equal(elements["result-count"].textContent, "1 listing");
+assert.equal(elements["result-count"].textContent, "7 listings", "the fixture Volvo plus all six catalog cars share subtype Cars");
 assert.match(elements["listing-grid"].innerHTML, /Volvo V60/);
 assert.match(elements["category-chips"].innerHTML, /class="chip active featured" data-category="Vehicles"/);
 context.resetFilters();
@@ -2609,11 +2739,11 @@ context.resetFilters();
 // Clear only resets the in-progress sheet fields, not anything already applied.
 context.toggleFilterChip("conditions", "Used");
 context.applyFilters();
-assert.equal(elements["result-count"].textContent, "1 listing", "skis is the only Used-condition listing");
+assert.equal(elements["result-count"].textContent, "7 listings", "Used matches the skis fixture plus all six catalog cars");
 context.openFilterSheet();
 context.clearFilterDraft();
 assert.equal(elements["filter-condition-group"].innerHTML.includes('class="chip active"'), false, "Clear empties the draft chips");
-assert.equal(elements["result-count"].textContent, "1 listing", "Clear must not touch already-applied filters until Apply is pressed");
+assert.equal(elements["result-count"].textContent, "7 listings", "Clear must not touch already-applied filters until Apply is pressed");
 context.closeFilterSheet();
 context.resetFilters();
 
@@ -2633,13 +2763,13 @@ assert.match(elements["filter-region-datalist"].innerHTML, /<option value="Väst
 // whose region is different from every seed listing's "Stockholm".
 elements["filter-region-input"].value = "Stockholm";
 context.applyFilters();
-assert.equal(elements["result-count"].textContent, "8 listings", "only the 8 Stockholm-region seed listings must match");
+assert.equal(elements["result-count"].textContent, "10 listings", "the 8 original seed listings plus the 2 Stockholm catalog cars must match");
 assert.doesNotMatch(elements["listing-grid"].innerHTML, /Test kayak, barely used/);
 assert.match(elements["active-filter-chips"].innerHTML, /data-remove-filter="region">Stockholm/, "the applied region must render as a removable chip");
 
 context.removeActiveFilter("region");
 assert.doesNotMatch(elements["active-filter-chips"].innerHTML, /data-remove-filter="region"/);
-assert.equal(elements["result-count"].textContent, "9 listings", "removing the region chip must widen results immediately");
+assert.equal(elements["result-count"].textContent, "67 listings", "removing the region chip must widen results immediately");
 
 // Typed free text (lower-case, partial, not an exact datalist value) still
 // filters correctly via the same substring/diacritic-insensitive compare
@@ -2648,7 +2778,7 @@ assert.equal(elements["result-count"].textContent, "9 listings", "removing the r
 context.openFilterSheet();
 elements["filter-region-input"].value = "väst";
 context.applyFilters();
-assert.equal(elements["result-count"].textContent, "1 listing", "typed partial text must still match Västra Götaland");
+assert.equal(elements["result-count"].textContent, "2 listings", "typed partial text must still match Västra Götaland (the kayak and the catalog car in Bengtsfors)");
 assert.match(elements["listing-grid"].innerHTML, /Test kayak, barely used/);
 
 // Typed text matching no real listing's region must correctly return zero
@@ -2787,9 +2917,10 @@ context.generateAiPhoto();
 assert.match(elements["ai-photo-status"].textContent, /You've reached the 6-photo limit\./);
 assert.equal(elements["auth-modal"].hidden, true, "the photo-limit message must not itself require signing in");
 
-// Live preview must show a "1/6" count badge once there are multiple photos —
-// proof the count badge is wired to real form state, not just published listings.
-assert.match(elements["sell-preview"].innerHTML, /photo-count-badge">1\/6</);
+// Live preview must be rendering the REAL form state (Blocket-style clean
+// cards carry no photo-count tag anywhere -- that removal is asserted too).
+assert.match(elements["sell-preview"].innerHTML, /class="listing-card preview-card"/);
+assert.doesNotMatch(elements["sell-preview"].innerHTML, /photo-count-badge/, "the photo-count tag is hidden on cards, preview included");
 
 // Publish a real 6-photo listing and confirm the FULL set is saved — this is
 // the actual bug NM-A9 exists to fix: commitPublish previously kept only
@@ -2805,7 +2936,8 @@ elements["sell-description-input"].value = "Testing that all 6 photos are actual
 const published = await context.publishListing();
 assert.ok(published, "publish must succeed once signed in");
 assert.equal(published.images.length, 6, "all 6 photos must be persisted on the listing, not just the cover");
-assert.match(elements["listing-grid"].innerHTML, /photo-count-badge">1\/6</, "the published listing's Browse card must show the real photo count");
+assert.match(elements["listing-grid"].innerHTML, /Six-photo test lamp/, "the published listing must actually appear on Browse");
+assert.doesNotMatch(elements["listing-grid"].innerHTML, /photo-count-badge/, "Browse cards must not carry the photo-count tag either");
 assert.match(elements["listing-detail"].innerHTML, /id="detail-gallery-wrap"/);
 assert.equal(
   (elements["listing-detail"].innerHTML.match(/data-gallery-index="/g) || []).length,
@@ -3417,6 +3549,15 @@ await loginTestUser("ola@example.com", DEFAULT_TEST_PASSWORD);
 
 context.resetFilters();
 context.renderListings();
+const mikazanShowcaseHtml = elements["mikazan-showcase"].innerHTML;
+assert.match(mikazanShowcaseHtml, /Featured from Mikazan/, "Browse must render the Mikazan landing-page showcase");
+for (const heading of ["Auto &amp; Tech", "Home &amp; Pets", "Fashion &amp; Outdoor", "Digital Guides"]) {
+  assert.match(mikazanShowcaseHtml, new RegExp(heading), `showcase must render the ${heading} collection`);
+}
+const mikazanShowcaseIds = [...mikazanShowcaseHtml.matchAll(/data-id="(mikazan-[^"]+)"/g)].map((match) => match[1]);
+assert.equal(mikazanShowcaseIds.length, 12, "showcase must render exactly twelve Mikazan product cards");
+assert.equal(new Set(mikazanShowcaseIds).size, 12, "showcase product cards must be unique");
+assert.equal((mikazanShowcaseHtml.match(/class="card-source-link"/g) || []).length, 12, "every showcased product must preserve its source link");
 const recentOrderGrid = elements["listing-grid"].innerHTML;
 const boostedIndex = recentOrderGrid.indexOf("Analytics test bicycle");
 const newerUnboostedIndex = recentOrderGrid.indexOf("Newer Unboosted Listing");
@@ -5749,6 +5890,393 @@ console.log("PASS: NM-A25 fresh page loads -- a real, direct (non-client-side-na
   }
 
   console.log("PASS: Blocket Phase 1, Part C -- boosting is free and paid checkout is genuinely frozen behind a ~6-month deadline that is persisted (never re-anchored by a redeploy), the localized 'free until <date>' note renders in all six languages and disappears the moment the window closes, an explicit past date really opens payments and 402-blocks free activation, a typo'd date degrades safely to the stored deadline, and an explicit deployer flag still wins in both directions.");
+}
+
+// --- Blocket Phase 2: the real Blocket/FINN source catalog, links as a privilege ---
+//
+// Browse carries REAL Blocket cars and FINN homes, each with an outbound
+// `sourceUrl` that opens the original where it actually lives. A clickable
+// link is a privilege: an ADMIN may set one on any listing (admins author the
+// curated catalog), an advertiser only on their own, and only once boosting
+// is unlocked (scripts/boost.js isBoostPaymentsEnabled). Every server claim
+// below goes through the REAL endpoint (same process, live process.env)
+// rather than re-implementing the logic in the test, so it proves the shipped
+// behavior; every client claim reads the REAL rendered DOM of the sandbox.
+{
+  const phase2Boost = require("../scripts/boost");
+  const savedPhase2PaymentsFlag = process.env.BOOST_PAYMENTS_ENABLED;
+  const savedPhase2FreeUntil = process.env.BOOST_FREE_UNTIL;
+
+  // The default production posture for this whole block: the persisted
+  // ~6-month free window is still open and no deployer flag is set, so
+  // boosting's paid switch is OFF and links are admin-only. Every env change
+  // below is local to this block and restored in the finally.
+  delete process.env.BOOST_PAYMENTS_ENABLED;
+  delete process.env.BOOST_FREE_UNTIL;
+  await context.loadBoostConfig();
+  assert.equal(phase2Boost.isBoostFreeWindowActive(testDb), true, "precondition: the persisted free-boost window is still open");
+  assert.equal(phase2Boost.isBoostPaymentsEnabled(testDb), false, "precondition: boosting's paid switch is off, so links stay admin-only");
+
+  try {
+    // --- A. The seed catalog is REAL: 6 Blocket cars + 6 FINN homes, every
+    // link https on the source's own host, every photo hot-linked from that
+    // source's own CDN and asserted against the SAME ad id / finnkode the
+    // link opens -- never a copied file, never a random image.
+    const seedDataJs = fs.readFileSync(path.join(root, "db", "seed-data.js"), "utf8");
+    const phase2Links = [...seedDataJs.matchAll(/sourceUrl: "([^"]+)"/g)].map((entry) => entry[1]);
+    assert.equal(phase2Links.length, 12, "the catalog must be exactly 6 Blocket cars + 6 FINN homes");
+    assert.equal(phase2Links.filter((url) => url.startsWith("https://www.blocket.se/")).length, 6, "6 cars must be sourced from Blocket");
+    assert.equal(phase2Links.filter((url) => url.startsWith("https://www.finn.no/realestate/homes/ad.html?finnkode=")).length, 6, "6 homes must be sourced from FINN");
+    assert.ok(phase2Links.every((url) => url.startsWith("https://")), "every source link must be https");
+    assert.doesNotMatch(phase2Links.join(" "), /javascript:|data:/, "no script-bearing scheme may ever be seeded as a link");
+
+    const phase2Entries = [...seedDataJs.matchAll(/id: "(src-[^"]+)",[\s\S]*?sourceUrl: "([^"]+)"/g)];
+    assert.equal(phase2Entries.length, 12, "every catalog entry must pair one id with one source link");
+    for (const [, entryId, entrySourceUrl] of phase2Entries) {
+      const entryBlock = new RegExp(`id: "${entryId}",[\\s\\S]*?sourceUrl:`).exec(seedDataJs)[0];
+      if (entrySourceUrl.startsWith("https://www.blocket.se/")) {
+        assert.match(entryBlock, /images\.blocketcdn\.se/, `${entryId}: a Blocket car must show Blocket's own CDN photo`);
+        const blocketAdId = /blocket\.se\/(\d+)/.exec(entrySourceUrl)[1];
+        assert.match(entryBlock, new RegExp(`item/${blocketAdId}/`), `${entryId}: the hot-linked photo must be of the SAME ad the source link opens`);
+      } else {
+        assert.ok(entrySourceUrl.startsWith("https://www.finn.no/"), `${entryId}: unexpected source host in ${entrySourceUrl}`);
+        assert.match(entryBlock, /images\.finncdn\.no/, `${entryId}: a FINN home must show FINN's own CDN photo`);
+        const finnkode = /finnkode=(\d+)/.exec(entrySourceUrl)[1];
+        assert.match(
+          entryBlock,
+          new RegExp(`${finnkode.slice(0, 3)}/${finnkode.slice(3, 6)}/${finnkode.slice(6)}_`),
+          `${entryId}: the hot-linked photo must be of the SAME finnkode the source link opens`
+        );
+      }
+    }
+
+    // The column ships with the schema AND migrates databases created before
+    // it existed (NULL = render no button, never a broken one).
+    const schemaSql = fs.readFileSync(path.join(root, "db", "schema.sql"), "utf8");
+    assert.match(schemaSql, /source_url TEXT/, "the listings table must store the outbound source link");
+    const dbScript = fs.readFileSync(path.join(root, "scripts", "db.js"), "utf8");
+    assert.match(dbScript, /function migrateListingsSourceUrlColumn\(db\)/, "pre-upgrade databases must gain the column idempotently");
+    assert.match(dbScript, /ALTER TABLE listings ADD COLUMN source_url TEXT/, "the migration must really add the column");
+
+    // --- B. The REAL database and the REAL API carry those links; an ordinary
+    // listing exposes null (render nothing), never undefined (silent drift).
+    const seededSourceRows = testDb.prepare("SELECT id, source_url FROM listings WHERE source_url IS NOT NULL").all();
+    assert.equal(seededSourceRows.length, 24, "the seeded database must carry all 12 Blocket/FINN links and all 12 Mikazan product links -- not just the JS file");
+    assert.ok(seededSourceRows.every((row) => row.source_url.startsWith("https://")), "every stored link must be https");
+    assert.equal(testDb.prepare("SELECT source_url FROM listings WHERE id = ?").get("oak-table").source_url, null, "an ordinary fixture must store NULL");
+
+    const phase2ApiListings = (await (await fetch(`${serverOrigin}/api/listings`)).json()).listings;
+    const phase2ApiGolf = phase2ApiListings.find((item) => item.id === "src-blocket-golf-plus");
+    assert.ok(phase2ApiGolf, "the seeded Blocket car must be served by the real API");
+    assert.equal(phase2ApiGolf.sourceUrl, "https://www.blocket.se/27260133", "the API must expose the source link on catalog rows");
+    assert.equal(phase2ApiListings.find((item) => item.id === "oak-table").sourceUrl, null, "the API must expose null for listings without a link");
+
+    // --- C. The rendered Browse cards: the outbound link is a SIBLING anchor
+    // of the card button (an <a> inside <button> is invalid, and nesting would
+    // let the delegated open-listing handler swallow the click), opens the
+    // original in a hardened new tab -- and a listing without a link renders
+    // NO source button at all, never a dead one.
+    elements["search-input"].value = "";
+    context.setActiveScope("All Nordics");
+    context.resetFilters();
+    const phase2Grid = elements["listing-grid"].innerHTML;
+    const golfCardChunk = phase2Grid.split("<article").find((chunk) => chunk.includes('data-id="src-blocket-golf-plus"'));
+    assert.ok(golfCardChunk, "the real seeded Blocket car must render a card on Browse");
+    assert.match(golfCardChunk, /class="listing-card has-source-link"/, "a listing with a source link must carry the has-source-link marker");
+    assert.match(
+      golfCardChunk,
+      /<a class="card-source-link" href="https:\/\/www\.blocket\.se\/27260133" target="_blank" rel="noopener noreferrer" aria-label="View original listing: /,
+      "the card's source button must open the ORIGINAL listing in a new tab, hardened against opener access"
+    );
+    const golfCardButton = /<button type="button" class="card-button"[\s\S]*?<\/button>/.exec(golfCardChunk)[0];
+    assert.doesNotMatch(golfCardButton, /<a\s/, "the outbound link must never be nested inside the card button");
+    assert.match(
+      golfCardChunk,
+      /<\/button>\s*<button type="button" class="save-button[\s\S]*?<\/button>\s*<a class="card-source-link"/,
+      "the source link must sit AFTER both card buttons as a sibling"
+    );
+    const oakCardChunk = phase2Grid.split("<article").find((chunk) => chunk.includes('data-id="oak-table"'));
+    assert.ok(oakCardChunk, "the ordinary seed fixture must render too");
+    assert.doesNotMatch(oakCardChunk, /card-source-link|has-source-link/, "a listing with no source link must render no source button at all");
+
+    // The detail view offers the same destination as a readable CTA...
+    context.openListing("src-blocket-golf-plus");
+    const golfDetailHtml = elements["listing-detail"].innerHTML;
+    assert.match(
+      golfDetailHtml,
+      /class="source-cta" id="detail-source-link" href="https:\/\/www\.blocket\.se\/27260133" target="_blank" rel="noopener noreferrer"/,
+      "the detail view must carry the same outbound link as a readable CTA"
+    );
+    assert.ok(golfDetailHtml.includes(">View original listing</a>"), "the CTA must show its localized text, not just an icon");
+    context.openListing("oak-table");
+    assert.doesNotMatch(elements["listing-detail"].innerHTML, /detail-source-link/, "a listing without a link must render no CTA at all");
+
+    // --- D. Client-side gating: the field ships hidden, appears only for
+    // someone who could actually USE it, and a hidden field must OMIT the key
+    // from the payload so an unrelated edit can never wipe somebody's link.
+    assert.match(html, /id="sell-source-url-field" hidden/, "the source-link field must ship HIDDEN in the static page");
+    const phase2InputTag = /<input[^>]*id="sell-source-url-input"[^>]*>/.exec(html);
+    assert.ok(phase2InputTag, "the source-link input must exist in the static page");
+    assert.match(phase2InputTag[0], /maxlength="512"/, "the input must cap the link at the same 512 chars the server enforces");
+
+    // Guest: no field at all.
+    assert.equal(context.sourceUrlFieldAllowed(), false, "a guest must never be offered the source-link field");
+    context.refreshSourceUrlFieldVisibility();
+    assert.equal(elements["sell-source-url-field"].hidden, true, "the field must stay hidden for a guest");
+
+    // A regular seller while boosting is locked: still no field, and because
+    // the hidden field is omitted from the payload, their own edits can never
+    // clobber a link somebody else (an admin) put on their listing.
+    const phase2Seller = await registerTestUser("Phase Two Seller", "phase2-seller@example.com", DEFAULT_TEST_PASSWORD);
+    assert.ok(phase2Seller, "the seller must really be signed in for this to prove anything");
+    const phase2SellerCookie = testCookieJar;
+    assert.equal(context.sourceUrlFieldAllowed(), false, "a seller must stay locked out while boosting's paid switch is off");
+    context.refreshSourceUrlFieldVisibility();
+    assert.equal(elements["sell-source-url-field"].hidden, true, "the field must be hidden for a locked seller");
+    elements["sell-source-url-input"].value = "https://example.com/clobber";
+    assert.equal(context.sourceUrlFormValue(), undefined, "a hidden field must OMIT the key entirely -- an unrelated edit can never wipe an existing link");
+
+    // ...and gains it the moment boosting unlocks (the advertiser's half of
+    // the permission model), with a really trimmed payload.
+    process.env.BOOST_PAYMENTS_ENABLED = "true";
+    await context.loadBoostConfig();
+    assert.equal(context.sourceUrlFieldAllowed(), true, "once boosting is unlocked, the seller's own link field must appear");
+    assert.equal(elements["sell-source-url-field"].hidden, false, "the unlocked seller's field must be visible");
+    elements["sell-source-url-input"].value = "  https://example.com/ad  ";
+    assert.equal(context.sourceUrlFormValue(), "https://example.com/ad", "a visible field must send its trimmed value");
+    elements["sell-source-url-input"].value = "";
+
+    // Relock: the field must react BACK to hidden (it tracks the live config,
+    // not a one-way latch)...
+    process.env.BOOST_PAYMENTS_ENABLED = "false";
+    await context.loadBoostConfig();
+    assert.equal(context.sourceUrlFieldAllowed(), false, "relocking must hide the field again for a non-admin");
+    assert.equal(elements["sell-source-url-field"].hidden, true, "and re-hide the actual control");
+
+    // The admin keeps it in EVERY state -- and its label plus the outbound CTA
+    // are real translations in all six languages, checked in the rendered DOM
+    // (not just in the dictionary file).
+    await loginTestUser("nma21-admin@example.com", "correcthorse1");
+    assert.equal(context.sourceUrlFieldAllowed(), true, "the admin must keep the field even while every advertiser is locked");
+    context.refreshSourceUrlFieldVisibility();
+    assert.equal(elements["sell-source-url-field"].hidden, false, "the admin's field must be visible");
+    const phase2Localized = {
+      en: { label: "Source link", cta: "View original listing" },
+      sv: { label: "Källänk", cta: "Visa originalannonsen" },
+      no: { label: "Kildelenke", cta: "Se originalannonsen" },
+      da: { label: "Kildelink", cta: "Se originalannoncen" },
+      fi: { label: "Lähdelinkki", cta: "Näytä alkuperäinen ilmoitus" },
+      is: { label: "Heimildartengill", cta: "Skoða upprunalega auglýsingu" }
+    };
+    for (const [phase2Lang, expected] of Object.entries(phase2Localized)) {
+      context.setLanguage(phase2Lang);
+      assert.equal(
+        elements["sell-source-url-label-text"].textContent,
+        expected.label,
+        `${phase2Lang} must localize the source-link field label, not silently stay English`
+      );
+      assert.ok(elements["sell-source-url-hint"].textContent.length > 0, `${phase2Lang} must fill the field hint too`);
+      context.openListing("src-blocket-golf-plus");
+      assert.ok(
+        elements["listing-detail"].innerHTML.includes(`>${expected.cta}</a>`),
+        `${phase2Lang} must localize the outbound CTA itself (expected: "${expected.cta}")`
+      );
+    }
+    context.setLanguage("en");
+
+    // --- E. Real HTTP, create time. The seller's own cookie, the real server,
+    // the live env: a locked advertiser is refused with the machine-readable
+    // lock code, the same seller gets in the moment the free window closes,
+    // and an admin is never blocked -- whatever the flag says.
+    process.env.BOOST_PAYMENTS_ENABLED = "false";
+    delete process.env.BOOST_FREE_UNTIL;
+
+    const phase2Create = (cookie, body) =>
+      fetch(`${serverOrigin}/api/listings`, {
+        method: "POST",
+        headers: { "content-type": "application/json", cookie },
+        body: JSON.stringify({ price: "800", country: "Sweden", ...body })
+      });
+
+    const lockedCreate = await phase2Create(phase2SellerCookie, {
+      title: "Phase two locked kayak",
+      category: "Sports & Outdoor",
+      sourceUrl: "https://example.com/locked"
+    });
+    assert.equal(lockedCreate.status, 403, "a seller must be refused a source link while boosting is locked");
+    assert.equal((await lockedCreate.json()).code, "SOURCE_LINK_LOCKED", "with the dedicated code the client translates");
+
+    delete process.env.BOOST_PAYMENTS_ENABLED;
+    process.env.BOOST_FREE_UNTIL = "2020-01-01";
+    const unlockedCreate = await phase2Create(phase2SellerCookie, {
+      title: "Phase two open-window kayak",
+      category: "Sports & Outdoor",
+      sourceUrl: "https://example.com/opened"
+    });
+    assert.equal(unlockedCreate.status, 200, "once the free-boost window closes, an advertiser's own link must be accepted");
+    const unlockedCreateBody = await unlockedCreate.json();
+    assert.equal(unlockedCreateBody.sourceUrl, "https://example.com/opened", "...and stored through the real API");
+    const phase2OwnerListingId = unlockedCreateBody.id;
+    assert.ok(phase2OwnerListingId, "the unlocked create must really return the new listing");
+
+    // The admin attaches a link under the LOCKED default -- admin access never
+    // depends on the window or a deployer flag.
+    process.env.BOOST_PAYMENTS_ENABLED = "false";
+    delete process.env.BOOST_FREE_UNTIL;
+    const adminCreate = await phase2Create(adminCookie, {
+      title: "Phase two admin catalog anchor",
+      category: "Home & Furniture",
+      price: "250",
+      sourceUrl: "https://www.blocket.se/27260133"
+    });
+    assert.equal(adminCreate.status, 200, "the admin must be able to attach a link while every advertiser is locked");
+    const adminCreateBody = await adminCreate.json();
+    assert.equal(adminCreateBody.sourceUrl, "https://www.blocket.se/27260133", "...and it must round-trip exactly");
+    const phase2AdminListingId = adminCreateBody.id;
+    assert.ok(phase2AdminListingId, "the admin create must really return its listing for the ownership checks below");
+
+    // Shape battery against the REAL server (as admin, so permission never
+    // interferes): javascript:/data:/ftp: schemes, embedded credentials,
+    // whitespace, an over-long URL and a non-string are all 400.
+    const phase2InvalidUrls = [
+      ["a javascript: URL", "javascript:alert(1)"],
+      ["a data: URL", "data:text/html,x"],
+      ["an ftp: URL", "ftp://example.com/file"],
+      ["embedded credentials", "https://user:pass@example.com/x"],
+      ["whitespace", "https://example.com/has space"],
+      ["an over-512-char URL", `https://example.com/${"a".repeat(512)}`],
+      ["a non-string", 12345]
+    ];
+    for (const [what, badUrl] of phase2InvalidUrls) {
+      const badRes = await phase2Create(adminCookie, {
+        title: "Phase two shape probe",
+        category: "Electronics",
+        sourceUrl: badUrl
+      });
+      assert.equal(badRes.status, 400, `${what} must be refused with 400 before anything else`);
+      assert.equal((await badRes.json()).code, "INVALID_SOURCE_URL", `${what} must carry the machine-readable INVALID_SOURCE_URL code`);
+    }
+
+    // An empty string is not a link at all: it creates a listing with no
+    // source button, and needs no permission (nothing clickable was added).
+    const emptyCreate = await phase2Create(phase2SellerCookie, {
+      title: "Phase two no-link listing",
+      category: "Electronics",
+      sourceUrl: ""
+    });
+    assert.equal(emptyCreate.status, 200, "an empty source field must simply mean 'no link', not an error");
+    assert.equal((await emptyCreate.json()).sourceUrl, null, "...stored as NULL, which renders no button");
+
+    // --- F. Real HTTP, edit time.
+    const phase2Patch = (cookie, listingId, body) =>
+      fetch(`${serverOrigin}/api/listings/${listingId}`, {
+        method: "PATCH",
+        headers: { "content-type": "application/json", cookie },
+        body: JSON.stringify(body)
+      });
+
+    process.env.BOOST_PAYMENTS_ENABLED = "false";
+    delete process.env.BOOST_FREE_UNTIL;
+
+    const ownerLocked = await phase2Patch(phase2SellerCookie, phase2OwnerListingId, { sourceUrl: "https://example.com/mine" });
+    assert.equal(ownerLocked.status, 403, "the listing's own seller must be refused a link while boosting is locked");
+    assert.equal((await ownerLocked.json()).code, "SOURCE_LINK_LOCKED", "with the same lock code as create time");
+
+    // On the edit path the permission answer comes FIRST -- even a malformed
+    // URL from a locked seller hears why they can't have links at all.
+    const ownerLockedInvalid = await phase2Patch(phase2SellerCookie, phase2OwnerListingId, { sourceUrl: "javascript:alert(1)" });
+    assert.equal(ownerLockedInvalid.status, 403, "while locked, the lock is the edit path's first answer");
+    assert.equal((await ownerLockedInvalid.json()).code, "SOURCE_LINK_LOCKED", "...not a shape error");
+
+    // Window-closed unlock again, this time on the EDIT path -- the real
+    // product rule, with no deployer flag involved.
+    delete process.env.BOOST_PAYMENTS_ENABLED;
+    process.env.BOOST_FREE_UNTIL = "2020-01-01";
+    const ownerUnlocked = await phase2Patch(phase2SellerCookie, phase2OwnerListingId, { sourceUrl: "https://example.com/mine" });
+    assert.equal(ownerUnlocked.status, 200, "once the free window closes the seller may attach their own link");
+    assert.equal((await ownerUnlocked.json()).sourceUrl, "https://example.com/mine", "...and it round-trips");
+
+    const ownerInvalid = await phase2Patch(phase2SellerCookie, phase2OwnerListingId, { sourceUrl: "javascript:alert(1)" });
+    assert.equal(ownerInvalid.status, 400, "an unlocked seller still can't push a script-bearing URL");
+    assert.equal((await ownerInvalid.json()).code, "INVALID_SOURCE_URL", "...with the shape code");
+
+    // The client's contract, enforced here at the wire: a PATCH that never
+    // MENTIONS sourceUrl leaves the stored link alone -- all the way down to
+    // the real column, not just the API echo.
+    const ownerRetitle = await phase2Patch(phase2SellerCookie, phase2OwnerListingId, { title: "Phase two owner listing, retitled" });
+    assert.equal(ownerRetitle.status, 200, "an ordinary edit must keep working");
+    assert.equal((await ownerRetitle.json()).sourceUrl, "https://example.com/mine", "a PATCH without a sourceUrl key must not touch the stored link");
+    assert.equal(
+      testDb.prepare("SELECT source_url FROM listings WHERE id = ?").get(phase2OwnerListingId).source_url,
+      "https://example.com/mine",
+      "...verified against the real column, immune to a lying response body"
+    );
+
+    // An empty-but-visible field is a DELIBERATE clear (still permission-gated).
+    const ownerClear = await phase2Patch(phase2SellerCookie, phase2OwnerListingId, { sourceUrl: "" });
+    assert.equal(ownerClear.status, 200, "an unlocked seller may deliberately clear their own link");
+    assert.equal((await ownerClear.json()).sourceUrl, null, "...which really stores NULL");
+
+    const ownerReset = await phase2Patch(phase2SellerCookie, phase2OwnerListingId, { sourceUrl: "https://example.com/back" });
+    assert.equal((await ownerReset.json()).sourceUrl, "https://example.com/back", "the seller can set it again for the admin checks below");
+
+    // Admin, NON-owner, sourceUrl ONLY: allowed while every advertiser is
+    // locked -- and it must not smuggle in edit rights over the rest of the ad.
+    process.env.BOOST_PAYMENTS_ENABLED = "false";
+    delete process.env.BOOST_FREE_UNTIL;
+    const finnSourceUrl = "https://www.finn.no/realestate/homes/ad.html?finnkode=478094838";
+    const adminSourceOnly = await phase2Patch(adminCookie, phase2OwnerListingId, { sourceUrl: finnSourceUrl });
+    assert.equal(adminSourceOnly.status, 200, "an admin must be able to attach a link to ANY listing under the locked default");
+    const adminSourceOnlyBody = await adminSourceOnly.json();
+    assert.equal(adminSourceOnlyBody.sourceUrl, finnSourceUrl, "...and it must store exactly");
+    assert.equal(adminSourceOnlyBody.title, "Phase two owner listing, retitled", "the source-only PATCH must not touch any other field");
+
+    const adminMixed = await phase2Patch(adminCookie, phase2OwnerListingId, { sourceUrl: "https://example.com/mixed", title: "Hijacked" });
+    assert.equal(adminMixed.status, 403, "adding a link must NOT grant edit rights over somebody else's ad");
+    assert.equal((await adminMixed.json()).error, "You can only edit your own listings.", "the same ownership error as before must still apply");
+    assert.equal(
+      testDb.prepare("SELECT title FROM listings WHERE id = ?").get(phase2OwnerListingId).title,
+      "Phase two owner listing, retitled",
+      "the refused admin PATCH must really have changed nothing"
+    );
+
+    const adminImages = await phase2Patch(adminCookie, phase2OwnerListingId, { sourceUrl: "https://example.com/x", images: [] });
+    assert.equal(adminImages.status, 403, "any photo change alongside the link is still an ownership error for a non-owner");
+
+    const adminInvalid = await phase2Patch(adminCookie, phase2OwnerListingId, { sourceUrl: "javascript:alert(1)" });
+    assert.equal(adminInvalid.status, 400, "even an admin can only store a well-formed URL");
+    assert.equal((await adminInvalid.json()).code, "INVALID_SOURCE_URL", "...with the shape code");
+
+    // And a NON-admin non-owner -- even with boosting fully unlocked, so the
+    // lock can't be the reason -- is stopped by pure OWNERSHIP and never
+    // reaches the admin branch at all.
+    delete process.env.BOOST_PAYMENTS_ENABLED;
+    process.env.BOOST_FREE_UNTIL = "2020-01-01";
+    const foreignAttemptBody = await (await phase2Patch(phase2SellerCookie, phase2AdminListingId, { sourceUrl: "https://example.com/loophole" })).json();
+    assert.equal(foreignAttemptBody.error, "You can only edit your own listings.", "an unlocked advertiser still cannot attach a link to SOMEONE ELSE's listing");
+    assert.ok(!("code" in foreignAttemptBody), "...and it fails as ownership, proving the admin branch is unreachable by a non-admin");
+
+    // --- G. Static client assets: all six languages really carry every new
+    // key, and the Blocket-style styles for both links exist.
+    for (const phase2Key of ["listingCard.viewSource", "sell.sourceUrlLabel", "sell.sourceUrlHint", "sell.sourceUrlLocked", "sell.sourceUrlInvalid"]) {
+      const escapedPhase2Key = phase2Key.split(".").join("\\.");
+      const phase2Translations = js.match(new RegExp(`"${escapedPhase2Key}": "[^"]+"`, "g")) || [];
+      assert.equal(phase2Translations.length, 6, `${phase2Key} must be defined in ALL SIX language dictionaries (found ${phase2Translations.length})`);
+    }
+    assert.match(css, /\.card-source-link\s*\{/, "the card's outbound link needs its own Blocket-style styling");
+    assert.match(css, /\.source-cta\s*\{/, "the detail view's source CTA needs its own styling");
+  } finally {
+    // Leave process.env exactly as this block found it, and refresh the cached
+    // config so nothing downstream reads a stale value.
+    if (savedPhase2PaymentsFlag === undefined) delete process.env.BOOST_PAYMENTS_ENABLED;
+    else process.env.BOOST_PAYMENTS_ENABLED = savedPhase2PaymentsFlag;
+    if (savedPhase2FreeUntil === undefined) delete process.env.BOOST_FREE_UNTIL;
+    else process.env.BOOST_FREE_UNTIL = savedPhase2FreeUntil;
+    await context.loadBoostConfig();
+    await context.signOutUser();
+  }
+
+  console.log("PASS: Blocket Phase 2 -- the catalog really is 6 Blocket cars + 6 FINN homes (every link https on the source's own host, every hot-linked photo asserted against the same ad id / finnkode the link opens), the real DB and API expose all 12 links (null for ordinary listings), cards render the link as a hardened sibling anchor never nested in the card button with none at all when there's no source, the Sell field ships hidden and gates guest/seller/relocked/admin exactly per the unlock rules (omitted-when-hidden so an unrelated edit can never wipe a link) with its label and outbound CTA localized in all six languages in the rendered DOM, and the REAL endpoints enforce the whole permission model: 403 SOURCE_LINK_LOCKED for locked advertisers at create and edit time, the window-closed unlock really opens for advertisers with no flag involved, 400 INVALID_SOURCE_URL for javascript:/data:/ftp:/credentials/whitespace/overlong/non-string shapes, an empty string clears to NULL, a PATCH without the key leaves the real column untouched, an admin can set the link on anyone's listing but ONLY the link, and even a fully unlocked non-admin is stopped by ownership with the admin branch unreachable.");
 }
 }
 

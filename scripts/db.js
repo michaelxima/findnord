@@ -6,7 +6,7 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const Database = require("better-sqlite3");
-const { listings: seedListings } = require("../db/seed-data");
+const { listings: seedListings, productionCatalogListings } = require("../db/seed-data");
 const { createImageStorage } = require("./image-storage");
 
 const DEFAULT_DB_PATH = path.join(__dirname, "..", "data", "findnord.db");
@@ -36,9 +36,9 @@ function seedIfEmpty(db) {
 
   const insertListing = db.prepare(`
     INSERT INTO listings
-      (id, title, category, subtype, price, locality, region, country, distance, condition, posted, posted_at, freshness, ai_photo, image, description, seller, seller_id, seller_type, trust, sponsored, created_at)
+      (id, title, category, subtype, price, locality, region, country, distance, condition, posted, posted_at, freshness, ai_photo, image, description, seller, seller_id, seller_type, trust, sponsored, source_url, created_at)
     VALUES
-      (@id, @title, @category, @subtype, @price, @locality, @region, @country, @distance, @condition, @posted, @postedAt, @freshness, @aiPhoto, @image, @description, @seller, @sellerId, @sellerType, @trust, @sponsored, @createdAt)
+      (@id, @title, @category, @subtype, @price, @locality, @region, @country, @distance, @condition, @posted, @postedAt, @freshness, @aiPhoto, @image, @description, @seller, @sellerId, @sellerType, @trust, @sponsored, @sourceUrl, @createdAt)
   `);
   const insertImage = db.prepare(`
     INSERT INTO listing_images (listing_id, position, css, ai_generated) VALUES (?, ?, ?, ?)
@@ -68,6 +68,9 @@ function seedIfEmpty(db) {
         sellerType: listing.sellerType,
         trust: listing.trust,
         sponsored: listing.sponsored ? 1 : 0,
+        // Admin-authored seed content, so it carries a source link the same way
+        // an admin-set one would -- see the permission note in db/schema.sql.
+        sourceUrl: listing.sourceUrl || null,
         createdAt: listing.postedAt
       });
       listing.images.forEach((image, index) => {
@@ -76,6 +79,59 @@ function seedIfEmpty(db) {
     }
   });
   seedAll();
+}
+
+// Bundled catalog products are published content rather than disposable demo
+// fixtures, so they are synchronized independently of shouldSeedDemoData().
+// INSERT OR IGNORE makes this safe on every startup: existing rows (including
+// a user's row with a colliding id) are never overwritten, and images are
+// inserted only when their parent catalog row was newly added.
+function syncBundledCatalog(db) {
+  const insertListing = db.prepare(`
+    INSERT OR IGNORE INTO listings
+      (id, title, category, subtype, price, locality, region, country, distance, condition, posted, posted_at, freshness, ai_photo, image, description, seller, seller_id, seller_type, trust, sponsored, source_url, created_at)
+    VALUES
+      (@id, @title, @category, @subtype, @price, @locality, @region, @country, @distance, @condition, @posted, @postedAt, @freshness, @aiPhoto, @image, @description, @seller, @sellerId, @sellerType, @trust, @sponsored, @sourceUrl, @createdAt)
+  `);
+  const insertImage = db.prepare(`
+    INSERT INTO listing_images (listing_id, position, css, ai_generated) VALUES (?, ?, ?, ?)
+  `);
+
+  const sync = db.transaction(() => {
+    for (const listing of productionCatalogListings) {
+      const result = insertListing.run({
+        id: listing.id,
+        title: listing.title,
+        category: listing.category,
+        subtype: listing.subtype || null,
+        price: listing.price,
+        locality: listing.locality,
+        region: listing.region || null,
+        country: listing.country || "Sweden",
+        distance: listing.distance,
+        condition: listing.condition,
+        posted: listing.posted,
+        postedAt: listing.postedAt,
+        freshness: listing.freshness || "",
+        aiPhoto: 0,
+        image: listing.images[0].css,
+        description: listing.description,
+        seller: listing.seller,
+        sellerId: null,
+        sellerType: listing.sellerType,
+        trust: listing.trust,
+        sponsored: listing.sponsored ? 1 : 0,
+        sourceUrl: listing.sourceUrl || null,
+        createdAt: listing.postedAt
+      });
+      if (result.changes === 1) {
+        listing.images.forEach((image, index) => {
+          insertImage.run(listing.id, index, image.css, image.aiGenerated ? 1 : 0);
+        });
+      }
+    }
+  });
+  sync();
 }
 
 // NM-A12: defensive, idempotent migration for any database created before
@@ -310,6 +366,17 @@ function migrateUsersHomeLocationColumns(db) {
   }
 }
 
+// Defensive, idempotent migration for any database created before the outbound
+// source link existed. Existing rows keep NULL, which rowToListing exposes as
+// "no source link" -- so an upgraded database renders no source button rather
+// than a broken one. Same additive pattern as every prior column migration.
+function migrateListingsSourceUrlColumn(db) {
+  const columns = db.prepare("PRAGMA table_info(listings)").all();
+  if (!columns.some((column) => column.name === "source_url")) {
+    db.exec("ALTER TABLE listings ADD COLUMN source_url TEXT");
+  }
+}
+
 function openDatabase(dbPath, options = {}) {
   const resolvedPath = dbPath || process.env.DB_PATH || DEFAULT_DB_PATH;
   if (resolvedPath !== ":memory:") fs.mkdirSync(path.dirname(resolvedPath), { recursive: true });
@@ -330,7 +397,9 @@ function openDatabase(dbPath, options = {}) {
   migrateUsersContactAndAdminColumns(db);
   migrateUsersHomeLocationColumns(db);
   migrateListingsAdminHiddenColumn(db);
+  migrateListingsSourceUrlColumn(db);
   seedIfEmpty(db);
+  syncBundledCatalog(db);
   // Runs AFTER seeding: fresh seed data itself includes sponsored=1 rows
   // (see db/seed-data.js) with no boost_expires_at, same as any pre-NM-A18
   // database would -- backfilling here, not before seeding, catches both.
@@ -340,4 +409,4 @@ function openDatabase(dbPath, options = {}) {
   return db;
 }
 
-module.exports = { openDatabase, makeId, DEFAULT_DB_PATH };
+module.exports = { openDatabase, makeId, DEFAULT_DB_PATH, syncBundledCatalog };

@@ -142,6 +142,8 @@
 
         <div class="active-filter-chips" id="active-filter-chips" aria-label="Active filters"></div>
 
+        <section class="mikazan-showcase" id="mikazan-showcase" aria-labelledby="mikazan-showcase-title"></section>
+
         <div class="section-title">
           <div>
             <p class="eyebrow" id="result-scope">Nearby</p>
@@ -260,6 +262,17 @@
           <div class="sell-field">
             <label class="field-label" for="sell-description-input">Description</label>
             <textarea id="sell-description-input" rows="4" placeholder="Condition, size, pickup details..."></textarea>
+          </div>
+
+          <!-- Outbound "view the original listing" link. Hidden by default so
+               a regular seller never even sees the control: scripts/api.js
+               only accepts sourceUrl from an ADMIN, or from an advertiser once
+               boosting is unlocked. app.js reveals it for exactly those two
+               populations and localizes both strings below (see
+               refreshSourceUrlFieldVisibility). -->
+          <div class="sell-field" id="sell-source-url-field" hidden>
+            <label class="field-label" for="sell-source-url-input" id="sell-source-url-label"><span id="sell-source-url-label-text">Source link</span> <span class="field-hint" id="sell-source-url-hint">Optional. Opens the original listing on its source site.</span></label>
+            <input id="sell-source-url-input" type="text" maxlength="512" placeholder="https://..." autocomplete="off" spellcheck="false" />
           </div>
 
           <div class="sell-validation" id="sell-validation" role="status" aria-live="polite"></div>

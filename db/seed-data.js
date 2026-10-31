@@ -28,6 +28,107 @@ const categories = [
 
 const MINUTES_AGO = (minutes) => Date.now() - minutes * 60000;
 
+// A broad baseline catalog keeps every category useful on a fresh install.
+// Source-backed Mikazan rows deliberately retain the shop's exact product
+// title, USD price, product URL and CDN image URL supplied by the merchant.
+const CATALOG_ROWS = [
+  ["mikazan-driveconnect", "DriveConnect Smart Car Screen", "Electronics", "$109.70", "https://mikazan.shop/products/10-26-inch-portable-car-central-control-smart-screen-with-wireless-carplay-android-auto-bluetooth-and-ahd-backup-camera", "https://cdn.shopify.com/s/files/1/1090/4744/7883/files/4FD8F03B4B9ADE9A5BC17B9731BC1FD0.jpg?v=1791158290"],
+  ["mikazan-drivelink", "DriveLink CarPlay Screen Kit", "Electronics", "$76.78", "https://mikazan.shop/products/7-inch-wireless-carplay-portable-car-bluetooth-mp5-player-multimedia-android-projection-navigation-device", "https://cdn.shopify.com/s/files/1/1090/4744/7883/files/32A2F7EC50F8AA22C8127897D35D3D5B.jpg?v=1791158297"],
+  ["mikazan-drivetune", "DriveTune Car Charging Hub", "Electronics", "$19.68", "https://mikazan.shop/products/kc-01-car-charger-with-one-to-two-usb-ports-intelligent-digital-display-qc3-0-fast-charging-multifunctional-car-cigarette-lighter", "https://cdn.shopify.com/s/files/1/1090/4744/7883/files/083E7F9E04723B3C79730E1D2EFBBED1.jpg?v=1791158294"],
+  ["mikazan-babyview", "BabyView Car Monitor Kit", "Electronics", "$60.38", "https://mikazan.shop/products/4-3-inch-private-model-hd-1080p-car-baby-monitor-car-baby-mirror", "https://cdn.shopify.com/s/files/1/1090/4744/7883/files/AC2DF1CE839B53404B1DF74F6869DA47.jpg?v=1791158307"],
+  ["phone-pixel", "Google Pixel 8 with case", "Phones & Tablets", "4 800 kr"],
+  ["phone-ipad", "iPad Air 5th generation", "Phones & Tablets", "5 200 kr"],
+  ["phone-galaxy", "Samsung Galaxy S23", "Phones & Tablets", "4 950 kr"],
+  ["mikazan-cozy-pet-bed", "Cozy Quilted Pet Bed", "Home & Furniture", "$34.99", "https://mikazan.shop/products/autumn-and-winter-deep-sleep-creative-cat-litter-quilted-cotton-quilted-plush-slippers-cat-bed-dog-pad-pet-litter", "https://cdn.shopify.com/s/files/1/1090/4744/7883/files/7973A2F65D5F9BD927D938D73179D0BD.jpg?v=1791158272"],
+  ["mikazan-bunny-bed", "Bunny Ears Pet Bed", "Home & Furniture", "$44.99", "https://mikazan.shop/products/cat-litter-dog-litter-rabbit-ears-pet-litter-dog-bed-winter-warm-mat-dog-mat-pet-supplies", "https://cdn.shopify.com/s/files/1/1090/4744/7883/files/0BCDDD5AEBC9AB89B883C36A44DB3AEA__E4_B8_BB_E5_9B_BE-02.jpg?v=1791158285"],
+  ["mikazan-shopify-prompts", "200 Shopify Building & Automation Prompts", "Books & Media", "$9.99", "https://mikazan.shop/products/200-shopify-building-automation-prompts", "https://cdn.shopify.com/s/files/1/1090/4744/7883/files/image_49bf6f72-a8d4-4136-87f0-94d7253df51b.png?v=1791226741"],
+  ["book-nordic-cooking", "The Nordic Cookbook", "Books & Media", "280 kr"],
+  ["book-vinyl-jazz", "Scandinavian jazz vinyl collection", "Books & Media", "450 kr"],
+  ["book-language-set", "Swedish language learning set", "Books & Media", "190 kr"],
+  ["mikazan-boldline-pants", "Boldline High-Waist Pants", "Fashion", "$69.99", "https://mikazan.shop/products/casual-pants-with-high-waist-flower-gray-broken-seam-thick-cotton-rope-wide-version-curved-knife-guard-pants", "https://cdn.shopify.com/s/files/1/1090/4744/7883/files/16A23342AFD243B030F9CFBA8FFFE651.jpg?v=1791158285"],
+  ["mikazan-feral-wife", "Feral Wife Statement Top", "Fashion", "$36.40", "https://mikazan.shop/products/feral-wife-leopard-print-hoodie", "https://cdn.shopify.com/s/files/1/1090/4744/7883/files/0505F5949789E7F516569F13973E22E0.jpg?v=1791158335"],
+  ["fashion-wool-coat", "Classic wool winter coat", "Fashion", "1 100 kr"],
+  ["baby-wooden-toys", "Wooden toddler toy bundle", "Baby & Kids", "320 kr"],
+  ["baby-high-chair", "Adjustable wooden high chair", "Baby & Kids", "700 kr"],
+  ["baby-carrier", "Ergonomic baby carrier", "Baby & Kids", "560 kr"],
+  ["mikazan-tactical-gloves", "FieldReady Full-Finger Tactical Gloves", "Sports & Outdoor", "$16.92", "https://mikazan.shop/products/men-s-tactical-gloves-full-finger-anti-slip-combat-gloves-for-military-outdoor-fitness-use", "https://cdn.shopify.com/s/files/1/1090/4744/7883/files/66029084A03C90A7FFE87464FC40E3B5.jpg?v=1791158419"],
+  ["sports-tent", "Four-person trekking tent", "Sports & Outdoor", "1 350 kr"],
+  ["sports-skates", "Touring ice skates", "Sports & Outdoor", "620 kr"],
+  ["health-yoga-mat", "Natural rubber yoga mat", "Health & Wellness", "390 kr"],
+  ["health-massage-gun", "Compact massage gun", "Health & Wellness", "750 kr"],
+  ["health-scale", "Smart body composition scale", "Health & Wellness", "340 kr"],
+  ["health-sauna-blanket", "Infrared sauna blanket", "Health & Wellness", "1 900 kr"],
+  ["job-carpenter", "Experienced carpenter wanted", "Jobs", "Full time"],
+  ["job-designer", "Junior product designer", "Jobs", "Full time"],
+  ["job-barista", "Weekend barista", "Jobs", "Part time"],
+  ["job-developer", "Frontend developer", "Jobs", "Contract"],
+  ["service-cleaning", "Eco-friendly home cleaning", "Services", "350 kr"],
+  ["service-photography", "Portrait photography session", "Services", "1 200 kr"],
+  ["service-bike-repair", "Mobile bicycle repair", "Services", "450 kr"],
+  ["service-tutoring", "Math and physics tutoring", "Services", "300 kr"],
+  ["garden-planters", "Raised garden planter pair", "Agriculture & Garden", "600 kr"],
+  ["garden-tools", "Garden hand-tool set", "Agriculture & Garden", "250 kr"],
+  ["mikazan-cat-scratcher", "Artful Cat Scratch Board", "Agriculture & Garden", "$27.95", "https://mikazan.shop/products/cats-scratch-board-jute-vertical-wall-mounted-cat-scratcher-durable-non-shedding-pet-cat-claw-board", "https://cdn.shopify.com/s/files/1/1090/4744/7883/files/40B62BDCB13BC0686899356853CE64C2.jpg?v=1791158280"],
+  ["garden-compost", "Insulated garden composter", "Agriculture & Garden", "780 kr"],
+  ["free-moving-boxes", "Moving boxes, bundle of 20", "Free Items", "Free"],
+  ["free-desk", "Small writing desk", "Free Items", "Free"],
+  ["free-books", "Assorted children's books", "Free Items", "Free"],
+  ["free-pallets", "Four clean wooden pallets", "Free Items", "Free"],
+  ["mikazan-duowalk", "DuoWalk Retractable Dog Leash", "Other Items", "$33.28", "https://mikazan.shop/products/dual-double-dog-leash-360-retractable-roulette-3m-led-light-tangle-free-double-ended-traction-rope", "https://cdn.shopify.com/s/files/1/1090/4744/7883/files/6B721051B850DC4C705F311584A226E5.jpg?v=1791158302"],
+  ["other-sewing-machine", "Vintage sewing machine", "Other Items", "850 kr"],
+  ["other-luggage", "Hard-shell luggage set", "Other Items", "900 kr"],
+  ["other-binoculars", "Compact waterproof binoculars", "Other Items", "480 kr"]
+];
+
+const catalogListings = CATALOG_ROWS.map(([id, title, category, price, sourceUrl, imageUrl], index) => ({
+  id,
+  title,
+  category,
+  price,
+  locality: "Catalog delivery",
+  region: "Catalog Region",
+  country: "Sweden",
+  distance: `${2 + (index % 18)}.${index % 10} km`,
+  condition: sourceUrl ? "New" : "Good",
+  posted: index < 8 ? "Today" : "This week",
+  postedAt: MINUTES_AGO(300 + index * 47),
+  freshness: index < 8 ? "New today" : "",
+  images: [{ css: imageUrl ? `url("${imageUrl}")` : `linear-gradient(135deg, hsl(${(index * 37) % 360} 35% 45%), hsl(${(index * 37 + 45) % 360} 45% 82%))`, aiGenerated: false }],
+  description: sourceUrl ? `${title}, available from Mikazan. Open the source listing for full product details.` : `${title} in good condition. Contact the seller for collection details.`,
+  seller: sourceUrl ? "Mikazan" : "FindNord community",
+  sellerType: sourceUrl ? "Professional seller" : "Private seller",
+  trust: sourceUrl ? "Shop product · Buy through the source link" : "Email verified · Local pickup available",
+  sponsored: false,
+  ...(sourceUrl ? { sourceUrl } : {})
+}));
+
+// Production publishes only this deliberately approved merchant catalog.
+// The broader catalogListings array remains part of the local/demo seed so
+// every taxonomy category stays useful during development, but it must not
+// silently populate a real empty marketplace database.
+const PRODUCTION_CATALOG_IDS = [
+  "mikazan-driveconnect",
+  "mikazan-drivelink",
+  "mikazan-drivetune",
+  "mikazan-babyview",
+  "mikazan-cozy-pet-bed",
+  "mikazan-bunny-bed",
+  "mikazan-shopify-prompts",
+  "mikazan-boldline-pants",
+  "mikazan-feral-wife",
+  "mikazan-tactical-gloves",
+  "mikazan-cat-scratcher",
+  "mikazan-duowalk"
+];
+
+const productionCatalogListings = PRODUCTION_CATALOG_IDS.map((id) =>
+  catalogListings.find((listing) => listing.id === id)
+);
+
+if (productionCatalogListings.some((listing) => !listing)) {
+  throw new Error("The approved production catalog references a missing listing.");
+}
+
 const listings = [
   {
     id: "oak-table",
@@ -197,7 +298,286 @@ const listings = [
     sellerType: "Professional seller",
     trust: "Verified agency · 62 completed rentals · Fast responder",
     sponsored: true
-  }
+  },
+
+  // ---------------------------------------------------------------------------
+  // Curated source catalog: REAL cars listed on blocket.se and REAL homes on
+  // finn.no, each carrying its outbound `sourceUrl` so a visitor can open the
+  // original listing where it actually lives. Every URL here was verified to
+  // return 200 (page AND image) before shipping -- a dead source link is a
+  // broken feature, not a content typo.
+  //
+  // These are ADMIN-authored rows (seed content), which is exactly the
+  // population allowed to carry links under scripts/api.js's permission rule:
+  // an admin may add a clickable link; a seller may only once boosting is
+  // unlocked. Photos are hot-linked from the source's own CDN (CSP allows
+  // https images), never copied into this repo.
+  // ---------------------------------------------------------------------------
+  {
+    id: "src-blocket-golf-plus",
+    title: "Volkswagen Golf Plus",
+    category: "Vehicles",
+    subtype: "Cars",
+    price: "36 500 kr",
+    locality: "Örebro",
+    region: "Örebro",
+    country: "Sweden",
+    distance: "5.4 km",
+    condition: "Used",
+    posted: "Today",
+    postedAt: MINUTES_AGO(210),
+    freshness: "New today",
+    images: [{ css: 'url("https://images.blocketcdn.se/dynamic/480x480c/item/27260133/19d6b8f1-39b5-469b-9592-592bcd6ffec3")', aiGenerated: false }],
+    description: "Listed on Blocket in Örebro. Open the source listing for full photos, seller details and pickup arrangement.",
+    seller: "Blocket seller",
+    sellerType: "Private seller",
+    trust: "Original listing on Blocket · Contact via the source link",
+    sponsored: false,
+    sourceUrl: "https://www.blocket.se/27260133"
+  },
+  {
+    id: "src-blocket-scirocco",
+    title: "Volkswagen Scirocco",
+    category: "Vehicles",
+    subtype: "Cars",
+    price: "69 000 kr",
+    locality: "Bjärnum",
+    region: "Skåne",
+    country: "Sweden",
+    distance: "8.9 km",
+    condition: "Used",
+    posted: "Today",
+    postedAt: MINUTES_AGO(420),
+    freshness: "New today",
+    images: [{ css: 'url("https://images.blocketcdn.se/dynamic/480x480c/item/26999102/be1af3db-0e25-46f3-8e04-415ddf5f5cff")', aiGenerated: false }],
+    description: "Listed on Blocket near Hässleholm. Open the source listing for full photos, seller details and pickup arrangement.",
+    seller: "Blocket seller",
+    sellerType: "Private seller",
+    trust: "Original listing on Blocket · Contact via the source link",
+    sponsored: false,
+    sourceUrl: "https://www.blocket.se/26999102"
+  },
+  {
+    id: "src-blocket-camaro",
+    title: "Chevrolet Camaro",
+    category: "Vehicles",
+    subtype: "Cars",
+    price: "345 000 kr",
+    locality: "Bengtsfors",
+    region: "Västra Götaland",
+    country: "Sweden",
+    distance: "11.2 km",
+    condition: "Used",
+    posted: "Yesterday",
+    postedAt: MINUTES_AGO(1620),
+    freshness: "",
+    images: [{ css: 'url("https://images.blocketcdn.se/dynamic/480x480c/item/26834104/51792f0f-dedb-4aea-8cfa-3ad436f28982")', aiGenerated: false }],
+    description: "Listed on Blocket in Bengtsfors. Open the source listing for full photos, seller details and pickup arrangement.",
+    seller: "Blocket seller",
+    sellerType: "Private seller",
+    trust: "Original listing on Blocket · Contact via the source link",
+    sponsored: false,
+    sourceUrl: "https://www.blocket.se/26834104"
+  },
+  {
+    id: "src-blocket-polo",
+    title: "Volkswagen Polo",
+    category: "Vehicles",
+    subtype: "Cars",
+    price: "20 000 kr",
+    locality: "Enköping",
+    region: "Uppsala",
+    country: "Sweden",
+    distance: "6.7 km",
+    condition: "Used",
+    posted: "2 days ago",
+    postedAt: MINUTES_AGO(2940),
+    freshness: "",
+    images: [{ css: 'url("https://images.blocketcdn.se/dynamic/480x480c/item/25467213/b07f7036-e0d8-4ede-a4ff-210b56cfb8e4")', aiGenerated: false }],
+    description: "Listed on Blocket in Enköping. Open the source listing for full photos, seller details and pickup arrangement.",
+    seller: "Blocket seller",
+    sellerType: "Private seller",
+    trust: "Original listing on Blocket · Contact via the source link",
+    sponsored: false,
+    sourceUrl: "https://www.blocket.se/25467213"
+  },
+  {
+    id: "src-blocket-tahoe",
+    title: "Chevrolet Tahoe",
+    category: "Vehicles",
+    subtype: "Cars",
+    price: "91 000 kr",
+    locality: "Hägersten",
+    region: "Stockholm",
+    country: "Sweden",
+    distance: "4.3 km",
+    condition: "Used",
+    posted: "3 days ago",
+    postedAt: MINUTES_AGO(4380),
+    freshness: "",
+    images: [{ css: 'url("https://images.blocketcdn.se/dynamic/480x480c/item/27196535/ca3712c8-0ba0-4c44-b305-02d8df6e25ce")', aiGenerated: false }],
+    description: "Listed on Blocket in Hägersten. Open the source listing for full photos, seller details and pickup arrangement.",
+    seller: "Blocket seller",
+    sellerType: "Private seller",
+    trust: "Original listing on Blocket · Contact via the source link",
+    sponsored: false,
+    sourceUrl: "https://www.blocket.se/27196535"
+  },
+  {
+    id: "src-blocket-gle350",
+    title: "Mercedes-Benz GLE350 de",
+    category: "Vehicles",
+    subtype: "Cars",
+    price: "799 900 kr",
+    locality: "Segeltorp",
+    region: "Stockholm",
+    country: "Sweden",
+    distance: "7.8 km",
+    condition: "Used",
+    posted: "Today",
+    postedAt: MINUTES_AGO(320),
+    freshness: "New today",
+    images: [{ css: 'url("https://images.blocketcdn.se/dynamic/480x480c/item/27266878/0721dbea-7837-47df-a510-446649355ff1")', aiGenerated: false }],
+    description: "Listed on Blocket in Segeltorp. Open the source listing for full photos, seller details and pickup arrangement.",
+    seller: "Blocket seller",
+    sellerType: "Private seller",
+    trust: "Original listing on Blocket · Contact via the source link",
+    sponsored: false,
+    sourceUrl: "https://www.blocket.se/27266878"
+  },
+  {
+    id: "src-finn-briskeby",
+    title: "2-roms toppleilighet med original takbjelker, Briskebyveien 70",
+    category: "Real Estate",
+    subtype: "For Sale",
+    price: "5 150 000 kr",
+    locality: "Briskebyveien 70",
+    region: "Oslo",
+    country: "Norway",
+    distance: "3.6 km",
+    condition: "Good",
+    posted: "Today",
+    postedAt: MINUTES_AGO(150),
+    freshness: "New today",
+    images: [{ css: 'url("https://images.finncdn.no/dynamic/480w/2026/10/vertical-2/06/8/478/094/838_5972c945-488e-4b65-9b5c-adc8b2300000.jpg")', aiGenerated: false }],
+    description: "Top-floor flat in a classic Oslo apartment building, 58 m². Listed on FINN -- open the source listing for the full description and agent contact.",
+    seller: "FINN listing",
+    sellerType: "Professional seller",
+    trust: "Original listing on FINN · Contact via the source link",
+    sponsored: false,
+    sourceUrl: "https://www.finn.no/realestate/homes/ad.html?finnkode=478094838"
+  },
+  {
+    id: "src-finn-nico-hambros",
+    title: "Enderekkehus over 3 plan med veranda, Nico Hambros vei 127",
+    category: "Real Estate",
+    subtype: "For Sale",
+    price: "5 600 000 kr",
+    locality: "Nico Hambros vei 127",
+    region: "Oslo",
+    country: "Norway",
+    distance: "9.1 km",
+    condition: "Good",
+    posted: "Yesterday",
+    postedAt: MINUTES_AGO(1560),
+    freshness: "",
+    images: [{ css: 'url("https://images.finncdn.no/dynamic/480w/2026/10/vertical-2/17/3/478/851/473_7b1df3e9-1aa5-490e-9ae7-98111e1e7bd5.jpg")', aiGenerated: false }],
+    description: "Family end-terrace house over three floors with a large south-west veranda and garage space. Listed on FINN -- open the source listing for the full description and agent contact.",
+    seller: "FINN listing",
+    sellerType: "Professional seller",
+    trust: "Original listing on FINN · Contact via the source link",
+    sponsored: false,
+    sourceUrl: "https://www.finn.no/realestate/homes/ad.html?finnkode=478851473"
+  },
+  {
+    id: "src-finn-ammerud",
+    title: "3-roms med innglasset balkong, Ammerudhellinga 74",
+    category: "Real Estate",
+    subtype: "For Sale",
+    price: "3 750 000 kr",
+    locality: "Ammerudhellinga 74",
+    region: "Oslo",
+    country: "Norway",
+    distance: "12.4 km",
+    condition: "Good",
+    posted: "2 days ago",
+    postedAt: MINUTES_AGO(3060),
+    freshness: "",
+    images: [{ css: 'url("https://images.finncdn.no/dynamic/480w/2026/10/vertical-2/17/7/478/789/437_2fa19588-bccc-445a-bc42-bd78d10e2105.jpg")', aiGenerated: false }],
+    description: "Bright three-room flat with a glazed 12 m² balcony and lift access, in a green area at Ammerud. Listed on FINN -- open the source listing for the full description and agent contact.",
+    seller: "FINN listing",
+    sellerType: "Professional seller",
+    trust: "Original listing on FINN · Contact via the source link",
+    sponsored: false,
+    sourceUrl: "https://www.finn.no/realestate/homes/ad.html?finnkode=478789437"
+  },
+  {
+    id: "src-finn-osteras",
+    title: "Moderne 3-roms toppleilighet med terrasse, Otto Ruges vei 86 A",
+    category: "Real Estate",
+    subtype: "For Sale",
+    price: "5 900 000 kr",
+    locality: "Otto Ruges vei 86 A, Østerås",
+    region: "Akershus",
+    country: "Norway",
+    distance: "14.8 km",
+    condition: "Good",
+    posted: "Yesterday",
+    postedAt: MINUTES_AGO(1740),
+    freshness: "",
+    images: [{ css: 'url("https://images.finncdn.no/dynamic/480w/2026/10/vertical-2/08/6/478/256/576_8ba21b1c-94ee-443b-8c13-8c4c6718dedf.jpg")', aiGenerated: false }],
+    description: "Modern top-floor flat with a south-facing terrace and garage with charger, minutes from Østerås centre and the metro. Listed on FINN -- open the source listing for the full description and agent contact.",
+    seller: "FINN listing",
+    sellerType: "Professional seller",
+    trust: "Original listing on FINN · Contact via the source link",
+    sponsored: false,
+    sourceUrl: "https://www.finn.no/realestate/homes/ad.html?finnkode=478256576"
+  },
+  {
+    id: "src-finn-hanneviktoppen",
+    title: "Enebolig renovert i 2021, Hanneviktoppen 24",
+    category: "Real Estate",
+    subtype: "For Sale",
+    price: "4 990 000 kr",
+    locality: "Hanneviktoppen 24, Kristiansand",
+    region: "Agder",
+    country: "Norway",
+    distance: "18.2 km",
+    condition: "Good",
+    posted: "3 days ago",
+    postedAt: MINUTES_AGO(4500),
+    freshness: "",
+    images: [{ css: 'url("https://images.finncdn.no/dynamic/480w/2026/10/vertical-2/17/4/478/898/574_8bd07509-676c-4603-809d-2f34589ad0ad.jpg")', aiGenerated: false }],
+    description: "Renovated detached house on Tinnheia with a landscaped plot, garden shed and garage. Listed on FINN -- open the source listing for the full description and agent contact.",
+    seller: "FINN listing",
+    sellerType: "Professional seller",
+    trust: "Original listing on FINN · Contact via the source link",
+    sponsored: false,
+    sourceUrl: "https://www.finn.no/realestate/homes/ad.html?finnkode=478898574"
+  },
+  {
+    id: "src-finn-svartdalsveien",
+    title: "Attraktiv 2-roms med peis, Svartdalsveien 46",
+    category: "Real Estate",
+    subtype: "For Sale",
+    price: "3 390 000 kr",
+    locality: "Svartdalsveien 46",
+    region: "Oslo",
+    country: "Norway",
+    distance: "5.9 km",
+    condition: "Good",
+    posted: "4 days ago",
+    postedAt: MINUTES_AGO(5940),
+    freshness: "",
+    images: [{ css: 'url("https://images.finncdn.no/dynamic/480w/2026/9/vertical-2/04/2/475/526/292_aacf0ee1-2006-4435-8836-44468122b86f.jpg")', aiGenerated: false }],
+    description: "Light two-room flat with fireplace, step-free access and a quiet interior position. Listed on FINN -- open the source listing for the full description and agent contact.",
+    seller: "FINN listing",
+    sellerType: "Professional seller",
+    trust: "Original listing on FINN · Contact via the source link",
+    sponsored: false,
+    sourceUrl: "https://www.finn.no/realestate/homes/ad.html?finnkode=475526292"
+  },
+  ...catalogListings
 ];
 
-module.exports = { categories, listings };
+module.exports = { categories, listings, catalogListings, productionCatalogListings };

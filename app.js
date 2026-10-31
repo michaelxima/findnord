@@ -98,6 +98,10 @@ const translations = {
     "report.sent": "Thanks — your report has been submitted for review.",
     "report.failed": "Couldn't submit that report.",
     "sell.publishFailed": "Couldn't publish this listing. Please try again.",
+    "sell.sourceUrlLabel": "Source link",
+    "sell.sourceUrlHint": "Optional. Opens the original listing on its source site.",
+    "sell.sourceUrlLocked": "Adding a source link unlocks when boosting is unlocked.",
+    "sell.sourceUrlInvalid": "Choose a valid source link starting with https://.",
     "rateLimit.listings": "You're publishing listings too quickly. Try again in {minutes} minutes.",
     "rateLimit.messages": "You're sending messages too quickly. Try again in {minutes} minutes.",
     "rateLimit.reports": "You're submitting reports too quickly. Try again in {minutes} minutes.",
@@ -157,6 +161,7 @@ const translations = {
     "filter.priceChipPrefix": "Price",
     "ai.badge": "AI photo",
     "listingCard.paidPlacement": "Sponsored",
+    "listingCard.viewSource": "View original listing",
     "browse.popularSearches": "Popular searches",
     "ai.buttonLabel": "Generate with AI",
     "ai.promptLabel": "Describe your item for AI (optional)",
@@ -405,6 +410,10 @@ const translations = {
     "report.sent": "Tack — din anmälan har skickats för granskning.",
     "report.failed": "Anmälan kunde inte skickas.",
     "sell.publishFailed": "Annonsen kunde inte publiceras. Försök igen.",
+    "sell.sourceUrlLabel": "Källänk",
+    "sell.sourceUrlHint": "Valfritt. Öppnar originalannonsen på dess källa.",
+    "sell.sourceUrlLocked": "En källänk kan läggas till när det går att boosta.",
+    "sell.sourceUrlInvalid": "Välj en giltig källänk som börjar med https://.",
     "rateLimit.listings": "Du publicerar annonser för snabbt. Försök igen om {minutes} minuter.",
     "rateLimit.messages": "Du skickar meddelanden för snabbt. Försök igen om {minutes} minuter.",
     "rateLimit.reports": "Du skickar anmälningar för snabbt. Försök igen om {minutes} minuter.",
@@ -464,6 +473,7 @@ const translations = {
     "filter.priceChipPrefix": "Pris",
     "ai.badge": "AI-foto",
     "listingCard.paidPlacement": "Annons",
+    "listingCard.viewSource": "Visa originalannonsen",
     "browse.popularSearches": "Vanliga sökningar",
     "ai.buttonLabel": "Skapa med AI",
     "ai.promptLabel": "Beskriv föremålet för AI (valfritt)",
@@ -714,6 +724,10 @@ const translations = {
     "report.sent": "Takk — rapporten din er sendt til gjennomgang.",
     "report.failed": "Kunne ikke sende rapporten.",
     "sell.publishFailed": "Kunne ikke publisere annonsen. Prøv igjen.",
+    "sell.sourceUrlLabel": "Kildelenke",
+    "sell.sourceUrlHint": "Valgfritt. Åpner originalannonsen på kilden.",
+    "sell.sourceUrlLocked": "En kildelenke kan legges til når det er mulig å booste.",
+    "sell.sourceUrlInvalid": "Velg en gyldig kildelenke som begynner med https://.",
     "rateLimit.listings": "Du publiserer annonser for raskt. Prøv igjen om {minutes} minutter.",
     "rateLimit.messages": "Du sender meldinger for raskt. Prøv igjen om {minutes} minutter.",
     "rateLimit.reports": "Du sender rapporter for raskt. Prøv igjen om {minutes} minutter.",
@@ -773,6 +787,7 @@ const translations = {
     "filter.priceChipPrefix": "Pris",
     "ai.badge": "AI-bilde",
     "listingCard.paidPlacement": "Annonse",
+    "listingCard.viewSource": "Se originalannonsen",
     "browse.popularSearches": "Populære søk",
     "ai.buttonLabel": "Generer med AI",
     "ai.promptLabel": "Beskriv varen for AI (valgfritt)",
@@ -1021,6 +1036,10 @@ const translations = {
     "report.sent": "Tak — din anmeldelse er sendt til gennemgang.",
     "report.failed": "Kunne ikke indsende anmeldelsen.",
     "sell.publishFailed": "Kunne ikke publicere denne annonce. Prøv igen.",
+    "sell.sourceUrlLabel": "Kildelink",
+    "sell.sourceUrlHint": "Valgfrit. Åbner originalannoncen på dens kilde.",
+    "sell.sourceUrlLocked": "Et kildelink kan tilføjes, når det er muligt at booste.",
+    "sell.sourceUrlInvalid": "Vælg et gyldigt kildelink, der begynder med https://.",
     "rateLimit.listings": "Du opretter annoncer for hurtigt. Prøv igen om {minutes} minutter.",
     "rateLimit.messages": "Du sender beskeder for hurtigt. Prøv igen om {minutes} minutter.",
     "rateLimit.reports": "Du indsender anmeldelser for hurtigt. Prøv igen om {minutes} minutter.",
@@ -1080,6 +1099,7 @@ const translations = {
     "filter.priceChipPrefix": "Pris",
     "ai.badge": "AI-foto",
     "listingCard.paidPlacement": "Annonce",
+    "listingCard.viewSource": "Se originalannoncen",
     "browse.popularSearches": "Populære søgninger",
     "ai.buttonLabel": "Generer med AI",
     "ai.promptLabel": "Beskriv din vare til AI (valgfrit)",
@@ -1328,6 +1348,10 @@ const translations = {
     "report.sent": "Kiitos — ilmoituksesi on lähetetty tarkistettavaksi.",
     "report.failed": "Ilmoituksen lähettäminen epäonnistui.",
     "sell.publishFailed": "Ilmoituksen julkaiseminen epäonnistui. Yritä uudelleen.",
+    "sell.sourceUrlLabel": "Lähdelinkki",
+    "sell.sourceUrlHint": "Valinnainen. Avaa alkuperäisen ilmoituksen sen lähdesivustolla.",
+    "sell.sourceUrlLocked": "Lähdelinkin voi lisätä, kun nostaminen on mahdollista.",
+    "sell.sourceUrlInvalid": "Valitse kelvollinen lähdelinkki, joka alkaa https://.",
     "rateLimit.listings": "Julkaiset ilmoituksia liian nopeasti. Yritä uudelleen {minutes} minuutin kuluttua.",
     "rateLimit.messages": "Lähetät viestejä liian nopeasti. Yritä uudelleen {minutes} minuutin kuluttua.",
     "rateLimit.reports": "Lähetät ilmoituksia liian nopeasti. Yritä uudelleen {minutes} minuutin kuluttua.",
@@ -1387,6 +1411,7 @@ const translations = {
     "filter.priceChipPrefix": "Hinta",
     "ai.badge": "AI-kuva",
     "listingCard.paidPlacement": "Mainos",
+    "listingCard.viewSource": "Näytä alkuperäinen ilmoitus",
     "browse.popularSearches": "Suositut haut",
     "ai.buttonLabel": "Luo AI:lla",
     "ai.promptLabel": "Kuvaile tuotettasi AI:lle (valinnainen)",
@@ -1635,6 +1660,10 @@ const translations = {
     "report.sent": "Takk — tilkynningin þín hefur verið send til yfirferðar.",
     "report.failed": "Ekki var hægt að senda tilkynninguna.",
     "sell.publishFailed": "Ekki var hægt að birta þessa auglýsingu. Vinsamlegast reyndu aftur.",
+    "sell.sourceUrlLabel": "Heimildartengill",
+    "sell.sourceUrlHint": "Ekki nauðsynlegt. Opnar upprunalegu auglýsinguna á upprunavefnum.",
+    "sell.sourceUrlLocked": "Hægt er að bæta við heimildartengli þegar boosta er mögulegt.",
+    "sell.sourceUrlInvalid": "Veldu gildan heimildartengil sem byrjar á https://.",
     "rateLimit.listings": "Þú birtir auglýsingar of hratt. Reyndu aftur eftir {minutes} mínútur.",
     "rateLimit.messages": "Þú sendir skilaboð of hratt. Reyndu aftur eftir {minutes} mínútur.",
     "rateLimit.reports": "Þú sendir tilkynningar of hratt. Reyndu aftur eftir {minutes} mínútur.",
@@ -1694,6 +1723,7 @@ const translations = {
     "filter.priceChipPrefix": "Verð",
     "ai.badge": "AI-mynd",
     "listingCard.paidPlacement": "Auglýsing",
+    "listingCard.viewSource": "Skoða upprunalega auglýsingu",
     "browse.popularSearches": "Vinsælar leitir",
     "ai.buttonLabel": "Búa til með AI",
     "ai.promptLabel": "Lýstu hlutnum fyrir AI (valkvætt)",
@@ -2172,6 +2202,9 @@ function setLanguage(lang) {
     // Storage can be unavailable (private browsing, blocked cookies); the UI still works.
   }
   applyTranslations();
+  // Labels inside fields applyTranslations doesn't know about (it only walks
+  // its own staticTargets map) still need re-localizing on a language switch.
+  refreshSourceUrlFieldVisibility();
 }
 
 // --- Country-colored navigation groundwork: real color mapping + a working
@@ -2735,6 +2768,9 @@ async function completeSignIn(user) {
   renderAccountPanel();
   renderProfileAvatar();
   renderAccountActions();
+  // Admin state just changed, and that decides whether the source-link field
+  // exists in the Sell form at all.
+  refreshSourceUrlFieldVisibility();
   renderListings();
   renderInbox();
   renderMyListings();
@@ -3222,6 +3258,55 @@ function fairnessSectionTemplate() {
   `;
 }
 
+// A merchant-curated landing-page shelf built entirely from the canonical
+// listing records returned by the API. Keeping only IDs here means titles,
+// prices, photos and outbound source links can never drift from the product
+// detail cards or duplicate inventory data in the frontend.
+const MIKAZAN_LANDING_COLLECTIONS = [
+  {
+    title: "Auto & Tech",
+    ids: ["mikazan-driveconnect", "mikazan-drivelink", "mikazan-drivetune", "mikazan-babyview"]
+  },
+  {
+    title: "Home & Pets",
+    ids: ["mikazan-cozy-pet-bed", "mikazan-bunny-bed", "mikazan-cat-scratcher", "mikazan-duowalk"]
+  },
+  {
+    title: "Fashion & Outdoor",
+    ids: ["mikazan-boldline-pants", "mikazan-feral-wife", "mikazan-tactical-gloves"]
+  },
+  {
+    title: "Digital Guides",
+    ids: ["mikazan-shopify-prompts"]
+  }
+];
+
+function mikazanShowcaseTemplate() {
+  const groups = MIKAZAN_LANDING_COLLECTIONS.map((collection, groupIndex) => {
+    const products = collection.ids
+      .map((id) => listings.find((listing) => listing.id === id && listing.status === "active" && !listing.adminHidden))
+      .filter(Boolean);
+    if (products.length === 0) return "";
+    const headingId = `mikazan-collection-${groupIndex}`;
+    return `
+      <section class="mikazan-collection" aria-labelledby="${headingId}">
+        <h3 id="${headingId}">${escapeHtml(collection.title)}</h3>
+        <div class="listing-grid">${products.map((listing) => listingCardTemplate(listing)).join("")}</div>
+      </section>
+    `;
+  }).join("");
+
+  if (!groups) return "";
+  return `
+    <div class="mikazan-showcase-heading">
+      <p class="eyebrow">Shop products</p>
+      <h2 id="mikazan-showcase-title">Featured from Mikazan</h2>
+      <p>Explore twelve source-linked products across four collections.</p>
+    </div>
+    <div class="mikazan-collection-list">${groups}</div>
+  `;
+}
+
 // --- NM-A18: Boost / Premium (free-first, Stripe-ready) ---
 // Replaces NM-A9's simple sponsored on/off toggle with real, package-based,
 // time-limited boosts. `boostConfig` (real packages + the live
@@ -3237,6 +3322,9 @@ async function loadBoostConfig() {
   } catch (error) {
     boostConfig = { paymentsEnabled: false, freeUntil: null, freeWindowActive: false, packages: [] };
   }
+  // The source-link field's visibility is decided by this config (see
+  // sourceUrlFieldAllowed), so re-evaluate it once the real answer lands.
+  refreshSourceUrlFieldVisibility();
 }
 
 function formatBoostExpiry(timestampMs) {
@@ -4433,7 +4521,6 @@ function getFilteredListings() {
 
 function listingCardTemplate(listing, options) {
   const interactive = !options || options.interactive !== false;
-  const photoCount = listing.images ? listing.images.length : 0;
   const status = listing.status && listing.status !== "active" ? listing.status : null;
   // A status badge (Reserved/Sold) takes the same corner the paid-placement
   // badge uses and takes priority over it when both would apply -- advertising
@@ -4448,17 +4535,25 @@ function listingCardTemplate(listing, options) {
   // The card's screen-reader name reads mid-sentence, so the same word is
   // lower-cased there. For English that reproduces the exact ", sponsored"
   // wording assistive tech already gets today.
+  // The card's screen-reader name reads mid-sentence, so the same word is
+  // lower-cased there. For English that reproduces the exact ", sponsored"
+  // wording assistive tech already gets today.
   const paidPlacementSpoken = paidPlacementLabel.charAt(0).toLowerCase() + paidPlacementLabel.slice(1);
+  // Deliberately lean: status (with the paid-placement label as its fallback)
+  // plus freshness, and NOTHING else. The AI-photo badge, the 1/N photo counter
+  // and the "Popular" chip are all gone -- they were tag clutter, and Browse
+  // cards now carry only what a buyer actually reads (photo, price, title,
+  // place) plus the two labels that carry real meaning. The AI badge and photo
+  // positions still surface where they carry information: the gallery, the
+  // photo manager, and the Sell preview's own editing strip.
   const mediaBadges = `${
     status ? `<span class="status-badge status-${status}">${t(`status.${status}`)}</span>` : listing.sponsored ? `<span class="sponsored">${paidPlacementLabel}</span>` : ""
-  }${listing.freshness ? `<span class="freshness">${listing.freshness}</span>` : ""}${
-    listing.aiPhoto ? `<span class="ai-badge">${t("ai.badge")}</span>` : ""
-  }${photoCount > 1 ? `<span class="photo-count-badge">1/${photoCount}</span>` : ""}`;
+  }${listing.freshness ? `<span class="freshness">${listing.freshness}</span>` : ""}`;
   const body = `
     <div class="listing-photo" style="background: ${listing.image}" aria-hidden="true">${mediaBadges}</div>
     <div class="card-copy"${interactive ? ' aria-hidden="true"' : ""}>
-      <strong>${formatListingPrice(listing)}</strong>
       <h3>${escapeHtml(listing.title)}</h3>
+      <strong>${formatListingPrice(listing)}</strong>
       <p>${escapeHtml(listing.locality)} · ${listing.distance}</p>
     </div>
   `;
@@ -4468,12 +4563,21 @@ function listingCardTemplate(listing, options) {
   }
 
   const saved = isSaved(listing.id);
+  // Outbound source link: a SIBLING of the card button (never nested -- an
+  // <a> inside <button> is invalid, and this also keeps clicking it from
+  // hijacking the delegated data-open-listing handler). It opens the original
+  // listing in a new tab; the card itself still opens FindNord's own detail
+  // view. Absent entirely (no dead button) when the listing has no source.
+  const sourceLink = listing.sourceUrl
+    ? `<a class="card-source-link" href="${escapeHtml(listing.sourceUrl)}" target="_blank" rel="noopener noreferrer" aria-label="${escapeHtml(t("listingCard.viewSource"))}: ${escapeHtml(listing.title)}"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 2.5h4v4"/><path d="M13.5 2.5 7.8 8.2"/><path d="M12 9.2v3.3a1 1 0 0 1-1 1H3.5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h3.3"/></svg></a>`
+    : "";
   return `
-    <article class="listing-card" data-id="${listing.id}">
+    <article class="listing-card${sourceLink ? " has-source-link" : ""}" data-id="${listing.id}">
       <button type="button" class="card-button" data-open-listing="${listing.id}" aria-label="Open listing: ${escapeHtml(listing.title)}, ${formatListingPrice(listing)}${status ? ", " + t(`status.${status}`) : ""}${listing.sponsored ? ", " + paidPlacementSpoken : ""}${listing.freshness ? ", " + listing.freshness : ""}, ${escapeHtml(listing.locality)}, ${listing.distance} away">
         ${body}
       </button>
       <button type="button" class="save-button${saved ? " saved" : ""}" data-save-listing="${listing.id}" aria-pressed="${saved}" aria-label="${saved ? `Remove ${escapeHtml(listing.title)} from saved items` : `Save ${escapeHtml(listing.title)} for later`}">${saved ? HEART_ICON_FILLED : HEART_ICON_OUTLINE}${saved ? "Saved" : "Save"}</button>
+      ${sourceLink}
     </article>
   `;
 }
@@ -4486,6 +4590,8 @@ function renderListings() {
   document.getElementById("result-scope").textContent = activeScope;
   empty.hidden = results.length > 0;
   grid.innerHTML = results.map((listing) => listingCardTemplate(listing)).join("");
+  const mikazanShowcase = document.getElementById("mikazan-showcase");
+  if (mikazanShowcase) mikazanShowcase.innerHTML = mikazanShowcaseTemplate();
   renderSidebarLocation();
   const fairnessContainer = document.getElementById("fairness-section-container");
   if (fairnessContainer) fairnessContainer.innerHTML = fairnessSectionTemplate();
@@ -4880,7 +4986,6 @@ function renderCategories() {
       ).length;
       return `
         <button type="button" class="category-tile${category.featured ? " featured" : ""}" data-category-jump="${category.id}">
-          ${category.featured ? '<span class="popular-badge">Popular</span>' : ""}
           <strong>${categoryLabel(category.id)}</strong>
           <span>${count} nearby</span>
         </button>
@@ -4953,6 +5058,9 @@ function updateSubtypeVisibility() {
 
 function showView(viewId) {
   activeView = viewId;
+  // The source-link field's visibility can change with the session and the
+  // live boost config, so re-evaluate it exactly when someone can act on it.
+  if (viewId === "sell-view") refreshSourceUrlFieldVisibility();
   document.querySelectorAll(".view").forEach((view) => view.classList.toggle("active-view", view.id === viewId));
   document.querySelectorAll(".nav-item").forEach((item) => item.classList.toggle("active", item.dataset.view === viewId));
   document.querySelectorAll(".sidebar-item").forEach((item) => item.classList.toggle("active", item.dataset.view === viewId));
@@ -5139,6 +5247,11 @@ function openListing(id) {
         <button type="button" class="secondary-action" data-share-listing="${listing.id}" aria-label="Share ${escapeHtml(listing.title)}">${SHARE_ICON}Share</button>
         <button type="button" class="secondary-action" data-report-listing="${listing.id}" aria-label="Report ${escapeHtml(listing.title)}">${FLAG_ICON}Report</button>
       </div>
+      ${
+        listing.sourceUrl
+          ? `<a class="source-cta" id="detail-source-link" href="${escapeHtml(listing.sourceUrl)}" target="_blank" rel="noopener noreferrer" aria-label="${escapeHtml(t("listingCard.viewSource"))}: ${escapeHtml(listing.title)}"><svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 2.5h4v4"/><path d="M13.5 2.5 7.8 8.2"/><path d="M12 9.2v3.3a1 1 0 0 1-1 1H3.5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h3.3"/></svg>${escapeHtml(t("listingCard.viewSource"))}</a>`
+          : ""
+      }
       ${isOwnListing ? "" : `<button type="button" class="opener" id="suggested-opener">Hi, is this still available?</button>`}
       <p>${escapeHtml(listing.description)}</p>
       <dl class="attributes">
@@ -5700,6 +5813,7 @@ function resetSellForm() {
   document.getElementById("sell-location-input").value = "";
   document.getElementById("sell-region-input").value = "";
   document.getElementById("sell-description-input").value = "";
+  document.getElementById("sell-source-url-input").value = "";
   renderSellPreview();
 }
 
@@ -5732,6 +5846,7 @@ function startEditListing(id) {
   document.getElementById("sell-location-input").value = listing.locality;
   document.getElementById("sell-region-input").value = listing.region || "";
   document.getElementById("sell-description-input").value = listing.description;
+  document.getElementById("sell-source-url-input").value = listing.sourceUrl || "";
 
   renderSellPhotos();
   renderSellPreview();
@@ -5773,7 +5888,10 @@ async function commitPublishRequest(values, images) {
     // account, so there's no "You"/guest fallback to write here anymore.
     sellerType: "Private seller",
     trust: "New seller · Published just now",
-    sponsored: false
+    sponsored: false,
+    // Omitted (undefined) for anyone the server wouldn't accept it from --
+    // see sourceUrlFormValue.
+    sourceUrl: sourceUrlFormValue()
   });
 }
 
@@ -5791,7 +5909,7 @@ async function commitPublish(values) {
     // client-side checks above already use, rather than a toast, since
     // that's this exact form's own existing error-surfacing convention.
     validation.classList.remove("success");
-    validation.textContent = error.code === "RATE_LIMITED" ? formatRetryMinutesMessage("rateLimit.listings", error.retryAfter) : error.message || t("sell.publishFailed");
+    validation.textContent = sellErrorMessage(error);
     return null;
   }
 
@@ -5814,17 +5932,31 @@ async function commitPublish(values) {
 async function commitEdit(values) {
   const editedId = editingListingId;
   const images = photosToImageObjects(values.photos);
-  const record = await DataService.listings.update(editedId, {
-    title: values.title,
-    category: values.category,
-    subtype: values.subtype,
-    price: values.isFree ? "Free" : formatPrice(values.rawPrice),
-    locality: values.location,
-    region: values.region,
-    condition: values.condition,
-    description: values.description,
-    images
-  });
+  let record;
+  try {
+    record = await DataService.listings.update(editedId, {
+      title: values.title,
+      category: values.category,
+      subtype: values.subtype,
+      price: values.isFree ? "Free" : formatPrice(values.rawPrice),
+      locality: values.location,
+      region: values.region,
+      condition: values.condition,
+      description: values.description,
+      images,
+      // Present only when the field is visible -- sourceUrlFormValue() above
+      // explains why "hidden" must mean OMITTED, never "".
+      sourceUrl: sourceUrlFormValue()
+    });
+  } catch (error) {
+    // Same inline slot publish uses: a rejected edit (now including the
+    // source-link permission codes) must surface as a sentence instead of
+    // dying as an unhandled rejection, and the form keeps its contents.
+    const validation = document.getElementById("sell-validation");
+    validation.classList.remove("success");
+    validation.textContent = sellErrorMessage(error);
+    return null;
+  }
 
   await refreshListingsCache();
   renderCategories();
@@ -5839,6 +5971,51 @@ async function commitEdit(values) {
   // edited listing's own detail page is a real navigation into it.
   navigateToListing(editedId);
   return record;
+}
+
+// --- Outbound source link field ---------------------------------------------
+// Admins today; advertisers once boosting is unlocked. The SERVER is the real
+// gate (scripts/api.js sourceUrlPermissionError) -- this only decides whether
+// the control is shown at all, so a regular seller never sees a field they
+// could not use anyway.
+function sourceUrlFieldAllowed() {
+  if (!currentUser) return false;
+  if (currentUser.isAdmin) return true;
+  return Boolean(boostConfig && boostConfig.paymentsEnabled);
+}
+
+// The field's value when -- and ONLY when -- it is visible, else undefined.
+// undefined makes the key vanish from the JSON payload entirely, which the
+// server reads as "leave the stored link alone" -- so an edit by someone
+// without the right can never silently wipe a link somebody else put there,
+// and an empty-but-visible field is a deliberate clear.
+function sourceUrlFormValue() {
+  const field = document.getElementById("sell-source-url-field");
+  const input = document.getElementById("sell-source-url-input");
+  if (!field || !input || field.hidden) return undefined;
+  return input.value.trim();
+}
+
+function refreshSourceUrlFieldVisibility() {
+  const field = document.getElementById("sell-source-url-field");
+  if (!field) return;
+  const allowed = sourceUrlFieldAllowed();
+  field.hidden = !allowed;
+  if (!allowed) return;
+  const labelText = document.getElementById("sell-source-url-label-text");
+  const hint = document.getElementById("sell-source-url-hint");
+  if (labelText) labelText.textContent = t("sell.sourceUrlLabel");
+  if (hint) hint.textContent = t("sell.sourceUrlHint");
+}
+
+// One place that turns a rejected publish/edit into a human sentence. The two
+// source-link codes get their own translations here because the raw server
+// strings are English-only, matching how RATE_LIMITED was already handled.
+function sellErrorMessage(error) {
+  if (error.code === "RATE_LIMITED") return formatRetryMinutesMessage("rateLimit.listings", error.retryAfter);
+  if (error.code === "SOURCE_LINK_LOCKED") return t("sell.sourceUrlLocked");
+  if (error.code === "INVALID_SOURCE_URL") return t("sell.sourceUrlInvalid");
+  return error.message || t("sell.publishFailed");
 }
 
 async function publishListing(event) {

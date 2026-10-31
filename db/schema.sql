@@ -85,6 +85,12 @@ CREATE TABLE IF NOT EXISTS listings (
   -- moderation action, not a change to the seller's own sale status. Either
   -- one hides the listing from Browse; they're independent and can coexist.
   admin_hidden INTEGER NOT NULL DEFAULT 0,
+  -- Outbound "view the original listing" link. An ADMIN may set it on any
+  -- listing; an advertiser may set it on their own only once the free-boost
+  -- window has closed (scripts/boost.js isBoostFreeWindowActive). Both are
+  -- enforced server-side in scripts/api.js -- this column only stores the
+  -- result, and NULL means "render no source button at all".
+  source_url TEXT,
   created_at INTEGER NOT NULL,
   FOREIGN KEY (seller_id) REFERENCES users(id)
 );

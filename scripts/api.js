@@ -176,6 +176,9 @@ function rowToListing(db, row) {
     sponsored: Boolean(row.boost_expires_at && row.boost_expires_at > Date.now()),
     boostExpiresAt: row.boost_expires_at || null,
     boostPackage: row.boost_package || null,
+    // Outbound source link (admin-set, or advertiser-set once boosting is
+    // unlocked). NULL renders no source button -- see schema.sql's column note.
+    sourceUrl: row.source_url || null,
     status: row.status || "active",
     // NM-A21: real, admin-moderation-driven hiding -- kept deliberately
     // separate from `status` (see schema.sql's own comment on this column).
@@ -264,10 +267,67 @@ const LISTING_UPDATE_COLUMNS = {
   sellerType: "seller_type",
   trust: "trust",
   sponsored: "sponsored",
-  status: "status"
+  status: "status",
+  // Deliberately last, and only reachable through the permission+validation
+  // gate in PATCH /listings/:id (owner-with-unlocked-boost, or admin) -- the
+  // allowlist decides WHICH column a whitelisted field maps to, never whether
+  // the requester may write it.
+  sourceUrl: "source_url"
 };
 const LISTING_BOOLEAN_FIELDS = new Set(["aiPhoto", "sponsored"]);
 const LISTING_STATUSES = new Set(["active", "reserved", "sold"]);
+
+// ---------------------------------------------------------------------------
+// Outbound "view the original listing" source links.
+//
+// Exactly two populations may ever put a clickable link on a listing, and the
+// SERVER decides which -- the client only shows/hides the field as a courtesy:
+//
+//   1. An ADMIN, on any listing, always. Admins author curated catalogue
+//      content (the seeded car/property listings), which is exactly where an
+//      outbound link to the original source belongs.
+//   2. An ADVERTISER -- the listing's own seller -- but only once boosting is
+//      unlocked, i.e. after the free-boost window closes. Until then a link
+//      would be an unpayable premium placement, so it is refused with a
+//      dedicated code the client translates into all six languages.
+//
+// Validation is strict about SHAPE because the stored value becomes a live
+// href: http/https only (never javascript:/data:), no embedded credentials
+// (user:pass@host is the classic link-legitimiser), a hard length cap, and no
+// whitespace. It is escaped again on render in app.js.
+const SOURCE_URL_MAX_LENGTH = 512;
+
+function normalizeSourceUrl(raw) {
+  const invalid = { error: { error: "Choose a valid source link.", code: "INVALID_SOURCE_URL" } };
+  if (raw === undefined || raw === null || raw === "") return { value: null };
+  if (typeof raw !== "string") return invalid;
+  const trimmed = raw.trim();
+  if (!trimmed || trimmed.length > SOURCE_URL_MAX_LENGTH || /\s/.test(trimmed)) return invalid;
+  let parsed;
+  try {
+    parsed = new URL(trimmed);
+  } catch (error) {
+    return invalid;
+  }
+  if (parsed.protocol !== "http:" && parsed.protocol !== "https:") return invalid;
+  if (!parsed.hostname || parsed.username || parsed.password) return invalid;
+  return { value: parsed.toString() };
+}
+
+// Returns null when the requester may write a source link, or the error body
+// to reject with. Admins always pass; everyone else waits for boosting to be
+// unlocked, which is exactly boosting's own payment switch being live
+// (scripts/boost.js isBoostPaymentsEnabled: an explicit BOOST_PAYMENTS_ENABLED
+// wins either way, otherwise the free window has to have closed first). While
+// boosting is still frozen inside the free window, links stay admin-only.
+function sourceUrlPermissionError(user, db) {
+  if (user && user.isAdmin) return null;
+  if (isBoostPaymentsEnabled(db)) return null;
+  return {
+    error: "Adding a source link unlocks when boosting is unlocked.",
+    code: "SOURCE_LINK_LOCKED"
+  };
+}
 // Mirrors app.js's own MAX_LISTING_PHOTOS (frontend-only, not shared across
 // the browser/server boundary) -- the real server-side enforcement a direct
 // API call can't bypass. See PATCH /listings/:id below for the edit path,
@@ -750,6 +810,7 @@ function createApiRouter(db, options = {}) {
         sponsored: Boolean(row.boost_expires_at && row.boost_expires_at > Date.now()),
         boostExpiresAt: row.boost_expires_at || null,
         boostPackage: row.boost_package || null,
+        sourceUrl: row.source_url || null,
         status: row.status || "active",
         adminHidden: Boolean(row.admin_hidden),
         images
@@ -791,6 +852,22 @@ function createApiRouter(db, options = {}) {
       const allowed = entry ? entry.subtypes : [];
       if (!allowed.includes(normalizedSubtype.value)) {
         res.status(400).json({ error: "Choose a valid type.", code: "INVALID_SUBTYPE" });
+        return;
+      }
+    }
+
+    // Outbound source links: shape-checked first, then permission-checked
+    // (admins always, advertisers only once boosting is unlocked) -- both
+    // server-side, so a direct API call can't skip the client's field gating.
+    const normalizedSourceUrl = normalizeSourceUrl(fields.sourceUrl);
+    if (normalizedSourceUrl.error) {
+      res.status(400).json(normalizedSourceUrl.error);
+      return;
+    }
+    if (normalizedSourceUrl.value) {
+      const sourceUrlPermission = sourceUrlPermissionError(req.currentUser, db);
+      if (sourceUrlPermission) {
+        res.status(403).json(sourceUrlPermission);
         return;
       }
     }
@@ -841,9 +918,9 @@ function createApiRouter(db, options = {}) {
 
     const insertListing = db.prepare(
       `INSERT INTO listings
-        (id, title, category, subtype, price, locality, region, country, distance, condition, posted, posted_at, freshness, ai_photo, image, description, seller, seller_id, seller_type, trust, sponsored, status, created_at)
+        (id, title, category, subtype, price, locality, region, country, distance, condition, posted, posted_at, freshness, ai_photo, image, description, seller, seller_id, seller_type, trust, sponsored, status, source_url, created_at)
        VALUES
-        (@id, @title, @category, @subtype, @price, @locality, @region, @country, @distance, @condition, @posted, @postedAt, @freshness, @aiPhoto, @image, @description, @seller, @sellerId, @sellerType, @trust, @sponsored, @status, @createdAt)`
+        (@id, @title, @category, @subtype, @price, @locality, @region, @country, @distance, @condition, @posted, @postedAt, @freshness, @aiPhoto, @image, @description, @seller, @sellerId, @sellerType, @trust, @sponsored, @status, @sourceUrl, @createdAt)`
     );
     const insertImage = db.prepare("INSERT INTO listing_images (listing_id, position, css, ai_generated) VALUES (?, ?, ?, ?)");
     // Deployment-readiness audit finding: the listing INSERT and its image
@@ -890,6 +967,7 @@ function createApiRouter(db, options = {}) {
       trust: fields.trust || "",
       sponsored: fields.sponsored ? 1 : 0,
       status: LISTING_STATUSES.has(fields.status) ? fields.status : "active",
+      sourceUrl: normalizedSourceUrl.value,
       createdAt: Date.now()
     });
 
@@ -911,8 +989,34 @@ function createApiRouter(db, options = {}) {
       res.json(null);
       return;
     }
-    if (existing.seller_id !== req.currentUser.id) {
+    const isOwner = existing.seller_id === req.currentUser.id;
+    const isAdmin = Boolean(req.currentUser.isAdmin);
+    if (!isOwner && !isAdmin) {
       res.status(403).json({ error: "You can only edit your own listings." });
+      return;
+    }
+
+    // Admins are the ONLY non-owners who may touch a listing at all, and only
+    // on the source link itself: links are an admin privilege, so an admin can
+    // attach or remove one on any listing WITHOUT gaining edit rights over the
+    // rest of somebody else's ad. Anything else in the body (or any photo
+    // change) still hits the same ownership error as before.
+    if (!isOwner) {
+      const onlySourceUrl = rawImages === undefined
+        && Object.keys(columnFields).length === 1
+        && Object.prototype.hasOwnProperty.call(columnFields, "sourceUrl");
+      if (!onlySourceUrl) {
+        res.status(403).json({ error: "You can only edit your own listings." });
+        return;
+      }
+      const adminSourceUrl = normalizeSourceUrl(columnFields.sourceUrl);
+      if (adminSourceUrl.error) {
+        res.status(400).json(adminSourceUrl.error);
+        return;
+      }
+      db.prepare("UPDATE listings SET source_url = ? WHERE id = ?").run(adminSourceUrl.value, req.params.id);
+      const adminUpdated = db.prepare("SELECT * FROM listings WHERE id = ?").get(req.params.id);
+      res.json(rowToListing(db, adminUpdated));
       return;
     }
     if (Object.prototype.hasOwnProperty.call(columnFields, "category") && !VALID_CATEGORIES.has(columnFields.category)) {
@@ -978,6 +1082,23 @@ function createApiRouter(db, options = {}) {
     }
 
     if (columnFields.status && !LISTING_STATUSES.has(columnFields.status)) delete columnFields.status;
+
+    // Owner path: same two rules as create -- admins pass, advertisers wait
+    // for the boost unlock. Rejecting (rather than silently dropping) keeps
+    // the failure explicit and translatable on the client.
+    if (Object.prototype.hasOwnProperty.call(columnFields, "sourceUrl")) {
+      const ownerSourcePermission = sourceUrlPermissionError(req.currentUser, db);
+      if (ownerSourcePermission) {
+        res.status(403).json(ownerSourcePermission);
+        return;
+      }
+      const ownerSourceUrl = normalizeSourceUrl(columnFields.sourceUrl);
+      if (ownerSourceUrl.error) {
+        res.status(400).json(ownerSourceUrl.error);
+        return;
+      }
+      columnFields.sourceUrl = ownerSourceUrl.value;
+    }
 
     const setClauses = [];
     const params = {};
