@@ -21,6 +21,17 @@ const dataServiceJs = fs.readFileSync(path.join(root, "data-service.js"), "utf8"
 const seedDataJs = fs.readFileSync(path.join(root, "db", "seed-data.js"), "utf8");
 const { categories: seedCategories, listings: seedListings } = require("../db/seed-data");
 
+// Shopify purchase integration is deliberately limited to canonical Mikazan
+// product URLs; every other marketplace source keeps its outbound-link flow.
+assert.match(html, /https:\/\/cdn\.shopify\.com\/storefront\/web-components\.js/, "Shopify Storefront Web Components must load from the official CDN");
+assert.match(html, /<shopify-store[^>]*store-domain="https:\/\/mikazan\.shop"/, "the global Shopify store must target Mikazan");
+assert.equal((html.match(/<shopify-cart\b/g) || []).length, 1, "exactly one shared Shopify cart must exist");
+assert.match(js, /function shopifyProductHandle\(sourceUrl\)/, "Shopify URL classification must be centralized");
+assert.match(js, /\^https:\\\/\\\/mikazan\\\.shop\\\/products\\\//, "only an exact canonical Mikazan product URL may become an embedded purchase");
+assert.match(js, /shopify-attr--disabled="!product\.selectedOrFirstAvailableVariant\.availableForSale"/, "sold-out variants must disable Add to cart");
+assert.match(js, /getElementById\('shopify-cart'\)\.addLine\(event\)\.showModal\(\)/, "Add to cart must open the shared embedded cart");
+assert.match(js, /return listing\.sourceUrl[\s\S]*?<a class="source-cta"/, "non-Shopify source listings must retain their outbound CTA");
+
 // Catalog expansion: every taxonomy category must be useful on first run,
 // and Mikazan products must remain traceable to their real shop listings.
 for (const category of seedCategories) {
@@ -43,7 +54,7 @@ assert.ok(
 const expectedMikazanProducts = [
   ["mikazan-driveconnect", "DriveConnect Smart Car Screen", "from 1078", "https://mikazan.shop/products/10-26-inch-portable-car-central-control-smart-screen-with-wireless-carplay-android-auto-bluetooth-and-ahd-backup-camera", "https://cdn.shopify.com/s/files/1/1090/4744/7883/files/4FD8F03B4B9ADE9A5BC17B9731BC1FD0.jpg?v=1791158290"],
   ["mikazan-drivelink", "DriveLink CarPlay Screen Kit", "755", "https://mikazan.shop/products/7-inch-wireless-carplay-portable-car-bluetooth-mp5-player-multimedia-android-projection-navigation-device", "https://cdn.shopify.com/s/files/1/1090/4744/7883/files/32A2F7EC50F8AA22C8127897D35D3D5B.jpg?v=1791158297"],
-  ["mikazan-drivetune", "DriveTune Car Charging Hub", "from 194", "https://mikazan.shop/products/kc-01-car-charger-with-one-to-two-usb-ports-intelligent-digital-display-qc3-0-fast-charging-multifunctional-car-cigarette-lighter", "https://cdn.shopify.com/s/files/1/1090/4744/7883/files/083E7F9E04723B3C79730E1D2EFBBED1.jpg?v=1791158294"],
+  ["mikazan-drivetune", "DriveTune Car Charging Hub", "from 196", "https://mikazan.shop/products/kc-01-car-charger-with-one-to-two-usb-ports-intelligent-digital-display-qc3-0-fast-charging-multifunctional-car-cigarette-lighter", "https://cdn.shopify.com/s/files/1/1090/4744/7883/files/083E7F9E04723B3C79730E1D2EFBBED1.jpg?v=1791158294"],
   ["mikazan-babyview", "BabyView Car Monitor Kit", "from 594", "https://mikazan.shop/products/4-3-inch-private-model-hd-1080p-car-baby-monitor-car-baby-mirror", "https://cdn.shopify.com/s/files/1/1090/4744/7883/files/AC2DF1CE839B53404B1DF74F6869DA47.jpg?v=1791158307"],
   ["mikazan-cozy-pet-bed", "Cozy Quilted Pet Bed", "344", "https://mikazan.shop/products/autumn-and-winter-deep-sleep-creative-cat-litter-quilted-cotton-quilted-plush-slippers-cat-bed-dog-pad-pet-litter", "https://cdn.shopify.com/s/files/1/1090/4744/7883/files/7973A2F65D5F9BD927D938D73179D0BD.jpg?v=1791158272"],
   ["mikazan-bunny-bed", "Bunny Ears Pet Bed", "from 443", "https://mikazan.shop/products/cat-litter-dog-litter-rabbit-ears-pet-litter-dog-bed-winter-warm-mat-dog-mat-pet-supplies", "https://cdn.shopify.com/s/files/1/1090/4744/7883/files/0BCDDD5AEBC9AB89B883C36A44DB3AEA__E4_B8_BB_E5_9B_BE-02.jpg?v=1791158285"],
@@ -81,6 +92,7 @@ for (const [id, title, price, sourceUrl, imageUrl] of expectedMikazanProducts) {
     const preservedId = "phone-pixel";
     syncDb.prepare("UPDATE listings SET title = ? WHERE id = ?").run("User-preserved custom title", preservedId);
     syncDb.prepare("UPDATE listings SET seller = 'Collision user', price = '42', image = 'linear-gradient(#111, #222)' WHERE id = 'mikazan-drivelink'").run();
+    syncDb.prepare("UPDATE listings SET price = 'from 194' WHERE id = 'mikazan-drivetune'").run();
     syncDb.prepare("UPDATE listings SET price = '$34.99', image = 'url(\"https://cdn.example/old-cover.jpg\")' WHERE id = 'mikazan-cozy-pet-bed'").run();
     syncDb.prepare("UPDATE listing_images SET css = 'url(\"https://cdn.example/old-gallery.jpg\")' WHERE listing_id = 'mikazan-cozy-pet-bed' AND position = 0").run();
     syncDb.prepare("DELETE FROM listing_images WHERE listing_id = ?").run("mikazan-driveconnect");
@@ -95,6 +107,11 @@ for (const [id, title, price, sourceUrl, imageUrl] of expectedMikazanProducts) {
     assert.equal(synchronizedCozy.price, "344", "an existing canonical production row must receive the current exact SEK price");
     assert.equal(synchronizedCozy.image, 'url("/assets/product-images/generated/mikazan-cozy-pet-bed-02.webp")', "an existing canonical production row must receive its bundled cover");
     assert.equal(synchronizedCozy.source_url, expectedMikazanProducts.find(([id]) => id === "mikazan-cozy-pet-bed")[3], "canonical synchronization must retain the exact outbound source link");
+    assert.equal(
+      syncDb.prepare("SELECT price FROM listings WHERE id = 'mikazan-drivetune'").get().price,
+      "from 196",
+      "startup synchronization must update the canonical DriveTune price"
+    );
     assert.deepEqual(
       syncDb.prepare("SELECT position, css FROM listing_images WHERE listing_id = 'mikazan-cozy-pet-bed' ORDER BY position").all(),
       [
@@ -2007,6 +2024,7 @@ function firePopState() {
 const context = vm.createContext({
   document,
   fetch: makeTestFetch(),
+  URL,
   FileReader: FakeFileReader,
   Image: FakeImage,
   navigator: fakeNavigator,
@@ -2037,6 +2055,34 @@ async function flushDebounce() {
 }
 const secondBootstrap = vm.runInContext(combinedJs, context);
 await secondBootstrap;
+
+assert.equal(context.shopifyProductHandle("https://mikazan.shop/products/feral-wife-leopard-print-hoodie"), "feral-wife-leopard-print-hoodie");
+assert.equal(context.shopifyProductHandle("https://mikazan.shop/products/feral-wife-leopard-print-hoodie/"), "feral-wife-leopard-print-hoodie");
+for (const unsafeShopifyUrl of [
+  "http://mikazan.shop/products/example",
+  "https://mikazan.shop.evil.test/products/example",
+  "https://mikazan.shop:443/products/example",
+  "https://mikazan.shop/products/example?variant=123",
+  "https://mikazan.shop/products/example#details",
+  "https://mikazan.shop/products/example/extra",
+  "https://user@mikazan.shop/products/example",
+  "https://mikazan.shop/collections/example"
+]) {
+  assert.equal(context.shopifyProductHandle(unsafeShopifyUrl), null, `${unsafeShopifyUrl} must not become an embedded product`);
+}
+const driveTuneUrl = "https://mikazan.shop/products/kc-01-car-charger-with-one-to-two-usb-ports-intelligent-digital-display-qc3-0-fast-charging-multifunctional-car-cigarette-lighter";
+const embeddedPurchase = context.sourcePurchaseTemplate({ title: "DriveTune Car Charging Hub", sourceUrl: driveTuneUrl });
+assert.match(embeddedPurchase, /<shopify-context[^>]*handle="kc-01-car-charger-with-one-to-two-usb-ports-intelligent-digital-display-qc3-0-fast-charging-multifunctional-car-cigarette-lighter"/);
+assert.match(embeddedPurchase, />Add to cart<\/button>/);
+assert.doesNotMatch(embeddedPurchase, /source-cta/);
+assert.doesNotMatch(embeddedPurchase, /target="_blank"/);
+context.openListing("mikazan-drivetune");
+assert.match(elements["listing-detail"].innerHTML, /<shopify-context[^>]*handle="kc-01-car-charger-with-one-to-two-usb-ports-intelligent-digital-display-qc3-0-fast-charging-multifunctional-car-cigarette-lighter"/, "DriveTune detail DOM must render the Shopify product context");
+assert.match(elements["listing-detail"].innerHTML, />Add to cart<\/button>/, "DriveTune detail DOM must render Add to cart");
+assert.doesNotMatch(elements["listing-detail"].innerHTML, /source-cta|target="_blank"/, "DriveTune detail DOM must not render the external source CTA");
+const externalPurchase = context.sourcePurchaseTemplate({ title: "Blocket car", sourceUrl: "https://www.blocket.se/27260133" });
+assert.match(externalPurchase, /<a class="source-cta"/);
+assert.match(externalPurchase, /target="_blank" rel="noopener noreferrer"/);
 
 // Every image source crosses an HTML style-attribute boundary through one
 // normalizer. Quoted backend URLs must not terminate the attribute, while UI
@@ -2595,6 +2641,10 @@ assert.match(googleCsp, /script-src[^;]*https:\/\/accounts\.google\.com\/gsi\/cl
 assert.match(googleCsp, /style-src[^;]*https:\/\/accounts\.google\.com\/gsi\/style/, "CSP must allow Google Identity Services styles");
 assert.match(googleCsp, /connect-src[^;]*https:\/\/accounts\.google\.com\/gsi\//, "CSP must allow Google Identity Services connections");
 assert.match(googleCsp, /frame-src[^;]*https:\/\/accounts\.google\.com\/gsi\//, "CSP must allow the Google Identity Services iframe");
+assert.match(googleCsp, /script-src[^;]*https:\/\/cdn\.shopify\.com/, "CSP must allow only Shopify's official component script host");
+assert.match(googleCsp, /connect-src[^;]*https:\/\/mikazan\.shop/, "CSP must allow Storefront requests to Mikazan");
+assert.match(googleCsp, /form-action[^;]*https:\/\/mikazan\.shop/, "CSP must allow Shopify checkout navigation for Mikazan");
+assert.doesNotMatch(googleCsp, /https:\/\/\*\.(?:shopify|myshopify)/, "Shopify CSP allowances must not use wildcard hosts");
 
 // A brand-new Google account creates a real user with a real session.
 const newGoogleToken = makeFakeGoogleIdToken({ payload: { sub: "google-sub-new", email: "newgoogleuser@example.com", name: "New Googler" } });

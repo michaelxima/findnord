@@ -162,6 +162,7 @@ const translations = {
     "ai.badge": "AI photo",
     "listingCard.paidPlacement": "Sponsored",
     "listingCard.viewSource": "View original listing",
+    "shopify.addToCart": "Add to cart",
     "browse.popularSearches": "Popular searches",
     "ai.buttonLabel": "Generate with AI",
     "ai.promptLabel": "Describe your item for AI (optional)",
@@ -474,6 +475,7 @@ const translations = {
     "ai.badge": "AI-foto",
     "listingCard.paidPlacement": "Annons",
     "listingCard.viewSource": "Visa originalannonsen",
+    "shopify.addToCart": "Lägg i varukorgen",
     "browse.popularSearches": "Vanliga sökningar",
     "ai.buttonLabel": "Skapa med AI",
     "ai.promptLabel": "Beskriv föremålet för AI (valfritt)",
@@ -788,6 +790,7 @@ const translations = {
     "ai.badge": "AI-bilde",
     "listingCard.paidPlacement": "Annonse",
     "listingCard.viewSource": "Se originalannonsen",
+    "shopify.addToCart": "Legg i handlekurven",
     "browse.popularSearches": "Populære søk",
     "ai.buttonLabel": "Generer med AI",
     "ai.promptLabel": "Beskriv varen for AI (valgfritt)",
@@ -1100,6 +1103,7 @@ const translations = {
     "ai.badge": "AI-foto",
     "listingCard.paidPlacement": "Annonce",
     "listingCard.viewSource": "Se originalannoncen",
+    "shopify.addToCart": "Læg i kurven",
     "browse.popularSearches": "Populære søgninger",
     "ai.buttonLabel": "Generer med AI",
     "ai.promptLabel": "Beskriv din vare til AI (valgfrit)",
@@ -1412,6 +1416,7 @@ const translations = {
     "ai.badge": "AI-kuva",
     "listingCard.paidPlacement": "Mainos",
     "listingCard.viewSource": "Näytä alkuperäinen ilmoitus",
+    "shopify.addToCart": "Lisää ostoskoriin",
     "browse.popularSearches": "Suositut haut",
     "ai.buttonLabel": "Luo AI:lla",
     "ai.promptLabel": "Kuvaile tuotettasi AI:lle (valinnainen)",
@@ -1724,6 +1729,7 @@ const translations = {
     "ai.badge": "AI-mynd",
     "listingCard.paidPlacement": "Auglýsing",
     "listingCard.viewSource": "Skoða upprunalega auglýsingu",
+    "shopify.addToCart": "Bæta í körfu",
     "browse.popularSearches": "Vinsælar leitir",
     "ai.buttonLabel": "Búa til með AI",
     "ai.promptLabel": "Lýstu hlutnum fyrir AI (valkvætt)",
@@ -1911,6 +1917,30 @@ function escapeHtml(value) {
     /[&<>"']/g,
     (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[ch]
   );
+}
+
+// Shopify products are the only source listings that can be purchased on
+// FindNord. Parse rather than prefix-match so lookalike hosts, credentials,
+// query-string tricks, and nested paths can never become product handles.
+function shopifyProductHandle(sourceUrl) {
+  if (typeof sourceUrl !== "string") return null;
+  const match = sourceUrl.match(/^https:\/\/mikazan\.shop\/products\/([a-z0-9]+(?:-[a-z0-9]+)*)\/?$/);
+  return match ? match[1] : null;
+}
+
+function sourcePurchaseTemplate(listing) {
+  const handle = shopifyProductHandle(listing.sourceUrl);
+  if (handle) {
+    return `<shopify-context class="shopify-purchase" type="product" handle="${escapeHtml(handle)}">
+      <template>
+        <shopify-variant-selector></shopify-variant-selector>
+        <button type="button" class="shopify-add-button" onclick="document.getElementById('shopify-cart').addLine(event).showModal();" shopify-attr--disabled="!product.selectedOrFirstAvailableVariant.availableForSale" aria-label="${escapeHtml(t("shopify.addToCart"))}: ${escapeHtml(listing.title)}">${escapeHtml(t("shopify.addToCart"))}</button>
+      </template>
+    </shopify-context>`;
+  }
+  return listing.sourceUrl
+    ? `<a class="source-cta" id="detail-source-link" href="${escapeHtml(listing.sourceUrl)}" target="_blank" rel="noopener noreferrer" aria-label="${escapeHtml(t("listingCard.viewSource"))}: ${escapeHtml(listing.title)}"><svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 2.5h4v4"/><path d="M13.5 2.5 7.8 8.2"/><path d="M12 9.2v3.3a1 1 0 0 1-1 1H3.5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h3.3"/></svg>${escapeHtml(t("listingCard.viewSource"))}</a>`
+    : "";
 }
 
 // Listing images are stored as CSS background values because that shape also
@@ -5289,11 +5319,7 @@ function openListing(id) {
         <button type="button" class="secondary-action" data-share-listing="${listing.id}" aria-label="Share ${escapeHtml(listing.title)}">${SHARE_ICON}Share</button>
         <button type="button" class="secondary-action" data-report-listing="${listing.id}" aria-label="Report ${escapeHtml(listing.title)}">${FLAG_ICON}Report</button>
       </div>
-      ${
-        listing.sourceUrl
-          ? `<a class="source-cta" id="detail-source-link" href="${escapeHtml(listing.sourceUrl)}" target="_blank" rel="noopener noreferrer" aria-label="${escapeHtml(t("listingCard.viewSource"))}: ${escapeHtml(listing.title)}"><svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 2.5h4v4"/><path d="M13.5 2.5 7.8 8.2"/><path d="M12 9.2v3.3a1 1 0 0 1-1 1H3.5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h3.3"/></svg>${escapeHtml(t("listingCard.viewSource"))}</a>`
-          : ""
-      }
+      ${sourcePurchaseTemplate(listing)}
       ${isOwnListing ? "" : `<button type="button" class="opener" id="suggested-opener">Hi, is this still available?</button>`}
       <p>${escapeHtml(listing.description)}</p>
       <dl class="attributes">

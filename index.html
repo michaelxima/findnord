@@ -845,6 +845,16 @@
 
     <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
+    <!-- Shopify's Storefront Web Components keep variant selection and the
+         cart on FindNord. Checkout continues in this tab on Shopify's secure
+         hosted payment flow. -->
+    <shopify-store id="shopify-store" store-domain="https://mikazan.shop"></shopify-store>
+    <shopify-cart id="shopify-cart" aria-label="Mikazan shopping cart">
+      <span slot="empty">Your cart is empty.</span>
+      <span slot="checkout-button">Secure checkout with Shopify</span>
+    </shopify-cart>
+
+    <script src="https://cdn.shopify.com/storefront/web-components.js"></script>
     <script src="/data-service.js"></script>
     <script src="/app.js"></script>
   </body>
