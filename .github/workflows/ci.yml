@@ -18,8 +18,10 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [20.x, 22.x]
-        # Test against multiple Node versions to catch regressions early
+        # package.json deliberately supports Node 22 only. Native Sharp and
+        # better-sqlite3 binaries must be tested on the production runtime,
+        # not on an explicitly unsupported Node 20 job.
+        node-version: [22.x]
 
     steps:
       - name: Checkout repository
