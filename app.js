@@ -1913,6 +1913,31 @@ function escapeHtml(value) {
   );
 }
 
+// Listing images are stored as CSS background values because that shape also
+// supports the seed catalogue's gradients. They still cross an HTML attribute
+// boundary, though: `url("https://...")` inserted raw into `style="..."`
+// closes the attribute at its first quote and leaves a blank card. Normalize
+// every supported source here, add the same cover behavior to backend and UI
+// uploads, and HTML-escape the final CSS value at the single rendering edge.
+function imageBackgroundStyle(value) {
+  const fallback = "linear-gradient(135deg, #dfe6e1, #f4f6f1)";
+  const css = String(value || "").trim();
+  if (/^linear-gradient\([#(),.%\d\s\w+-]+\)$/i.test(css)) return escapeHtml(css);
+
+  const match = /^url\((.*)\)(.*)$/is.exec(css);
+  if (!match) return escapeHtml(fallback);
+  let source = match[1].trim();
+  if ((source.startsWith('"') && source.endsWith('"')) || (source.startsWith("'") && source.endsWith("'"))) {
+    source = source.slice(1, -1);
+  }
+  const supportedSource = /^(?:https?:\/\/|\/(?:uploads|assets)\/|data:image\/(?:jpeg|png|webp|gif);base64,)/i.test(source);
+  const safeSource = supportedSource && !/["'\\\r\n<>]/.test(source);
+  const suffix = match[2].trim();
+  const safeSuffix = !suffix || /^center\s*\/\s*cover\s+no-repeat$/i.test(suffix);
+  if (!safeSource || !safeSuffix) return escapeHtml(fallback);
+  return escapeHtml(`url("${source}") center / cover no-repeat`);
+}
+
 // Phase 3: simple debounce utility for search inputs and other
 // high-frequency events. No dependencies, ~5 lines. Returns a wrapped
 // function that delays invocation until `waitMs` has elapsed since the
@@ -3498,7 +3523,7 @@ function myListingRowTemplate(listing) {
   return `
     <article class="inbox-row my-listing-row">
       <button type="button" class="inbox-row-open" data-open-listing="${listing.id}" aria-label="${escapeHtml(listing.title)}">
-        <div class="inbox-row-photo" style="background: ${listing.image}" aria-hidden="true"></div>
+        <div class="inbox-row-photo" style="background: ${imageBackgroundStyle(listing.image)}" aria-hidden="true"></div>
         <div class="inbox-row-copy" aria-hidden="true">
           <strong>${escapeHtml(listing.title)}</strong>
           <span>${formatListingPrice(listing)}</span>
@@ -3923,7 +3948,7 @@ function inboxRowTemplate(conversation) {
   const preview = conversation.lastMessage ? conversation.lastMessage.text : "";
   return `
     <button type="button" class="inbox-row" data-open-thread="${conversation.id}" aria-label="${t("thread.replyLabel")}: ${escapeHtml(title)}, ${escapeHtml(seller)}">
-      <div class="inbox-row-photo" style="background: ${image}" aria-hidden="true"></div>
+      <div class="inbox-row-photo" style="background: ${imageBackgroundStyle(image)}" aria-hidden="true"></div>
       <div class="inbox-row-copy" aria-hidden="true">
         <strong>${escapeHtml(title)}</strong>
         <span>${escapeHtml(seller)}</span>
@@ -4550,7 +4575,7 @@ function listingCardTemplate(listing, options) {
     status ? `<span class="status-badge status-${status}">${t(`status.${status}`)}</span>` : listing.sponsored ? `<span class="sponsored">${paidPlacementLabel}</span>` : ""
   }${listing.freshness ? `<span class="freshness">${listing.freshness}</span>` : ""}`;
   const body = `
-    <div class="listing-photo" style="background: ${listing.image}" aria-hidden="true">${mediaBadges}</div>
+    <div class="listing-photo" style="background: ${imageBackgroundStyle(listing.image)}" aria-hidden="true">${mediaBadges}</div>
     <div class="card-copy"${interactive ? ' aria-hidden="true"' : ""}>
       <h3>${escapeHtml(listing.title)}</h3>
       <strong>${formatListingPrice(listing)}</strong>
@@ -5093,14 +5118,14 @@ function galleryTemplate(listing, activeIndex) {
           ${images
             .map(
               (image, i) =>
-                `<button type="button" class="gallery-thumb${i === index ? " active" : ""}" data-gallery-index="${i}" style="background: ${image.css}" aria-label="${t("detail.photoLabel")} ${i + 1}"></button>`
+                `<button type="button" class="gallery-thumb${i === index ? " active" : ""}" data-gallery-index="${i}" style="background: ${imageBackgroundStyle(image.css)}" aria-label="${t("detail.photoLabel")} ${i + 1}"></button>`
             )
             .join("")}
         </div>
       `
       : "";
   return `
-    <div class="detail-gallery" style="background: ${images[index].css}" role="img" aria-label="${t("detail.photoLabel")} ${index + 1}: ${escapeHtml(listing.title)}">
+    <div class="detail-gallery" style="background: ${imageBackgroundStyle(images[index].css)}" role="img" aria-label="${t("detail.photoLabel")} ${index + 1}: ${escapeHtml(listing.title)}">
       ${images[index].aiGenerated ? `<span class="ai-badge">${t("ai.badge")}</span>` : ""}
     </div>
     ${thumbs}
@@ -5565,7 +5590,7 @@ function renderSellPhotos() {
   const tiles = sellPhotos
     .map(
       (photo, index) => `
-        <div class="photo-tile" style="background: ${photoToCss(photo)}">
+        <div class="photo-tile" style="background: ${imageBackgroundStyle(photoToCss(photo))}">
           ${index === 0 ? '<span class="cover-badge">Cover</span>' : `<button type="button" class="make-cover-button" data-make-cover="${index}">${t("photo.makeCover")}</button>`}
           ${photo.kind === "ai" || (photo.kind === "existing" && photo.aiGenerated) ? `<span class="ai-badge">${t("ai.badge")}</span>` : ""}
           <button type="button" class="remove-photo" data-remove-photo="${index}" aria-label="Remove photo ${index + 1}">×</button>

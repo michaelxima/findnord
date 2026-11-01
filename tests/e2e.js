@@ -2009,6 +2009,28 @@ async function flushDebounce() {
 const secondBootstrap = vm.runInContext(combinedJs, context);
 await secondBootstrap;
 
+// Every image source crosses an HTML style-attribute boundary through one
+// normalizer. Quoted backend URLs must not terminate the attribute, while UI
+// uploads and bundled/local assets receive the same center/cover rendering.
+assert.equal(
+  context.imageBackgroundStyle('url("https://cdn.example.test/item.jpg?x=1&y=2")'),
+  'url(&quot;https://cdn.example.test/item.jpg?x=1&amp;y=2&quot;) center / cover no-repeat'
+);
+assert.equal(
+  context.imageBackgroundStyle('url("/assets/product-images/generated/item.webp")'),
+  'url(&quot;/assets/product-images/generated/item.webp&quot;) center / cover no-repeat'
+);
+assert.equal(
+  context.imageBackgroundStyle("url(/uploads/user-photo.webp) center/cover no-repeat"),
+  'url(&quot;/uploads/user-photo.webp&quot;) center / cover no-repeat'
+);
+assert.equal(
+  context.imageBackgroundStyle("url(javascript:alert(1))"),
+  "linear-gradient(135deg, #dfe6e1, #f4f6f1)",
+  "unsupported or malformed image CSS must fail closed to the neutral fallback"
+);
+assert.doesNotMatch(js, /style="background: \$\{(?:listing\.image|image|image\.css|images\[index\]\.css|photoToCss\(photo\))\}/, "every dynamic image sink must use the shared renderer");
+
 // Drives the real upload pipeline (FileReader -> Image -> canvas resize) the
 // same way a user's file picker selection would, via handleSellPhotoFilesSelected.
 async function uploadFakePhoto(marker) {
@@ -3015,7 +3037,7 @@ assert.equal((elements["sell-photo-grid"].innerHTML.match(/class="photo-tile"/g)
 // retains as much quality as the budget allows rather than over-compressing.
 const MAX_PHOTO_BYTES_EXPECTED = 1024 * 1024;
 await uploadFakePhoto("W2000H2000");
-let tileMatch = elements["sell-photo-grid"].innerHTML.match(/url\(data:image\/jpeg;base64,([A-Za-z0-9+/=]+)\)/);
+let tileMatch = elements["sell-photo-grid"].innerHTML.match(/url\(&quot;data:image\/jpeg;base64,([A-Za-z0-9+/=]+)&quot;\)/);
 assert.ok(tileMatch, "the uploaded photo must render as a real embedded image, not a CSS placeholder");
 const firstPhotoBytes = Math.ceil((tileMatch[1].length * 3) / 4);
 assert.ok(firstPhotoBytes <= MAX_PHOTO_BYTES_EXPECTED, `uploaded photo must be resized to <= 1MB (was ${firstPhotoBytes} bytes)`);
@@ -3025,7 +3047,7 @@ assert.match(elements["sell-photo-grid"].innerHTML, /<span class="cover-badge">C
 // A second, smaller photo must also upload for real, and it must be offered
 // a "Make cover" control since it is not (yet) the featured photo.
 await uploadFakePhoto("W300H300");
-const tileMatches = [...elements["sell-photo-grid"].innerHTML.matchAll(/<div class="photo-tile" style="background: url\(data:image\/jpeg;base64,([A-Za-z0-9+/=]+)\)/g)];
+const tileMatches = [...elements["sell-photo-grid"].innerHTML.matchAll(/<div class="photo-tile" style="background: url\(&quot;data:image\/jpeg;base64,([A-Za-z0-9+/=]+)&quot;\)/g)];
 assert.equal(tileMatches.length, 2, "both uploaded photos must render as real tiles");
 const secondPhotoBytes = tileMatches[1][1].length;
 assert.match(elements["sell-photo-grid"].innerHTML, /data-make-cover="1"/, "the non-cover photo must offer a Make cover control");
@@ -3034,7 +3056,7 @@ assert.doesNotMatch(elements["sell-photo-grid"].innerHTML, /data-make-cover="0"/
 // Selecting the second photo as the featured image must move it to the
 // cover position — the same convention publishing already relies on.
 context.setSellPhotoCover(1);
-const reorderedMatches = [...elements["sell-photo-grid"].innerHTML.matchAll(/<div class="photo-tile" style="background: url\(data:image\/jpeg;base64,([A-Za-z0-9+/=]+)\)/g)];
+const reorderedMatches = [...elements["sell-photo-grid"].innerHTML.matchAll(/<div class="photo-tile" style="background: url\(&quot;data:image\/jpeg;base64,([A-Za-z0-9+/=]+)&quot;\)/g)];
 assert.equal(reorderedMatches[0][1].length, secondPhotoBytes, "the newly-chosen featured photo must become the first (cover) tile");
 assert.match(elements["sell-photo-grid"].innerHTML, /data-make-cover="1"/, "the previous cover photo must now offer its own Make cover control");
 
