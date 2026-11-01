@@ -41,14 +41,18 @@ assert.ok(
   "every Mikazan listing must link to its canonical mikazan.shop product page"
 );
 const expectedMikazanProducts = [
-  ["mikazan-driveconnect", "DriveConnect Smart Car Screen", "$109.70", "https://mikazan.shop/products/10-26-inch-portable-car-central-control-smart-screen-with-wireless-carplay-android-auto-bluetooth-and-ahd-backup-camera", "https://cdn.shopify.com/s/files/1/1090/4744/7883/files/4FD8F03B4B9ADE9A5BC17B9731BC1FD0.jpg?v=1791158290"],
-  ["mikazan-drivelink", "DriveLink CarPlay Screen Kit", "$76.78", "https://mikazan.shop/products/7-inch-wireless-carplay-portable-car-bluetooth-mp5-player-multimedia-android-projection-navigation-device", "https://cdn.shopify.com/s/files/1/1090/4744/7883/files/32A2F7EC50F8AA22C8127897D35D3D5B.jpg?v=1791158297"],
-  ["mikazan-drivetune", "DriveTune Car Charging Hub", "$19.68", "https://mikazan.shop/products/kc-01-car-charger-with-one-to-two-usb-ports-intelligent-digital-display-qc3-0-fast-charging-multifunctional-car-cigarette-lighter", "https://cdn.shopify.com/s/files/1/1090/4744/7883/files/083E7F9E04723B3C79730E1D2EFBBED1.jpg?v=1791158294"],
-  ["mikazan-babyview", "BabyView Car Monitor Kit", "$60.38", "https://mikazan.shop/products/4-3-inch-private-model-hd-1080p-car-baby-monitor-car-baby-mirror", "https://cdn.shopify.com/s/files/1/1090/4744/7883/files/AC2DF1CE839B53404B1DF74F6869DA47.jpg?v=1791158307"],
-  ["mikazan-cozy-pet-bed", "Cozy Quilted Pet Bed", "$34.99", "https://mikazan.shop/products/autumn-and-winter-deep-sleep-creative-cat-litter-quilted-cotton-quilted-plush-slippers-cat-bed-dog-pad-pet-litter", "https://cdn.shopify.com/s/files/1/1090/4744/7883/files/7973A2F65D5F9BD927D938D73179D0BD.jpg?v=1791158272"],
-  ["mikazan-bunny-bed", "Bunny Ears Pet Bed", "$44.99", "https://mikazan.shop/products/cat-litter-dog-litter-rabbit-ears-pet-litter-dog-bed-winter-warm-mat-dog-mat-pet-supplies", "https://cdn.shopify.com/s/files/1/1090/4744/7883/files/0BCDDD5AEBC9AB89B883C36A44DB3AEA__E4_B8_BB_E5_9B_BE-02.jpg?v=1791158285"],
-  ["mikazan-shopify-prompts", "200 Shopify Building & Automation Prompts", "$9.99", "https://mikazan.shop/products/200-shopify-building-automation-prompts", "https://cdn.shopify.com/s/files/1/1090/4744/7883/files/image_49bf6f72-a8d4-4136-87f0-94d7253df51b.png?v=1791226741"],
-  ["mikazan-boldline-pants", "Boldline High-Waist Pants", "$69.99", "https://mikazan.shop/products/casual-pants-with-high-waist-flower-gray-broken-seam-thick-cotton-rope-wide-version-curved-knife-guard-pants", "https://cdn.shopify.com/s/files/1/1090/4744/7883/files/16A23342AFD243B030F9CFBA8FFFE651.jpg?v=1791158285"]
+  ["mikazan-driveconnect", "DriveConnect Smart Car Screen", "from 1078", "https://mikazan.shop/products/10-26-inch-portable-car-central-control-smart-screen-with-wireless-carplay-android-auto-bluetooth-and-ahd-backup-camera", "https://cdn.shopify.com/s/files/1/1090/4744/7883/files/4FD8F03B4B9ADE9A5BC17B9731BC1FD0.jpg?v=1791158290"],
+  ["mikazan-drivelink", "DriveLink CarPlay Screen Kit", "755", "https://mikazan.shop/products/7-inch-wireless-carplay-portable-car-bluetooth-mp5-player-multimedia-android-projection-navigation-device", "https://cdn.shopify.com/s/files/1/1090/4744/7883/files/32A2F7EC50F8AA22C8127897D35D3D5B.jpg?v=1791158297"],
+  ["mikazan-drivetune", "DriveTune Car Charging Hub", "from 194", "https://mikazan.shop/products/kc-01-car-charger-with-one-to-two-usb-ports-intelligent-digital-display-qc3-0-fast-charging-multifunctional-car-cigarette-lighter", "https://cdn.shopify.com/s/files/1/1090/4744/7883/files/083E7F9E04723B3C79730E1D2EFBBED1.jpg?v=1791158294"],
+  ["mikazan-babyview", "BabyView Car Monitor Kit", "from 594", "https://mikazan.shop/products/4-3-inch-private-model-hd-1080p-car-baby-monitor-car-baby-mirror", "https://cdn.shopify.com/s/files/1/1090/4744/7883/files/AC2DF1CE839B53404B1DF74F6869DA47.jpg?v=1791158307"],
+  ["mikazan-cozy-pet-bed", "Cozy Quilted Pet Bed", "344", "https://mikazan.shop/products/autumn-and-winter-deep-sleep-creative-cat-litter-quilted-cotton-quilted-plush-slippers-cat-bed-dog-pad-pet-litter", "https://cdn.shopify.com/s/files/1/1090/4744/7883/files/7973A2F65D5F9BD927D938D73179D0BD.jpg?v=1791158272"],
+  ["mikazan-bunny-bed", "Bunny Ears Pet Bed", "from 443", "https://mikazan.shop/products/cat-litter-dog-litter-rabbit-ears-pet-litter-dog-bed-winter-warm-mat-dog-mat-pet-supplies", "https://cdn.shopify.com/s/files/1/1090/4744/7883/files/0BCDDD5AEBC9AB89B883C36A44DB3AEA__E4_B8_BB_E5_9B_BE-02.jpg?v=1791158285"],
+  ["mikazan-shopify-prompts", "200 Shopify Building & Automation Prompts", "99", "https://mikazan.shop/products/200-shopify-building-automation-prompts", "https://cdn.shopify.com/s/files/1/1090/4744/7883/files/image_49bf6f72-a8d4-4136-87f0-94d7253df51b.png?v=1791226741"],
+  ["mikazan-boldline-pants", "Boldline High-Waist Pants", "688", "https://mikazan.shop/products/casual-pants-with-high-waist-flower-gray-broken-seam-thick-cotton-rope-wide-version-curved-knife-guard-pants", "https://cdn.shopify.com/s/files/1/1090/4744/7883/files/16A23342AFD243B030F9CFBA8FFFE651.jpg?v=1791158285"],
+  ["mikazan-feral-wife", "Feral Wife Statement Top", "from 358", "https://mikazan.shop/products/feral-wife-leopard-print-hoodie", "https://cdn.shopify.com/s/files/1/1090/4744/7883/files/0505F5949789E7F516569F13973E22E0.jpg?v=1791158335"],
+  ["mikazan-tactical-gloves", "FieldReady Full-Finger Tactical Gloves", "167", "https://mikazan.shop/products/men-s-tactical-gloves-full-finger-anti-slip-combat-gloves-for-military-outdoor-fitness-use", "https://cdn.shopify.com/s/files/1/1090/4744/7883/files/66029084A03C90A7FFE87464FC40E3B5.jpg?v=1791158419"],
+  ["mikazan-cat-scratcher", "Artful Cat Scratch Board", "275", "https://mikazan.shop/products/cats-scratch-board-jute-vertical-wall-mounted-cat-scratcher-durable-non-shedding-pet-cat-claw-board", "https://cdn.shopify.com/s/files/1/1090/4744/7883/files/40B62BDCB13BC0686899356853CE64C2.jpg?v=1791158280"],
+  ["mikazan-duowalk", "DuoWalk Retractable Dog Leash", "328", "https://mikazan.shop/products/dual-double-dog-leash-360-retractable-roulette-3m-led-light-tangle-free-double-ended-traction-rope", "https://cdn.shopify.com/s/files/1/1090/4744/7883/files/6B721051B850DC4C705F311584A226E5.jpg?v=1791158302"]
 ];
 for (const [id, title, price, sourceUrl, imageUrl] of expectedMikazanProducts) {
   const listing = seedListings.find((item) => item.id === id);
@@ -56,7 +60,8 @@ for (const [id, title, price, sourceUrl, imageUrl] of expectedMikazanProducts) {
   assert.equal(listing.title, title, `${id} must retain the exact Mikazan title`);
   assert.equal(listing.price, price, `${id} must retain the exact Mikazan price`);
   assert.equal(listing.sourceUrl, sourceUrl, `${id} must retain its canonical Mikazan product URL`);
-  assert.equal(listing.images[0].css, `url("${imageUrl}")`, `${id} must retain the exact Mikazan image URL`);
+  assert.equal(listing.images[0].css, `url("/assets/product-images/generated/${id}-02.webp")`, `${id} must use its reliable bundled cover image`);
+  assert.equal(listing.images[1].css, `url("${imageUrl}")`, `${id} must retain the exact Mikazan source image in its gallery`);
   assert.equal(listing.seller, "Mikazan", `${id} must identify Mikazan as its seller`);
   assert.equal(listing.sellerType, "Professional seller", `${id} must identify Mikazan as a professional seller`);
 }
@@ -75,6 +80,9 @@ for (const [id, title, price, sourceUrl, imageUrl] of expectedMikazanProducts) {
     );
     const preservedId = "phone-pixel";
     syncDb.prepare("UPDATE listings SET title = ? WHERE id = ?").run("User-preserved custom title", preservedId);
+    syncDb.prepare("UPDATE listings SET seller = 'Collision user', price = '42', image = 'linear-gradient(#111, #222)' WHERE id = 'mikazan-drivelink'").run();
+    syncDb.prepare("UPDATE listings SET price = '$34.99', image = 'url(\"https://cdn.example/old-cover.jpg\")' WHERE id = 'mikazan-cozy-pet-bed'").run();
+    syncDb.prepare("UPDATE listing_images SET css = 'url(\"https://cdn.example/old-gallery.jpg\")' WHERE listing_id = 'mikazan-cozy-pet-bed' AND position = 0").run();
     syncDb.prepare("DELETE FROM listing_images WHERE listing_id = ?").run("mikazan-driveconnect");
     syncDb.prepare("DELETE FROM listings WHERE id = ?").run("mikazan-driveconnect");
     syncDb.close();
@@ -83,6 +91,24 @@ for (const [id, title, price, sourceUrl, imageUrl] of expectedMikazanProducts) {
     assert.equal(syncDb.prepare("SELECT COUNT(*) AS count FROM listings WHERE id = ?").get("mikazan-driveconnect").count, 1, "an existing database must gain a missing bundled catalog row");
     assert.equal(syncDb.prepare("SELECT COUNT(*) AS count FROM listing_images WHERE listing_id = ?").get("mikazan-driveconnect").count, 3, "a newly synchronized catalog row must gain its complete three-image gallery");
     assert.equal(syncDb.prepare("SELECT title FROM listings WHERE id = ?").get(preservedId).title, "User-preserved custom title", "catalog sync must never overwrite an existing row");
+    const synchronizedCozy = syncDb.prepare("SELECT price, image, source_url FROM listings WHERE id = 'mikazan-cozy-pet-bed'").get();
+    assert.equal(synchronizedCozy.price, "344", "an existing canonical production row must receive the current exact SEK price");
+    assert.equal(synchronizedCozy.image, 'url("/assets/product-images/generated/mikazan-cozy-pet-bed-02.webp")', "an existing canonical production row must receive its bundled cover");
+    assert.equal(synchronizedCozy.source_url, expectedMikazanProducts.find(([id]) => id === "mikazan-cozy-pet-bed")[3], "canonical synchronization must retain the exact outbound source link");
+    assert.deepEqual(
+      syncDb.prepare("SELECT position, css FROM listing_images WHERE listing_id = 'mikazan-cozy-pet-bed' ORDER BY position").all(),
+      [
+        { position: 0, css: 'url("/assets/product-images/generated/mikazan-cozy-pet-bed-02.webp")' },
+        { position: 1, css: `url("${expectedMikazanProducts.find(([id]) => id === "mikazan-cozy-pet-bed")[4]}")` },
+        { position: 2, css: 'url("/assets/product-images/generated/mikazan-cozy-pet-bed-03.webp")' }
+      ],
+      "canonical synchronization must put the local cover first and retain the external original in the gallery"
+    );
+    assert.deepEqual(
+      syncDb.prepare("SELECT seller, price, image FROM listings WHERE id = 'mikazan-drivelink'").get(),
+      { seller: "Collision user", price: "42", image: "linear-gradient(#111, #222)" },
+      "catalog synchronization must never overwrite a user-owned ID collision"
+    );
     const listingCountAfterSync = syncDb.prepare("SELECT COUNT(*) AS count FROM listings").get().count;
     const imageCountAfterSync = syncDb.prepare("SELECT COUNT(*) AS count FROM listing_images").get().count;
     syncDb.close();
@@ -116,7 +142,7 @@ for (const [id, title, price, sourceUrl, imageUrl] of expectedMikazanProducts) {
     assert.equal(productionRows.length, 12, "an empty production database must publish exactly twelve approved products");
     assert.ok(productionRows.every((row) => row.id.startsWith("mikazan-")), "every production catalog row must be an approved Mikazan product");
     assert.ok(productionRows.every((row) => /^https:\/\/mikazan\.shop\/products\//.test(row.source_url)), "every production product must retain its canonical source link");
-    assert.ok(productionRows.every((row) => /^url\("https:\/\/cdn\.shopify\.com\//.test(row.image)), "every production product must retain its real image");
+    assert.ok(productionRows.every((row) => /^url\("\/assets\/product-images\/generated\/.+-02\.webp"\)$/.test(row.image)), "every production product must use its reliable bundled cover image");
     productionDb.close();
     productionDb = openDatabase(productionDbPath);
     assert.equal(productionDb.prepare("SELECT COUNT(*) AS count FROM listings").get().count, 12, "a second production startup must not duplicate catalog rows");
@@ -843,6 +869,9 @@ assert.match(apiJs, /sponsored: Boolean\(row\.boost_expires_at && row\.boost_exp
 
 assert.match(schemaSql, /boost_expires_at INTEGER/);
 assert.match(schemaSql, /boost_package TEXT/);
+assert.match(schemaSql, /boost_paid_at INTEGER/, "a durable paid timestamp must distinguish Stripe purchases from free promotional boosts");
+assert.match(apiJs, /checkout\.session\.completed[\s\S]*boost_paid_at = \?/, "only the verified Stripe completion path may create paid source-link entitlement");
+assert.match(apiJs, /boost_package = \?, boost_paid_at = NULL WHERE id = \?/, "a free boost must explicitly remain unpaid");
 assert.match(dbJs, /function migrateListingBoostColumns\(db\)/);
 assert.match(dbJs, /WHERE sponsored = 1 AND boost_expires_at IS NULL/, "a pre-NM-A18 permanently-sponsored listing must be grandfathered with a real expiry, not silently unmanaged forever");
 
@@ -2014,15 +2043,15 @@ await secondBootstrap;
 // uploads and bundled/local assets receive the same center/cover rendering.
 assert.equal(
   context.imageBackgroundStyle('url("https://cdn.example.test/item.jpg?x=1&y=2")'),
-  'url(&quot;https://cdn.example.test/item.jpg?x=1&amp;y=2&quot;) center / cover no-repeat'
+  'url(&quot;https://cdn.example.test/item.jpg?x=1&amp;y=2&quot;) center / contain no-repeat'
 );
 assert.equal(
   context.imageBackgroundStyle('url("/assets/product-images/generated/item.webp")'),
-  'url(&quot;/assets/product-images/generated/item.webp&quot;) center / cover no-repeat'
+  'url(&quot;/assets/product-images/generated/item.webp&quot;) center / contain no-repeat'
 );
 assert.equal(
   context.imageBackgroundStyle("url(/uploads/user-photo.webp) center/cover no-repeat"),
-  'url(&quot;/uploads/user-photo.webp&quot;) center / cover no-repeat'
+  'url(&quot;/uploads/user-photo.webp&quot;) center / contain no-repeat'
 );
 assert.equal(
   context.imageBackgroundStyle("url(javascript:alert(1))"),
@@ -2248,8 +2277,14 @@ assert.equal(elements["sell-subtype-select"].innerHTML, "");
 // place that turns a stored price + a listing's own country into a real,
 // locale-correct display string.
 assert.equal(context.formatPrice("1200"), "1200");
+assert.equal(context.formatPrice("$34.99"), "34.99", "a source price with a decimal must keep its decimal separator");
+assert.equal(context.formatPrice("from $34.99"), "from 34.99", "range prefixes must survive price normalization");
 assert.equal(context.formatPrice(""), "");
+assert.equal(context.parsePriceValue("$34.99"), 34.99, "a decimal source price must not be inflated by stripping its decimal point");
+assert.equal(context.parsePriceValue("500 SEK"), 500, "a plain SEK price must retain its exact magnitude");
+assert.equal(context.parsePriceValue("1 200 kr"), 1200);
 assert.equal(context.formatListingPrice({ price: "1200", country: "Sweden" }), "1 200 kr");
+assert.equal(context.formatListingPrice({ price: "from 1078", country: "Sweden" }), "From 1 078 kr");
 assert.equal(context.formatListingPrice({ price: "1200", country: "Finland" }), "1 200 €");
 assert.equal(context.formatListingPrice({ price: "Free", country: "Sweden" }), "Free");
 assert.equal(context.formatListingPrice({ price: "", country: "Sweden" }), "Set a price");
@@ -6083,34 +6118,22 @@ console.log("PASS: NM-A25 fresh page loads -- a real, direct (non-client-side-na
     context.refreshSourceUrlFieldVisibility();
     assert.equal(elements["sell-source-url-field"].hidden, true, "the field must stay hidden for a guest");
 
-    // A regular seller while boosting is locked: still no field, and because
+    // A regular seller without an active paid boost: still no field, and because
     // the hidden field is omitted from the payload, their own edits can never
     // clobber a link somebody else (an admin) put on their listing.
     const phase2Seller = await registerTestUser("Phase Two Seller", "phase2-seller@example.com", DEFAULT_TEST_PASSWORD);
     assert.ok(phase2Seller, "the seller must really be signed in for this to prove anything");
     const phase2SellerCookie = testCookieJar;
-    assert.equal(context.sourceUrlFieldAllowed(), false, "a seller must stay locked out while boosting's paid switch is off");
+    assert.equal(context.sourceUrlFieldAllowed(), false, "a seller must stay locked out without an active paid listing boost");
     context.refreshSourceUrlFieldVisibility();
     assert.equal(elements["sell-source-url-field"].hidden, true, "the field must be hidden for a locked seller");
     elements["sell-source-url-input"].value = "https://example.com/clobber";
     assert.equal(context.sourceUrlFormValue(), undefined, "a hidden field must OMIT the key entirely -- an unrelated edit can never wipe an existing link");
 
-    // ...and gains it the moment boosting unlocks (the advertiser's half of
-    // the permission model), with a really trimmed payload.
+    // A global payment switch alone is NOT proof this seller paid.
     process.env.BOOST_PAYMENTS_ENABLED = "true";
     await context.loadBoostConfig();
-    assert.equal(context.sourceUrlFieldAllowed(), true, "once boosting is unlocked, the seller's own link field must appear");
-    assert.equal(elements["sell-source-url-field"].hidden, false, "the unlocked seller's field must be visible");
-    elements["sell-source-url-input"].value = "  https://example.com/ad  ";
-    assert.equal(context.sourceUrlFormValue(), "https://example.com/ad", "a visible field must send its trimmed value");
-    elements["sell-source-url-input"].value = "";
-
-    // Relock: the field must react BACK to hidden (it tracks the live config,
-    // not a one-way latch)...
-    process.env.BOOST_PAYMENTS_ENABLED = "false";
-    await context.loadBoostConfig();
-    assert.equal(context.sourceUrlFieldAllowed(), false, "relocking must hide the field again for a non-admin");
-    assert.equal(elements["sell-source-url-field"].hidden, true, "and re-hide the actual control");
+    assert.equal(context.sourceUrlFieldAllowed(), false, "enabling checkout globally must not grant unpaid sellers a source link");
 
     // The admin keeps it in EVERY state -- and its label plus the outbound CTA
     // are real translations in all six languages, checked in the rendered DOM
@@ -6144,9 +6167,10 @@ console.log("PASS: NM-A25 fresh page loads -- a real, direct (non-client-side-na
     context.setLanguage("en");
 
     // --- E. Real HTTP, create time. The seller's own cookie, the real server,
-    // the live env: a locked advertiser is refused with the machine-readable
-    // lock code, the same seller gets in the moment the free window closes,
-    // and an admin is never blocked -- whatever the flag says.
+    // the live env: an unpaid advertiser is refused with the machine-readable
+    // lock code even when checkout is globally enabled. A listing is created
+    // without a link, then receives the same durable paid marker the verified
+    // Stripe webhook writes; only then may its owner add a link.
     process.env.BOOST_PAYMENTS_ENABLED = "false";
     delete process.env.BOOST_FREE_UNTIL;
 
@@ -6162,21 +6186,26 @@ console.log("PASS: NM-A25 fresh page loads -- a real, direct (non-client-side-na
       category: "Sports & Outdoor",
       sourceUrl: "https://example.com/locked"
     });
-    assert.equal(lockedCreate.status, 403, "a seller must be refused a source link while boosting is locked");
+    assert.equal(lockedCreate.status, 403, "an unpaid seller must be refused a source link");
     assert.equal((await lockedCreate.json()).code, "SOURCE_LINK_LOCKED", "with the dedicated code the client translates");
 
-    delete process.env.BOOST_PAYMENTS_ENABLED;
-    process.env.BOOST_FREE_UNTIL = "2020-01-01";
-    const unlockedCreate = await phase2Create(phase2SellerCookie, {
-      title: "Phase two open-window kayak",
+    process.env.BOOST_PAYMENTS_ENABLED = "true";
+    const globallyEnabledCreate = await phase2Create(phase2SellerCookie, {
+      title: "Phase two globally enabled but unpaid kayak",
       category: "Sports & Outdoor",
       sourceUrl: "https://example.com/opened"
     });
-    assert.equal(unlockedCreate.status, 200, "once the free-boost window closes, an advertiser's own link must be accepted");
-    const unlockedCreateBody = await unlockedCreate.json();
-    assert.equal(unlockedCreateBody.sourceUrl, "https://example.com/opened", "...and stored through the real API");
-    const phase2OwnerListingId = unlockedCreateBody.id;
-    assert.ok(phase2OwnerListingId, "the unlocked create must really return the new listing");
+    assert.equal(globallyEnabledCreate.status, 403, "a global payment switch must never impersonate proof of payment");
+    assert.equal((await globallyEnabledCreate.json()).code, "SOURCE_LINK_LOCKED");
+
+    const unpaidCreate = await phase2Create(phase2SellerCookie, {
+      title: "Phase two paid-link kayak",
+      category: "Sports & Outdoor"
+    });
+    assert.equal(unpaidCreate.status, 200, "a seller may create the listing before purchasing its boost");
+    const unpaidCreateBody = await unpaidCreate.json();
+    const phase2OwnerListingId = unpaidCreateBody.id;
+    assert.equal(unpaidCreateBody.sourceUrl, null);
 
     // The admin attaches a link under the LOCKED default -- admin access never
     // depends on the window or a deployer flag.
@@ -6238,7 +6267,7 @@ console.log("PASS: NM-A25 fresh page loads -- a real, direct (non-client-side-na
     delete process.env.BOOST_FREE_UNTIL;
 
     const ownerLocked = await phase2Patch(phase2SellerCookie, phase2OwnerListingId, { sourceUrl: "https://example.com/mine" });
-    assert.equal(ownerLocked.status, 403, "the listing's own seller must be refused a link while boosting is locked");
+    assert.equal(ownerLocked.status, 403, "the listing's own seller must be refused a link until payment is verified");
     assert.equal((await ownerLocked.json()).code, "SOURCE_LINK_LOCKED", "with the same lock code as create time");
 
     // On the edit path the permission answer comes FIRST -- even a malformed
@@ -6247,16 +6276,26 @@ console.log("PASS: NM-A25 fresh page loads -- a real, direct (non-client-side-na
     assert.equal(ownerLockedInvalid.status, 403, "while locked, the lock is the edit path's first answer");
     assert.equal((await ownerLockedInvalid.json()).code, "SOURCE_LINK_LOCKED", "...not a shape error");
 
-    // Window-closed unlock again, this time on the EDIT path -- the real
-    // product rule, with no deployer flag involved.
-    delete process.env.BOOST_PAYMENTS_ENABLED;
-    process.env.BOOST_FREE_UNTIL = "2020-01-01";
+    // Simulate the durable state written by the already signature-verified
+    // Stripe webhook. The entitlement is listing-specific and expires with
+    // the purchased boost.
+    const paidAt = Date.now();
+    testDb.prepare("UPDATE listings SET sponsored = 1, boost_expires_at = ?, boost_package = '7d', boost_paid_at = ? WHERE id = ?")
+      .run(paidAt + 7 * 24 * 60 * 60 * 1000, paidAt, phase2OwnerListingId);
+    await loginTestUser("phase2-seller@example.com", DEFAULT_TEST_PASSWORD);
+    await context.refreshListingsCache();
+    context.startEditListing(phase2OwnerListingId);
+    assert.equal(context.sourceUrlFieldAllowed(), true, "an owner editing their actively paid listing must see the source-link field");
+    assert.equal(elements["sell-source-url-field"].hidden, false);
+    elements["sell-source-url-input"].value = "  https://example.com/ad  ";
+    assert.equal(context.sourceUrlFormValue(), "https://example.com/ad", "a visible paid field must send its trimmed value");
+
     const ownerUnlocked = await phase2Patch(phase2SellerCookie, phase2OwnerListingId, { sourceUrl: "https://example.com/mine" });
-    assert.equal(ownerUnlocked.status, 200, "once the free window closes the seller may attach their own link");
+    assert.equal(ownerUnlocked.status, 200, "an active paid boost lets the owner attach their own link");
     assert.equal((await ownerUnlocked.json()).sourceUrl, "https://example.com/mine", "...and it round-trips");
 
     const ownerInvalid = await phase2Patch(phase2SellerCookie, phase2OwnerListingId, { sourceUrl: "javascript:alert(1)" });
-    assert.equal(ownerInvalid.status, 400, "an unlocked seller still can't push a script-bearing URL");
+    assert.equal(ownerInvalid.status, 400, "a paid seller still can't push a script-bearing URL");
     assert.equal((await ownerInvalid.json()).code, "INVALID_SOURCE_URL", "...with the shape code");
 
     // The client's contract, enforced here at the wire: a PATCH that never
@@ -6278,6 +6317,13 @@ console.log("PASS: NM-A25 fresh page loads -- a real, direct (non-client-side-na
 
     const ownerReset = await phase2Patch(phase2SellerCookie, phase2OwnerListingId, { sourceUrl: "https://example.com/back" });
     assert.equal((await ownerReset.json()).sourceUrl, "https://example.com/back", "the seller can set it again for the admin checks below");
+
+    testDb.prepare("UPDATE listings SET boost_expires_at = ? WHERE id = ?").run(Date.now() - 1, phase2OwnerListingId);
+    await context.refreshListingsCache();
+    context.startEditListing(phase2OwnerListingId);
+    assert.equal(context.sourceUrlFieldAllowed(), false, "an expired paid boost must hide the source-link field again");
+    const expiredPaid = await phase2Patch(phase2SellerCookie, phase2OwnerListingId, { sourceUrl: "https://example.com/expired" });
+    assert.equal(expiredPaid.status, 403, "an expired payment entitlement must fail closed server-side");
 
     // Admin, NON-owner, sourceUrl ONLY: allowed while every advertiser is
     // locked -- and it must not smuggle in edit rights over the rest of the ad.
@@ -6306,11 +6352,8 @@ console.log("PASS: NM-A25 fresh page loads -- a real, direct (non-client-side-na
     assert.equal(adminInvalid.status, 400, "even an admin can only store a well-formed URL");
     assert.equal((await adminInvalid.json()).code, "INVALID_SOURCE_URL", "...with the shape code");
 
-    // And a NON-admin non-owner -- even with boosting fully unlocked, so the
-    // lock can't be the reason -- is stopped by pure OWNERSHIP and never
+    // And a NON-admin non-owner is stopped by pure OWNERSHIP and never
     // reaches the admin branch at all.
-    delete process.env.BOOST_PAYMENTS_ENABLED;
-    process.env.BOOST_FREE_UNTIL = "2020-01-01";
     const foreignAttemptBody = await (await phase2Patch(phase2SellerCookie, phase2AdminListingId, { sourceUrl: "https://example.com/loophole" })).json();
     assert.equal(foreignAttemptBody.error, "You can only edit your own listings.", "an unlocked advertiser still cannot attach a link to SOMEONE ELSE's listing");
     assert.ok(!("code" in foreignAttemptBody), "...and it fails as ownership, proving the admin branch is unreachable by a non-admin");
@@ -6335,7 +6378,7 @@ console.log("PASS: NM-A25 fresh page loads -- a real, direct (non-client-side-na
     await context.signOutUser();
   }
 
-  console.log("PASS: Blocket Phase 2 -- the catalog really is 6 Blocket cars + 6 FINN homes (every link https on the source's own host, every hot-linked photo asserted against the same ad id / finnkode the link opens), the real DB and API expose all 12 links (null for ordinary listings), cards render the link as a hardened sibling anchor never nested in the card button with none at all when there's no source, the Sell field ships hidden and gates guest/seller/relocked/admin exactly per the unlock rules (omitted-when-hidden so an unrelated edit can never wipe a link) with its label and outbound CTA localized in all six languages in the rendered DOM, and the REAL endpoints enforce the whole permission model: 403 SOURCE_LINK_LOCKED for locked advertisers at create and edit time, the window-closed unlock really opens for advertisers with no flag involved, 400 INVALID_SOURCE_URL for javascript:/data:/ftp:/credentials/whitespace/overlong/non-string shapes, an empty string clears to NULL, a PATCH without the key leaves the real column untouched, an admin can set the link on anyone's listing but ONLY the link, and even a fully unlocked non-admin is stopped by ownership with the admin branch unreachable.");
+  console.log("PASS: Blocket Phase 2 -- the catalog really is 6 Blocket cars + 6 FINN homes (every link https on the source's own host, every hot-linked photo asserted against the same ad id / finnkode the link opens), the real DB and API expose all 12 links (null for ordinary listings), cards render the link as a hardened sibling anchor never nested in the card button with none at all when there's no source, the Sell field ships hidden and gates guest/unpaid owner/expired paid owner/active paid owner/admin consistently (omitted-when-hidden so an unrelated edit can never wipe a link) with its label and outbound CTA localized in all six languages in the rendered DOM, and the REAL endpoints enforce the whole permission model: 403 SOURCE_LINK_LOCKED for unpaid or expired owners at create and edit time, only a durable verified paid boost unlocks its own listing, 400 INVALID_SOURCE_URL for javascript:/data:/ftp:/credentials/whitespace/overlong/non-string shapes, an empty string clears to NULL, a PATCH without the key leaves the real column untouched, an admin can set the link on anyone's listing but ONLY the link, and even a paid non-admin is stopped by ownership with the admin branch unreachable.");
 }
 }
 

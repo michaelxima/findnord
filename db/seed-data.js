@@ -30,28 +30,29 @@ const MINUTES_AGO = (minutes) => Date.now() - minutes * 60000;
 
 // A broad baseline catalog keeps every category useful on a fresh install.
 // Source-backed Mikazan rows deliberately retain the shop's exact product
-// title, USD price, product URL and CDN image URL supplied by the merchant.
+// title, current SEK price, product URL and CDN image URL supplied by the
+// merchant. `from` marks products whose Shopify variants have a price range.
 const CATALOG_ROWS = [
-  ["mikazan-driveconnect", "DriveConnect Smart Car Screen", "Electronics", "$109.70", "https://mikazan.shop/products/10-26-inch-portable-car-central-control-smart-screen-with-wireless-carplay-android-auto-bluetooth-and-ahd-backup-camera", "https://cdn.shopify.com/s/files/1/1090/4744/7883/files/4FD8F03B4B9ADE9A5BC17B9731BC1FD0.jpg?v=1791158290"],
-  ["mikazan-drivelink", "DriveLink CarPlay Screen Kit", "Electronics", "$76.78", "https://mikazan.shop/products/7-inch-wireless-carplay-portable-car-bluetooth-mp5-player-multimedia-android-projection-navigation-device", "https://cdn.shopify.com/s/files/1/1090/4744/7883/files/32A2F7EC50F8AA22C8127897D35D3D5B.jpg?v=1791158297"],
-  ["mikazan-drivetune", "DriveTune Car Charging Hub", "Electronics", "$19.68", "https://mikazan.shop/products/kc-01-car-charger-with-one-to-two-usb-ports-intelligent-digital-display-qc3-0-fast-charging-multifunctional-car-cigarette-lighter", "https://cdn.shopify.com/s/files/1/1090/4744/7883/files/083E7F9E04723B3C79730E1D2EFBBED1.jpg?v=1791158294"],
-  ["mikazan-babyview", "BabyView Car Monitor Kit", "Electronics", "$60.38", "https://mikazan.shop/products/4-3-inch-private-model-hd-1080p-car-baby-monitor-car-baby-mirror", "https://cdn.shopify.com/s/files/1/1090/4744/7883/files/AC2DF1CE839B53404B1DF74F6869DA47.jpg?v=1791158307"],
+  ["mikazan-driveconnect", "DriveConnect Smart Car Screen", "Electronics", "from 1078", "https://mikazan.shop/products/10-26-inch-portable-car-central-control-smart-screen-with-wireless-carplay-android-auto-bluetooth-and-ahd-backup-camera", "https://cdn.shopify.com/s/files/1/1090/4744/7883/files/4FD8F03B4B9ADE9A5BC17B9731BC1FD0.jpg?v=1791158290"],
+  ["mikazan-drivelink", "DriveLink CarPlay Screen Kit", "Electronics", "755", "https://mikazan.shop/products/7-inch-wireless-carplay-portable-car-bluetooth-mp5-player-multimedia-android-projection-navigation-device", "https://cdn.shopify.com/s/files/1/1090/4744/7883/files/32A2F7EC50F8AA22C8127897D35D3D5B.jpg?v=1791158297"],
+  ["mikazan-drivetune", "DriveTune Car Charging Hub", "Electronics", "from 194", "https://mikazan.shop/products/kc-01-car-charger-with-one-to-two-usb-ports-intelligent-digital-display-qc3-0-fast-charging-multifunctional-car-cigarette-lighter", "https://cdn.shopify.com/s/files/1/1090/4744/7883/files/083E7F9E04723B3C79730E1D2EFBBED1.jpg?v=1791158294"],
+  ["mikazan-babyview", "BabyView Car Monitor Kit", "Electronics", "from 594", "https://mikazan.shop/products/4-3-inch-private-model-hd-1080p-car-baby-monitor-car-baby-mirror", "https://cdn.shopify.com/s/files/1/1090/4744/7883/files/AC2DF1CE839B53404B1DF74F6869DA47.jpg?v=1791158307"],
   ["phone-pixel", "Google Pixel 8 with case", "Phones & Tablets", "4 800 kr"],
   ["phone-ipad", "iPad Air 5th generation", "Phones & Tablets", "5 200 kr"],
   ["phone-galaxy", "Samsung Galaxy S23", "Phones & Tablets", "4 950 kr"],
-  ["mikazan-cozy-pet-bed", "Cozy Quilted Pet Bed", "Home & Furniture", "$34.99", "https://mikazan.shop/products/autumn-and-winter-deep-sleep-creative-cat-litter-quilted-cotton-quilted-plush-slippers-cat-bed-dog-pad-pet-litter", "https://cdn.shopify.com/s/files/1/1090/4744/7883/files/7973A2F65D5F9BD927D938D73179D0BD.jpg?v=1791158272"],
-  ["mikazan-bunny-bed", "Bunny Ears Pet Bed", "Home & Furniture", "$44.99", "https://mikazan.shop/products/cat-litter-dog-litter-rabbit-ears-pet-litter-dog-bed-winter-warm-mat-dog-mat-pet-supplies", "https://cdn.shopify.com/s/files/1/1090/4744/7883/files/0BCDDD5AEBC9AB89B883C36A44DB3AEA__E4_B8_BB_E5_9B_BE-02.jpg?v=1791158285"],
-  ["mikazan-shopify-prompts", "200 Shopify Building & Automation Prompts", "Books & Media", "$9.99", "https://mikazan.shop/products/200-shopify-building-automation-prompts", "https://cdn.shopify.com/s/files/1/1090/4744/7883/files/image_49bf6f72-a8d4-4136-87f0-94d7253df51b.png?v=1791226741"],
+  ["mikazan-cozy-pet-bed", "Cozy Quilted Pet Bed", "Home & Furniture", "344", "https://mikazan.shop/products/autumn-and-winter-deep-sleep-creative-cat-litter-quilted-cotton-quilted-plush-slippers-cat-bed-dog-pad-pet-litter", "https://cdn.shopify.com/s/files/1/1090/4744/7883/files/7973A2F65D5F9BD927D938D73179D0BD.jpg?v=1791158272"],
+  ["mikazan-bunny-bed", "Bunny Ears Pet Bed", "Home & Furniture", "from 443", "https://mikazan.shop/products/cat-litter-dog-litter-rabbit-ears-pet-litter-dog-bed-winter-warm-mat-dog-mat-pet-supplies", "https://cdn.shopify.com/s/files/1/1090/4744/7883/files/0BCDDD5AEBC9AB89B883C36A44DB3AEA__E4_B8_BB_E5_9B_BE-02.jpg?v=1791158285"],
+  ["mikazan-shopify-prompts", "200 Shopify Building & Automation Prompts", "Books & Media", "99", "https://mikazan.shop/products/200-shopify-building-automation-prompts", "https://cdn.shopify.com/s/files/1/1090/4744/7883/files/image_49bf6f72-a8d4-4136-87f0-94d7253df51b.png?v=1791226741"],
   ["book-nordic-cooking", "The Nordic Cookbook", "Books & Media", "280 kr"],
   ["book-vinyl-jazz", "Scandinavian jazz vinyl collection", "Books & Media", "450 kr"],
   ["book-language-set", "Swedish language learning set", "Books & Media", "190 kr"],
-  ["mikazan-boldline-pants", "Boldline High-Waist Pants", "Fashion", "$69.99", "https://mikazan.shop/products/casual-pants-with-high-waist-flower-gray-broken-seam-thick-cotton-rope-wide-version-curved-knife-guard-pants", "https://cdn.shopify.com/s/files/1/1090/4744/7883/files/16A23342AFD243B030F9CFBA8FFFE651.jpg?v=1791158285"],
-  ["mikazan-feral-wife", "Feral Wife Statement Top", "Fashion", "$36.40", "https://mikazan.shop/products/feral-wife-leopard-print-hoodie", "https://cdn.shopify.com/s/files/1/1090/4744/7883/files/0505F5949789E7F516569F13973E22E0.jpg?v=1791158335"],
+  ["mikazan-boldline-pants", "Boldline High-Waist Pants", "Fashion", "688", "https://mikazan.shop/products/casual-pants-with-high-waist-flower-gray-broken-seam-thick-cotton-rope-wide-version-curved-knife-guard-pants", "https://cdn.shopify.com/s/files/1/1090/4744/7883/files/16A23342AFD243B030F9CFBA8FFFE651.jpg?v=1791158285"],
+  ["mikazan-feral-wife", "Feral Wife Statement Top", "Fashion", "from 358", "https://mikazan.shop/products/feral-wife-leopard-print-hoodie", "https://cdn.shopify.com/s/files/1/1090/4744/7883/files/0505F5949789E7F516569F13973E22E0.jpg?v=1791158335"],
   ["fashion-wool-coat", "Classic wool winter coat", "Fashion", "1 100 kr"],
   ["baby-wooden-toys", "Wooden toddler toy bundle", "Baby & Kids", "320 kr"],
   ["baby-high-chair", "Adjustable wooden high chair", "Baby & Kids", "700 kr"],
   ["baby-carrier", "Ergonomic baby carrier", "Baby & Kids", "560 kr"],
-  ["mikazan-tactical-gloves", "FieldReady Full-Finger Tactical Gloves", "Sports & Outdoor", "$16.92", "https://mikazan.shop/products/men-s-tactical-gloves-full-finger-anti-slip-combat-gloves-for-military-outdoor-fitness-use", "https://cdn.shopify.com/s/files/1/1090/4744/7883/files/66029084A03C90A7FFE87464FC40E3B5.jpg?v=1791158419"],
+  ["mikazan-tactical-gloves", "FieldReady Full-Finger Tactical Gloves", "Sports & Outdoor", "167", "https://mikazan.shop/products/men-s-tactical-gloves-full-finger-anti-slip-combat-gloves-for-military-outdoor-fitness-use", "https://cdn.shopify.com/s/files/1/1090/4744/7883/files/66029084A03C90A7FFE87464FC40E3B5.jpg?v=1791158419"],
   ["sports-tent", "Four-person trekking tent", "Sports & Outdoor", "1 350 kr"],
   ["sports-skates", "Touring ice skates", "Sports & Outdoor", "620 kr"],
   ["health-yoga-mat", "Natural rubber yoga mat", "Health & Wellness", "390 kr"],
@@ -68,13 +69,13 @@ const CATALOG_ROWS = [
   ["service-tutoring", "Math and physics tutoring", "Services", "300 kr"],
   ["garden-planters", "Raised garden planter pair", "Agriculture & Garden", "600 kr"],
   ["garden-tools", "Garden hand-tool set", "Agriculture & Garden", "250 kr"],
-  ["mikazan-cat-scratcher", "Artful Cat Scratch Board", "Agriculture & Garden", "$27.95", "https://mikazan.shop/products/cats-scratch-board-jute-vertical-wall-mounted-cat-scratcher-durable-non-shedding-pet-cat-claw-board", "https://cdn.shopify.com/s/files/1/1090/4744/7883/files/40B62BDCB13BC0686899356853CE64C2.jpg?v=1791158280"],
+  ["mikazan-cat-scratcher", "Artful Cat Scratch Board", "Agriculture & Garden", "275", "https://mikazan.shop/products/cats-scratch-board-jute-vertical-wall-mounted-cat-scratcher-durable-non-shedding-pet-cat-claw-board", "https://cdn.shopify.com/s/files/1/1090/4744/7883/files/40B62BDCB13BC0686899356853CE64C2.jpg?v=1791158280"],
   ["garden-compost", "Insulated garden composter", "Agriculture & Garden", "780 kr"],
   ["free-moving-boxes", "Moving boxes, bundle of 20", "Free Items", "Free"],
   ["free-desk", "Small writing desk", "Free Items", "Free"],
   ["free-books", "Assorted children's books", "Free Items", "Free"],
   ["free-pallets", "Four clean wooden pallets", "Free Items", "Free"],
-  ["mikazan-duowalk", "DuoWalk Retractable Dog Leash", "Other Items", "$33.28", "https://mikazan.shop/products/dual-double-dog-leash-360-retractable-roulette-3m-led-light-tangle-free-double-ended-traction-rope", "https://cdn.shopify.com/s/files/1/1090/4744/7883/files/6B721051B850DC4C705F311584A226E5.jpg?v=1791158302"],
+  ["mikazan-duowalk", "DuoWalk Retractable Dog Leash", "Other Items", "328", "https://mikazan.shop/products/dual-double-dog-leash-360-retractable-roulette-3m-led-light-tangle-free-double-ended-traction-rope", "https://cdn.shopify.com/s/files/1/1090/4744/7883/files/6B721051B850DC4C705F311584A226E5.jpg?v=1791158302"],
   ["other-sewing-machine", "Vintage sewing machine", "Other Items", "850 kr"],
   ["other-luggage", "Hard-shell luggage set", "Other Items", "900 kr"],
   ["other-binoculars", "Compact waterproof binoculars", "Other Items", "480 kr"]
@@ -108,15 +109,13 @@ const catalogListings = CATALOG_ROWS.map(([id, title, category, price, sourceUrl
   posted: index < 8 ? "Today" : "This week",
   postedAt: MINUTES_AGO(300 + index * 47),
   freshness: index < 8 ? "New today" : "",
-  images: [
-    { css: imageUrl ? `url("${imageUrl}")` : `linear-gradient(135deg, hsl(${(index * 37) % 360} 35% 45%), hsl(${(index * 37 + 45) % 360} 45% 82%))`, aiGenerated: false },
-    ...(GENERATED_CATALOG_IMAGE_IDS.has(id)
-      ? [2, 3].map((position) => ({
-          css: `url("/assets/product-images/generated/${id}-0${position}.webp")`,
-          aiGenerated: true
-        }))
-      : [])
-  ],
+  images: GENERATED_CATALOG_IMAGE_IDS.has(id)
+    ? [
+        { css: `url("/assets/product-images/generated/${id}-02.webp")`, aiGenerated: true },
+        { css: `url("${imageUrl}")`, aiGenerated: false },
+        { css: `url("/assets/product-images/generated/${id}-03.webp")`, aiGenerated: true }
+      ]
+    : [{ css: imageUrl ? `url("${imageUrl}")` : `linear-gradient(135deg, hsl(${(index * 37) % 360} 35% 45%), hsl(${(index * 37 + 45) % 360} 45% 82%))`, aiGenerated: false }],
   description: sourceUrl ? `${title}, available from Mikazan. Open the source listing for full product details.` : `${title} in good condition. Contact the seller for collection details.`,
   seller: sourceUrl ? "Mikazan" : "FindNord community",
   sellerType: sourceUrl ? "Professional seller" : "Private seller",

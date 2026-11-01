@@ -10,7 +10,8 @@ const { productionCatalogListings } = require("../db/seed-data");
 async function main() {
   for (const listing of productionCatalogListings) {
     assert.ok(listing.images.length >= 3 && listing.images.length <= 6, `${listing.id} must ship with 3–6 images`);
-    for (const image of listing.images.slice(1)) {
+    assert.match(listing.images[1].css, /^url\("https:\/\/cdn\.shopify\.com\//, `${listing.id} must retain its external original in the gallery`);
+    for (const image of [listing.images[0], listing.images[2]]) {
       const match = /^url\("(\/assets\/product-images\/generated\/[^"?]+)"\)$/.exec(image.css);
       assert.ok(match, `${listing.id} generated gallery image must use a bundled asset`);
       const assetPath = path.join(__dirname, "..", match[1]);

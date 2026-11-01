@@ -83,10 +83,9 @@ function seedIfEmpty(db) {
 
 // Bundled catalog products are published content rather than disposable demo
 // fixtures, so they are synchronized independently of shouldSeedDemoData().
-// INSERT OR IGNORE makes this safe on every startup: existing rows (including
-// a user's row with a colliding id) are never overwritten. Missing bundled
-// gallery positions are synchronized independently so an existing production
-// catalogue gains newly shipped product photos without duplicating them.
+// INSERT OR IGNORE makes startup idempotent. Rows that still match the exact
+// source-backed Mikazan identity receive current catalogue price/cover/image
+// data; a user-owned row with a colliding id is deliberately left untouched.
 function syncBundledCatalog(db) {
   const insertListing = db.prepare(`
     INSERT OR IGNORE INTO listings
@@ -100,10 +99,19 @@ function syncBundledCatalog(db) {
   const hasImageAtPosition = db.prepare(`
     SELECT 1 FROM listing_images WHERE listing_id = ? AND position = ? LIMIT 1
   `);
+  const updateImageAtPosition = db.prepare(`
+    UPDATE listing_images SET css = ?, ai_generated = ? WHERE listing_id = ? AND position = ?
+  `);
+  const canonicalCatalogRow = db.prepare(`
+    SELECT 1 FROM listings WHERE id = ? AND seller = ? AND seller_id IS NULL AND source_url = ?
+  `);
+  const updateCanonicalCatalogRow = db.prepare(`
+    UPDATE listings SET price = ?, image = ? WHERE id = ?
+  `);
 
   const sync = db.transaction(() => {
     for (const listing of productionCatalogListings) {
-      const result = insertListing.run({
+      insertListing.run({
         id: listing.id,
         title: listing.title,
         category: listing.category,
@@ -128,10 +136,13 @@ function syncBundledCatalog(db) {
         sourceUrl: listing.sourceUrl || null,
         createdAt: listing.postedAt
       });
-      void result;
+      const canonical = Boolean(canonicalCatalogRow.get(listing.id, listing.seller, listing.sourceUrl));
+      if (canonical) updateCanonicalCatalogRow.run(listing.price, listing.images[0].css, listing.id);
       listing.images.forEach((image, index) => {
         if (!hasImageAtPosition.get(listing.id, index)) {
           insertImage.run(listing.id, index, image.css, image.aiGenerated ? 1 : 0);
+        } else if (canonical) {
+          updateImageAtPosition.run(image.css, image.aiGenerated ? 1 : 0, listing.id, index);
         }
       });
     }
@@ -367,6 +378,9 @@ function migrateListingBoostColumns(db) {
   }
   if (!columns.some((column) => column.name === "boost_package")) {
     db.exec("ALTER TABLE listings ADD COLUMN boost_package TEXT");
+  }
+  if (!columns.some((column) => column.name === "boost_paid_at")) {
+    db.exec("ALTER TABLE listings ADD COLUMN boost_paid_at INTEGER");
   }
   const legacyBoostedGrandfatherMs = 365 * 24 * 60 * 60 * 1000;
   db.prepare("UPDATE listings SET boost_expires_at = ?, boost_package = 'legacy' WHERE sponsored = 1 AND boost_expires_at IS NULL").run(

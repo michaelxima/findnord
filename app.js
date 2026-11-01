@@ -100,7 +100,7 @@ const translations = {
     "sell.publishFailed": "Couldn't publish this listing. Please try again.",
     "sell.sourceUrlLabel": "Source link",
     "sell.sourceUrlHint": "Optional. Opens the original listing on its source site.",
-    "sell.sourceUrlLocked": "Adding a source link unlocks when boosting is unlocked.",
+    "sell.sourceUrlLocked": "A source link requires an active paid boost on this listing.",
     "sell.sourceUrlInvalid": "Choose a valid source link starting with https://.",
     "rateLimit.listings": "You're publishing listings too quickly. Try again in {minutes} minutes.",
     "rateLimit.messages": "You're sending messages too quickly. Try again in {minutes} minutes.",
@@ -412,7 +412,7 @@ const translations = {
     "sell.publishFailed": "Annonsen kunde inte publiceras. Försök igen.",
     "sell.sourceUrlLabel": "Källänk",
     "sell.sourceUrlHint": "Valfritt. Öppnar originalannonsen på dess källa.",
-    "sell.sourceUrlLocked": "En källänk kan läggas till när det går att boosta.",
+    "sell.sourceUrlLocked": "En källänk kräver en aktiv betald boost på annonsen.",
     "sell.sourceUrlInvalid": "Välj en giltig källänk som börjar med https://.",
     "rateLimit.listings": "Du publicerar annonser för snabbt. Försök igen om {minutes} minuter.",
     "rateLimit.messages": "Du skickar meddelanden för snabbt. Försök igen om {minutes} minuter.",
@@ -726,7 +726,7 @@ const translations = {
     "sell.publishFailed": "Kunne ikke publisere annonsen. Prøv igjen.",
     "sell.sourceUrlLabel": "Kildelenke",
     "sell.sourceUrlHint": "Valgfritt. Åpner originalannonsen på kilden.",
-    "sell.sourceUrlLocked": "En kildelenke kan legges til når det er mulig å booste.",
+    "sell.sourceUrlLocked": "En kildelenke krever en aktiv betalt boost på annonsen.",
     "sell.sourceUrlInvalid": "Velg en gyldig kildelenke som begynner med https://.",
     "rateLimit.listings": "Du publiserer annonser for raskt. Prøv igjen om {minutes} minutter.",
     "rateLimit.messages": "Du sender meldinger for raskt. Prøv igjen om {minutes} minutter.",
@@ -1038,7 +1038,7 @@ const translations = {
     "sell.publishFailed": "Kunne ikke publicere denne annonce. Prøv igen.",
     "sell.sourceUrlLabel": "Kildelink",
     "sell.sourceUrlHint": "Valgfrit. Åbner originalannoncen på dens kilde.",
-    "sell.sourceUrlLocked": "Et kildelink kan tilføjes, når det er muligt at booste.",
+    "sell.sourceUrlLocked": "Et kildelink kræver et aktivt betalt boost på annoncen.",
     "sell.sourceUrlInvalid": "Vælg et gyldigt kildelink, der begynder med https://.",
     "rateLimit.listings": "Du opretter annoncer for hurtigt. Prøv igen om {minutes} minutter.",
     "rateLimit.messages": "Du sender beskeder for hurtigt. Prøv igen om {minutes} minutter.",
@@ -1350,7 +1350,7 @@ const translations = {
     "sell.publishFailed": "Ilmoituksen julkaiseminen epäonnistui. Yritä uudelleen.",
     "sell.sourceUrlLabel": "Lähdelinkki",
     "sell.sourceUrlHint": "Valinnainen. Avaa alkuperäisen ilmoituksen sen lähdesivustolla.",
-    "sell.sourceUrlLocked": "Lähdelinkin voi lisätä, kun nostaminen on mahdollista.",
+    "sell.sourceUrlLocked": "Lähdelinkki edellyttää ilmoituksen aktiivista maksettua nostoa.",
     "sell.sourceUrlInvalid": "Valitse kelvollinen lähdelinkki, joka alkaa https://.",
     "rateLimit.listings": "Julkaiset ilmoituksia liian nopeasti. Yritä uudelleen {minutes} minuutin kuluttua.",
     "rateLimit.messages": "Lähetät viestejä liian nopeasti. Yritä uudelleen {minutes} minuutin kuluttua.",
@@ -1662,7 +1662,7 @@ const translations = {
     "sell.publishFailed": "Ekki var hægt að birta þessa auglýsingu. Vinsamlegast reyndu aftur.",
     "sell.sourceUrlLabel": "Heimildartengill",
     "sell.sourceUrlHint": "Ekki nauðsynlegt. Opnar upprunalegu auglýsinguna á upprunavefnum.",
-    "sell.sourceUrlLocked": "Hægt er að bæta við heimildartengli þegar boosta er mögulegt.",
+    "sell.sourceUrlLocked": "Heimildartengill krefst virkrar greiddrar auglýsingahækkunar.",
     "sell.sourceUrlInvalid": "Veldu gildan heimildartengil sem byrjar á https://.",
     "rateLimit.listings": "Þú birtir auglýsingar of hratt. Reyndu aftur eftir {minutes} mínútur.",
     "rateLimit.messages": "Þú sendir skilaboð of hratt. Reyndu aftur eftir {minutes} mínútur.",
@@ -1935,7 +1935,7 @@ function imageBackgroundStyle(value) {
   const suffix = match[2].trim();
   const safeSuffix = !suffix || /^center\s*\/\s*cover\s+no-repeat$/i.test(suffix);
   if (!safeSource || !safeSuffix) return escapeHtml(fallback);
-  return escapeHtml(`url("${source}") center / cover no-repeat`);
+  return escapeHtml(`url("${source}") center / contain no-repeat`);
 }
 
 // Phase 3: simple debounce utility for search inputs and other
@@ -3347,8 +3347,8 @@ async function loadBoostConfig() {
   } catch (error) {
     boostConfig = { paymentsEnabled: false, freeUntil: null, freeWindowActive: false, packages: [] };
   }
-  // The source-link field's visibility is decided by this config (see
-  // sourceUrlFieldAllowed), so re-evaluate it once the real answer lands.
+  // Re-evaluate any open form after boost configuration loads. Actual
+  // source-link eligibility is listing-specific (see sourceUrlFieldAllowed).
   refreshSourceUrlFieldVisibility();
 }
 
@@ -4194,8 +4194,25 @@ let draftFilters = defaultFilters();
 
 function parsePriceValue(price) {
   if (price === "Free") return 0;
-  const digits = String(price).replace(/[^\d]/g, "");
-  return digits ? parseInt(digits, 10) : 0;
+  let numeric = String(price).trim().replace(/[^\d.,+-]/g, "");
+  if (!numeric) return 0;
+  const dot = numeric.lastIndexOf(".");
+  const comma = numeric.lastIndexOf(",");
+  if (dot >= 0 && comma >= 0) {
+    const decimalIndex = Math.max(dot, comma);
+    numeric = `${numeric.slice(0, decimalIndex).replace(/[.,]/g, "")}.${numeric.slice(decimalIndex + 1).replace(/[.,]/g, "")}`;
+  } else {
+    const separator = dot >= 0 ? "." : comma >= 0 ? "," : null;
+    if (separator) {
+      const parts = numeric.split(separator);
+      const fraction = parts.pop();
+      numeric = fraction.length >= 1 && fraction.length <= 2
+        ? `${parts.join("")}.${fraction}`
+        : `${parts.join("")}${fraction}`;
+    }
+  }
+  const amount = Number(numeric);
+  return Number.isFinite(amount) ? amount : 0;
 }
 
 function parseDistanceKm(distance) {
@@ -5621,7 +5638,33 @@ function renderSellPhotos() {
 // which knows the listing's own real currency; storage and display are two
 // separate, correctly-separated concerns.
 function formatPrice(rawPrice) {
-  return String(rawPrice || "").replace(/[^0-9]/g, "");
+  const value = String(rawPrice || "").trim();
+  if (!value) return "";
+  if (/^free$/i.test(value)) return "Free";
+
+  const prefix = /^from\b/i.test(value) ? "from " : "";
+  let numeric = value.replace(/[^\d.,+-]/g, "");
+  if (!numeric) return "";
+
+  const dot = numeric.lastIndexOf(".");
+  const comma = numeric.lastIndexOf(",");
+  if (dot >= 0 && comma >= 0) {
+    const decimalIndex = Math.max(dot, comma);
+    numeric = `${numeric.slice(0, decimalIndex).replace(/[.,]/g, "")}.${numeric.slice(decimalIndex + 1).replace(/[.,]/g, "")}`;
+  } else {
+    const separator = dot >= 0 ? "." : comma >= 0 ? "," : null;
+    if (separator) {
+      const parts = numeric.split(separator);
+      const fraction = parts.pop();
+      numeric = fraction.length >= 1 && fraction.length <= 2
+        ? `${parts.join("")}.${fraction}`
+        : `${parts.join("")}${fraction}`;
+    }
+  }
+
+  const amount = Number(numeric);
+  if (!Number.isFinite(amount)) return "";
+  return `${prefix}${amount}`;
 }
 
 // The one place a stored price (plus a listing's own country) becomes a
@@ -5670,7 +5713,8 @@ function formatListingPrice(listing) {
   if (!listing.price) return t("price.placeholder");
   const amount = parsePriceValue(listing.price);
   const formatted = currencyFormatterForCountry(listing.country).format(amount);
-  return isMonthlyRental(listing) ? `${formatted}${t("price.perMonthSuffix")}` : formatted;
+  const withRange = /^from\b/i.test(String(listing.price).trim()) ? `From ${formatted}` : formatted;
+  return isMonthlyRental(listing) ? `${withRange}${t("price.perMonthSuffix")}` : withRange;
 }
 
 // One place that decides where a listing's subtype value comes from: the
@@ -5999,14 +6043,17 @@ async function commitEdit(values) {
 }
 
 // --- Outbound source link field ---------------------------------------------
-// Admins today; advertisers once boosting is unlocked. The SERVER is the real
+// Admins always; sellers only while the listing being edited has a verified,
+// active paid boost. The SERVER is the real
 // gate (scripts/api.js sourceUrlPermissionError) -- this only decides whether
 // the control is shown at all, so a regular seller never sees a field they
 // could not use anyway.
 function sourceUrlFieldAllowed() {
   if (!currentUser) return false;
   if (currentUser.isAdmin) return true;
-  return Boolean(boostConfig && boostConfig.paymentsEnabled);
+  if (!editingListingId) return false;
+  const listing = getMyListings().find((item) => item.id === editingListingId);
+  return Boolean(listing && listing.boostPaidAt && listing.boostExpiresAt > Date.now());
 }
 
 // The field's value when -- and ONLY when -- it is visible, else undefined.

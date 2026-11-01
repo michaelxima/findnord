@@ -453,7 +453,7 @@ The new requirements said categories must be expanded now (NM-A3 explicitly need
 - Real Estate → For Sale, For Rent, Land, Commercial
 - Electronics, Phones & Tablets, Home & Furniture, Fashion, Baby & Kids, Sports & Outdoor, Jobs, Services, Agriculture & Garden, Free Items
 
-Featured categories get a visually distinct treatment in both the chip row (bordered/bold `.chip.featured`) and the Categories tab (tinted background + a "Popular" badge, `.category-tile.featured` / `.popular-badge`) — screenshot below.
+Featured categories get a visually distinct treatment in both the chip row (bordered/bold `.chip.featured`) and the Categories tab (tinted background via `.category-tile.featured`) — screenshot below. *(Update: the "Popular" badge itself — `.popular-badge` — was later removed as part of the Blocket-style card cleanup, since it was hardcoded-English tag clutter; the tinted `featured` treatment remains.)*
 
 Existing seed listings were remapped into the new taxonomy (`Home`→`Home & Furniture`, `Electronics`→`Phones & Tablets` for the iPhone, `Kids`→`Baby & Kids`, `Outdoor`→`Sports & Outdoor`), and two new listings were added to prove the flagship verticals are real, filterable data and not just labels: a Volvo V60 (`Vehicles` / `Cars`) and a 2-room rental apartment (`Real Estate` / `For Rent`, sponsored). Filtering the Vehicles chip returns exactly the Volvo listing — verified live, see measurements below.
 

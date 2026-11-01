@@ -79,6 +79,7 @@ CREATE TABLE IF NOT EXISTS listings (
   sponsored INTEGER NOT NULL DEFAULT 0,
   boost_expires_at INTEGER,
   boost_package TEXT,
+  boost_paid_at INTEGER,
   status TEXT NOT NULL DEFAULT 'active',
   -- NM-A21: kept deliberately separate from `status` (active/reserved/sold,
   -- which the SELLER controls) -- an admin hiding a reported listing is a

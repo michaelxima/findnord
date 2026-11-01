@@ -176,6 +176,7 @@ function rowToListing(db, row) {
     sponsored: Boolean(row.boost_expires_at && row.boost_expires_at > Date.now()),
     boostExpiresAt: row.boost_expires_at || null,
     boostPackage: row.boost_package || null,
+    boostPaidAt: row.boost_paid_at || null,
     // Outbound source link (admin-set, or advertiser-set once boosting is
     // unlocked). NULL renders no source button -- see schema.sql's column note.
     sourceUrl: row.source_url || null,
@@ -314,17 +315,20 @@ function normalizeSourceUrl(raw) {
   return { value: parsed.toString() };
 }
 
-// Returns null when the requester may write a source link, or the error body
-// to reject with. Admins always pass; everyone else waits for boosting to be
-// unlocked, which is exactly boosting's own payment switch being live
-// (scripts/boost.js isBoostPaymentsEnabled: an explicit BOOST_PAYMENTS_ENABLED
-// wins either way, otherwise the free window has to have closed first). While
-// boosting is still frozen inside the free window, links stay admin-only.
-function sourceUrlPermissionError(user, db) {
+// Returns null when the requester may write a source link. Admins always pass.
+// A seller passes only for their own listing while a Stripe-paid boost is
+// active. `boost_paid_at` is written exclusively by the verified Stripe
+// webhook; free promotional boosts never create a paid entitlement.
+function sourceUrlPermissionError(user, db, listingId) {
   if (user && user.isAdmin) return null;
-  if (isBoostPaymentsEnabled(db)) return null;
+  if (user && listingId) {
+    const paid = db.prepare(
+      "SELECT 1 FROM listings WHERE id = ? AND seller_id = ? AND boost_paid_at IS NOT NULL AND boost_expires_at > ?"
+    ).get(listingId, user.id, Date.now());
+    if (paid) return null;
+  }
   return {
-    error: "Adding a source link unlocks when boosting is unlocked.",
+    error: "Adding a source link requires an active paid boost on this listing.",
     code: "SOURCE_LINK_LOCKED"
   };
 }
@@ -501,7 +505,7 @@ function createApiRouter(db, options = {}) {
       const pkg = findBoostPackage(packageId);
       if (listingId && pkg) {
         const expiresAt = Date.now() + boostDurationMs(pkg);
-        db.prepare("UPDATE listings SET sponsored = 1, boost_expires_at = ?, boost_package = ? WHERE id = ?").run(expiresAt, pkg.id, listingId);
+        db.prepare("UPDATE listings SET sponsored = 1, boost_expires_at = ?, boost_package = ?, boost_paid_at = ? WHERE id = ?").run(expiresAt, pkg.id, Date.now(), listingId);
       }
     }
     res.json({ received: true });
@@ -660,7 +664,7 @@ function createApiRouter(db, options = {}) {
     }
 
     const expiresAt = Date.now() + boostDurationMs(pkg);
-    db.prepare("UPDATE listings SET sponsored = 1, boost_expires_at = ?, boost_package = ? WHERE id = ?").run(expiresAt, pkg.id, listing.id);
+    db.prepare("UPDATE listings SET sponsored = 1, boost_expires_at = ?, boost_package = ?, boost_paid_at = NULL WHERE id = ?").run(expiresAt, pkg.id, listing.id);
     const row = db.prepare("SELECT * FROM listings WHERE id = ?").get(listing.id);
     res.json(rowToListing(db, row));
   });
@@ -678,7 +682,7 @@ function createApiRouter(db, options = {}) {
       res.status(403).json({ error: "You can only unboost your own listings.", code: "NOT_YOUR_LISTING" });
       return;
     }
-    db.prepare("UPDATE listings SET sponsored = 0, boost_expires_at = NULL, boost_package = NULL WHERE id = ?").run(listing.id);
+    db.prepare("UPDATE listings SET sponsored = 0, boost_expires_at = NULL, boost_package = NULL, boost_paid_at = NULL WHERE id = ?").run(listing.id);
     const row = db.prepare("SELECT * FROM listings WHERE id = ?").get(listing.id);
     res.json(rowToListing(db, row));
   });
@@ -855,6 +859,7 @@ function createApiRouter(db, options = {}) {
         sponsored: Boolean(row.boost_expires_at && row.boost_expires_at > Date.now()),
         boostExpiresAt: row.boost_expires_at || null,
         boostPackage: row.boost_package || null,
+        boostPaidAt: row.boost_paid_at || null,
         sourceUrl: row.source_url || null,
         status: row.status || "active",
         adminHidden: Boolean(row.admin_hidden),
@@ -902,7 +907,8 @@ function createApiRouter(db, options = {}) {
     }
 
     // Outbound source links: shape-checked first, then permission-checked
-    // (admins always, advertisers only once boosting is unlocked) -- both
+    // (admins always; owners only after a verified, still-active paid boost)
+    // -- both
     // server-side, so a direct API call can't skip the client's field gating.
     const normalizedSourceUrl = normalizeSourceUrl(fields.sourceUrl);
     if (normalizedSourceUrl.error) {
@@ -1151,7 +1157,7 @@ function createApiRouter(db, options = {}) {
     // for the boost unlock. Rejecting (rather than silently dropping) keeps
     // the failure explicit and translatable on the client.
     if (Object.prototype.hasOwnProperty.call(columnFields, "sourceUrl")) {
-      const ownerSourcePermission = sourceUrlPermissionError(req.currentUser, db);
+      const ownerSourcePermission = sourceUrlPermissionError(req.currentUser, db, req.params.id);
       if (ownerSourcePermission) {
         res.status(403).json(ownerSourcePermission);
         return;
