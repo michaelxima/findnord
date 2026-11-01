@@ -7,7 +7,8 @@
     "node": ">=22.0.0 <23.0.0"
   },
   "scripts": {
-    "test": "node tests/e2e.js",
+    "test": "node tests/image-storage.js && node tests/e2e.js",
+    "test:image-storage": "node tests/image-storage.js",
     "serve": "node scripts/server.js",
     "start": "node scripts/server.js"
   },
@@ -16,7 +17,8 @@
     "@sentry/node": "^8.25.0",
     "better-sqlite3": "^13.0.3",
     "compression": "^1.8.2",
-    "express": "^5.2.1"
+    "express": "^5.2.1",
+    "sharp": "^0.34.5"
   },
   "devDependencies": {
     "@playwright/test": "^1.63.0"

@@ -81,7 +81,7 @@ for (const [id, title, price, sourceUrl, imageUrl] of expectedMikazanProducts) {
 
     syncDb = openDatabase(syncDbPath);
     assert.equal(syncDb.prepare("SELECT COUNT(*) AS count FROM listings WHERE id = ?").get("mikazan-driveconnect").count, 1, "an existing database must gain a missing bundled catalog row");
-    assert.equal(syncDb.prepare("SELECT COUNT(*) AS count FROM listing_images WHERE listing_id = ?").get("mikazan-driveconnect").count, 1, "a newly synchronized catalog row must gain its image");
+    assert.equal(syncDb.prepare("SELECT COUNT(*) AS count FROM listing_images WHERE listing_id = ?").get("mikazan-driveconnect").count, 3, "a newly synchronized catalog row must gain its complete three-image gallery");
     assert.equal(syncDb.prepare("SELECT title FROM listings WHERE id = ?").get(preservedId).title, "User-preserved custom title", "catalog sync must never overwrite an existing row");
     const listingCountAfterSync = syncDb.prepare("SELECT COUNT(*) AS count FROM listings").get().count;
     const imageCountAfterSync = syncDb.prepare("SELECT COUNT(*) AS count FROM listing_images").get().count;
@@ -939,7 +939,9 @@ assert.match(imageStorageJs, /INLINE_DATA_URL_PATTERN/, "must recognize the exac
 assert.doesNotMatch(imageStorageJs, /require\("(?:aws-sdk|@aws-sdk)/, "Phase 2 is local disk only -- no cloud storage yet");
 
 assert.match(apiJs, /const \{ saveImageIfInline, deleteFileIfLocal \} = createImageStorage\(options\.uploadsDir\)/, "the listings endpoint must actually use the file-storage helper");
-assert.match(apiJs, /saveImageIfInline\(image\.css, `\$\{id\}-\$\{index\}`\)/, "every uploaded/AI photo must be written to a real file, not stored inline");
+assert.match(apiJs, /await saveImageRecord\(input\.css, `\$\{listingId\}-\$\{index\}-\$\{Date\.now\(\)\}`/, "every uploaded/AI photo must be optimized and written to a real file, not stored inline");
+assert.match(imageStorageJs, /const MAX_IMAGE_BYTES = 1_000_000;/, "the server must enforce a hard sub-1MB file limit independently of the browser");
+assert.match(imageStorageJs, /outputMetadata\.width !== inputMetadata\.width \|\| outputMetadata\.height !== inputMetadata\.height/, "compression must preserve pixel dimensions");
 assert.doesNotMatch(apiJs, /image: fields\.image \|\| ""/, "the listing's cover field must go through file storage too, not store the client's raw (possibly inline) value directly");
 
 assert.match(dbJs, /function migrateInlineImagesToFiles\(db, uploadsDir\)/, "a database created before real file storage existed must self-heal on startup");
@@ -1112,8 +1114,8 @@ assert.match(rateLimitJs, /function resetRateLimiterState\(\)/);
 assert.doesNotMatch(rateLimitJs, /require\(["'](?:express-rate-limit|rate-limiter-flexible)["']\)/, "no new npm dependency for rate limiting");
 assert.match(
   fs.readFileSync(path.join(root, "package.json"), "utf8"),
-  /"dependencies": \{\s*\n\s*"@aws-sdk\/client-ses":.*\n\s*"@sentry\/node":.*\n\s*"better-sqlite3":.*\n\s*"compression":.*\n\s*"express":.*\n\s*\}/,
-  "Phase 2 adds @aws-sdk/client-ses (SES email) and @sentry/node (error tracking) on top of the Phase 0 baseline (better-sqlite3, compression, express)"
+  /"dependencies": \{\s*\n\s*"@aws-sdk\/client-ses":.*\n\s*"@sentry\/node":.*\n\s*"better-sqlite3":.*\n\s*"compression":.*\n\s*"express":.*\n\s*"sharp":.*\n\s*\}/,
+  "runtime dependencies must include the existing platform services plus Sharp for server-side image verification and optimization"
 );
 
 assert.match(schemaSql, /CREATE TABLE IF NOT EXISTS password_reset_tokens/);
@@ -1213,11 +1215,11 @@ assert.match(apiJs, /scope: "reports-create",\s*\n\s*windowMs: ONE_DAY_MS,\s*\n\
 // shared factory itself, so every scope gets it automatically).
 assert.match(rateLimitJs, /console\.warn\(\s*\n\s*`\[RateLimit\] blocked scope=\$\{scope\} key=\$\{keyFn\(req\)/, "a rate-limit trip must log a real, greppable [RateLimit] line with the real key, route, and count/max");
 
-// Phase 2 adds @aws-sdk/client-ses (SES email) and @sentry/node (error tracking) on top of the Phase 0 baseline.
+// Runtime dependency inventory, including server-side image processing.
 assert.match(
   fs.readFileSync(path.join(root, "package.json"), "utf8"),
-  /"dependencies": \{\s*\n\s*"@aws-sdk\/client-ses":.*\n\s*"@sentry\/node":.*\n\s*"better-sqlite3":.*\n\s*"compression":.*\n\s*"express":.*\n\s*\}/,
-  "Phase 2 adds @aws-sdk/client-ses (SES email) and @sentry/node (error tracking) on top of the Phase 0 baseline (better-sqlite3, compression, express)"
+  /"dependencies": \{\s*\n\s*"@aws-sdk\/client-ses":.*\n\s*"@sentry\/node":.*\n\s*"better-sqlite3":.*\n\s*"compression":.*\n\s*"express":.*\n\s*"sharp":.*\n\s*\}/,
+  "runtime dependencies must include the existing platform services plus Sharp for server-side image verification and optimization"
 );
 
 // Deployment-readiness audit finding: no .env.example/README existed
@@ -1375,6 +1377,25 @@ class FakeFileReader {
 }
 
 function makeFakeCanvas() {
+  const validJpeg = Buffer.from(
+    "/9j/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAACAAIDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAj/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAwT/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCbAFAH/9k=",
+    "base64"
+  );
+  function paddedValidJpeg(targetBytes) {
+    const parts = [validJpeg.subarray(0, 2)];
+    let remaining = Math.max(0, targetBytes - validJpeg.length);
+    while (remaining >= 4) {
+      const payloadLength = Math.min(65533, remaining - 4);
+      const header = Buffer.alloc(4);
+      header[0] = 0xff;
+      header[1] = 0xfe;
+      header.writeUInt16BE(payloadLength + 2, 2);
+      parts.push(header, Buffer.alloc(payloadLength, 0x41));
+      remaining -= payloadLength + 4;
+    }
+    parts.push(validJpeg.subarray(2));
+    return Buffer.concat(parts);
+  }
   const canvas = {
     width: 0,
     height: 0,
@@ -1382,8 +1403,7 @@ function makeFakeCanvas() {
     toDataURL(type, quality) {
       const q = quality === undefined ? 1 : quality;
       const bytes = Math.round(canvas.width * canvas.height * q * 1.5);
-      const base64Length = Math.ceil(Math.max(bytes, 0) / 3) * 4;
-      return `data:image/jpeg;base64,${"A".repeat(base64Length)}`;
+      return `data:image/jpeg;base64,${paddedValidJpeg(bytes).toString("base64")}`;
     }
   };
   return canvas;
@@ -2936,6 +2956,17 @@ elements["sell-description-input"].value = "Testing that all 6 photos are actual
 const published = await context.publishListing();
 assert.ok(published, "publish must succeed once signed in");
 assert.equal(published.images.length, 6, "all 6 photos must be persisted on the listing, not just the cover");
+const publishedImageRows = testDb.prepare("SELECT * FROM listing_images WHERE listing_id = ? ORDER BY position").all(published.id);
+assert.equal(publishedImageRows.length, 6, "every uploaded image must have its own durable database row");
+publishedImageRows.forEach((row) => {
+  assert.ok(row.byte_size > 0 && row.byte_size < 1_000_000, "every stored upload must be smaller than 1 MB");
+  assert.equal(row.mime_type, "image/jpeg", "the stored MIME type must be recorded");
+  assert.match(row.sha256, /^[a-f0-9]{64}$/, "the stored bytes must have a durable SHA-256 fingerprint");
+  assert.ok(row.storage_key, "the durable storage key must be recorded");
+  assert.equal(row.source_type, "upload", "ordinary user photos must be identified as uploads");
+  assert.equal(row.uploaded_by, published.sellerId, "the image row must retain its real authenticated owner");
+  assert.ok(row.created_at > 0, "the image row must retain its creation time");
+});
 assert.match(elements["listing-grid"].innerHTML, /Six-photo test lamp/, "the published listing must actually appear on Browse");
 assert.doesNotMatch(elements["listing-grid"].innerHTML, /photo-count-badge/, "Browse cards must not carry the photo-count tag either");
 assert.match(elements["listing-detail"].innerHTML, /id="detail-gallery-wrap"/);
@@ -2984,7 +3015,7 @@ assert.equal((elements["sell-photo-grid"].innerHTML.match(/class="photo-tile"/g)
 // retains as much quality as the budget allows rather than over-compressing.
 const MAX_PHOTO_BYTES_EXPECTED = 1024 * 1024;
 await uploadFakePhoto("W2000H2000");
-let tileMatch = elements["sell-photo-grid"].innerHTML.match(/url\(data:image\/jpeg;base64,(A+)\)/);
+let tileMatch = elements["sell-photo-grid"].innerHTML.match(/url\(data:image\/jpeg;base64,([A-Za-z0-9+/=]+)\)/);
 assert.ok(tileMatch, "the uploaded photo must render as a real embedded image, not a CSS placeholder");
 const firstPhotoBytes = Math.ceil((tileMatch[1].length * 3) / 4);
 assert.ok(firstPhotoBytes <= MAX_PHOTO_BYTES_EXPECTED, `uploaded photo must be resized to <= 1MB (was ${firstPhotoBytes} bytes)`);
@@ -2994,7 +3025,7 @@ assert.match(elements["sell-photo-grid"].innerHTML, /<span class="cover-badge">C
 // A second, smaller photo must also upload for real, and it must be offered
 // a "Make cover" control since it is not (yet) the featured photo.
 await uploadFakePhoto("W300H300");
-const tileMatches = [...elements["sell-photo-grid"].innerHTML.matchAll(/<div class="photo-tile" style="background: url\(data:image\/jpeg;base64,(A+)\)/g)];
+const tileMatches = [...elements["sell-photo-grid"].innerHTML.matchAll(/<div class="photo-tile" style="background: url\(data:image\/jpeg;base64,([A-Za-z0-9+/=]+)\)/g)];
 assert.equal(tileMatches.length, 2, "both uploaded photos must render as real tiles");
 const secondPhotoBytes = tileMatches[1][1].length;
 assert.match(elements["sell-photo-grid"].innerHTML, /data-make-cover="1"/, "the non-cover photo must offer a Make cover control");
@@ -3003,7 +3034,7 @@ assert.doesNotMatch(elements["sell-photo-grid"].innerHTML, /data-make-cover="0"/
 // Selecting the second photo as the featured image must move it to the
 // cover position — the same convention publishing already relies on.
 context.setSellPhotoCover(1);
-const reorderedMatches = [...elements["sell-photo-grid"].innerHTML.matchAll(/<div class="photo-tile" style="background: url\(data:image\/jpeg;base64,(A+)\)/g)];
+const reorderedMatches = [...elements["sell-photo-grid"].innerHTML.matchAll(/<div class="photo-tile" style="background: url\(data:image\/jpeg;base64,([A-Za-z0-9+/=]+)\)/g)];
 assert.equal(reorderedMatches[0][1].length, secondPhotoBytes, "the newly-chosen featured photo must become the first (cover) tile");
 assert.match(elements["sell-photo-grid"].innerHTML, /data-make-cover="1"/, "the previous cover photo must now offer its own Make cover control");
 
@@ -3740,6 +3771,12 @@ assert.equal(editedListing.id, managedListing.id, "editing must update the SAME 
 assert.equal(editedListing.title, "Vintage record player, price drop");
 assert.equal(editedListing.price, "650", "the STORED price is now just the raw digits -- see NM-A19, formatListingPrice() is what turns it into a real currency string for display");
 assert.equal(editedListing.images.length, 2, "both the existing and the newly added photo must be saved");
+const editedImageRows = testDb.prepare("SELECT * FROM listing_images WHERE listing_id = ? ORDER BY position").all(editedListing.id);
+assert.equal(editedImageRows.length, 2, "editing must replace the image database rows with the exact current gallery");
+editedImageRows.forEach((row) => {
+  assert.ok(row.byte_size > 0 && row.byte_size < 1_000_000, "edited image rows must retain the server-side size guarantee");
+  assert.equal(row.uploaded_by, editedListing.sellerId, "edited image rows must retain the authenticated owner");
+});
 assert.equal(elements["sell-title"].textContent, "Sell in under two minutes", "after saving an edit, the form must return to create mode");
 assert.equal(elements["sell-publish"].textContent, "Publish listing");
 assert.match(elements["listing-detail"].innerHTML, /Vintage record player, price drop/, "saving an edit must reopen the (now updated) listing");

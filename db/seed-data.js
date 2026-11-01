@@ -80,6 +80,21 @@ const CATALOG_ROWS = [
   ["other-binoculars", "Compact waterproof binoculars", "Other Items", "480 kr"]
 ];
 
+const GENERATED_CATALOG_IMAGE_IDS = new Set([
+  "mikazan-driveconnect",
+  "mikazan-drivelink",
+  "mikazan-drivetune",
+  "mikazan-babyview",
+  "mikazan-cozy-pet-bed",
+  "mikazan-bunny-bed",
+  "mikazan-shopify-prompts",
+  "mikazan-boldline-pants",
+  "mikazan-feral-wife",
+  "mikazan-tactical-gloves",
+  "mikazan-cat-scratcher",
+  "mikazan-duowalk"
+]);
+
 const catalogListings = CATALOG_ROWS.map(([id, title, category, price, sourceUrl, imageUrl], index) => ({
   id,
   title,
@@ -93,7 +108,15 @@ const catalogListings = CATALOG_ROWS.map(([id, title, category, price, sourceUrl
   posted: index < 8 ? "Today" : "This week",
   postedAt: MINUTES_AGO(300 + index * 47),
   freshness: index < 8 ? "New today" : "",
-  images: [{ css: imageUrl ? `url("${imageUrl}")` : `linear-gradient(135deg, hsl(${(index * 37) % 360} 35% 45%), hsl(${(index * 37 + 45) % 360} 45% 82%))`, aiGenerated: false }],
+  images: [
+    { css: imageUrl ? `url("${imageUrl}")` : `linear-gradient(135deg, hsl(${(index * 37) % 360} 35% 45%), hsl(${(index * 37 + 45) % 360} 45% 82%))`, aiGenerated: false },
+    ...(GENERATED_CATALOG_IMAGE_IDS.has(id)
+      ? [2, 3].map((position) => ({
+          css: `url("/assets/product-images/generated/${id}-0${position}.webp")`,
+          aiGenerated: true
+        }))
+      : [])
+  ],
   description: sourceUrl ? `${title}, available from Mikazan. Open the source listing for full product details.` : `${title} in good condition. Contact the seller for collection details.`,
   seller: sourceUrl ? "Mikazan" : "FindNord community",
   sellerType: sourceUrl ? "Professional seller" : "Private seller",

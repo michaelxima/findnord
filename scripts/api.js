@@ -428,7 +428,52 @@ const reportCreateRateLimiter = rateLimiter({
 
 function createApiRouter(db, options = {}) {
   const { saveImageIfInline, deleteFileIfLocal } = createImageStorage(options.uploadsDir);
+  const { saveImageRecord } = createImageStorage(options.uploadsDir);
+  void saveImageIfInline; // retained as the backwards-compatible storage API
   const router = express.Router();
+
+  const insertListingImage = db.prepare(`
+    INSERT INTO listing_images
+      (listing_id, position, css, ai_generated, mime_type, byte_size, width, height, sha256, storage_key, source_type, uploaded_by, created_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `);
+
+  function persistListingImageRow(listingId, position, image) {
+    insertListingImage.run(
+      listingId,
+      position,
+      image.css,
+      image.aiGenerated ? 1 : 0,
+      image.mimeType,
+      image.byteSize,
+      image.width,
+      image.height,
+      image.sha256,
+      image.storageKey,
+      image.sourceType,
+      image.uploadedBy,
+      image.createdAt
+    );
+  }
+
+  async function storeListingImages(rawImages, listingId, uploadedBy) {
+    const stored = [];
+    try {
+      for (let index = 0; index < rawImages.length; index += 1) {
+        const input = rawImages[index] || {};
+        const aiGenerated = Boolean(input.aiGenerated);
+        const record = await saveImageRecord(input.css, `${listingId}-${index}-${Date.now()}`, {
+          uploadedBy,
+          sourceType: aiGenerated ? "ai" : "upload"
+        });
+        stored.push({ ...record, aiGenerated });
+      }
+      return stored;
+    } catch (error) {
+      stored.forEach((image) => deleteFileIfLocal(image.css));
+      throw error;
+    }
+  }
 
   // NM-A18: the Stripe webhook needs the RAW request body to verify its
   // signature (HMAC over the exact bytes Stripe sent) -- registered here,
@@ -833,7 +878,7 @@ function createApiRouter(db, options = {}) {
     res.json(row ? rowToListing(db, row) : null);
   });
 
-  router.post("/listings", requireSession, listingCreateRateLimiter, (req, res) => {
+  router.post("/listings", requireSession, listingCreateRateLimiter, async (req, res) => {
     const fields = req.body || {};
     const id = makeId("listing");
 
@@ -897,7 +942,12 @@ function createApiRouter(db, options = {}) {
     // never did, so a request that bypassed the client's own cap (a direct
     // API call, not the real Sell form) could attach unlimited images to one
     // listing. Same cap, same place, on create too.
-    const rawImages = (Array.isArray(fields.images) ? fields.images : []).slice(0, MAX_LISTING_PHOTOS);
+    const submittedImages = Array.isArray(fields.images) ? fields.images : [];
+    const rawImages = (submittedImages.length > 0
+      ? submittedImages
+      : fields.image
+        ? [{ css: fields.image, aiGenerated: Boolean(fields.aiPhoto) }]
+        : []).slice(0, MAX_LISTING_PHOTOS);
 
     // Every real (uploaded or AI-generated) photo arrives here as an inline
     // `url(data:...)` CSS value; saveImageIfInline() writes it to a real file
@@ -910,11 +960,17 @@ function createApiRouter(db, options = {}) {
     // transaction can't roll back bytes already written to disk, so there's
     // nothing to gain by including them, and every DB write immediately
     // below is what actually needs to be atomic.
-    const images = rawImages.map((image, index) => ({
-      css: saveImageIfInline(image.css, `${id}-${index}`),
-      aiGenerated: Boolean(image.aiGenerated)
-    }));
-    const coverCss = images[0] ? images[0].css : saveImageIfInline(fields.image || "", `${id}-cover`);
+    let images;
+    try {
+      images = await storeListingImages(rawImages, id, req.currentUser.id);
+    } catch (error) {
+      res.status(400).json({
+        error: error.message || "The image could not be stored.",
+        code: error.code || "IMAGE_STORAGE_FAILED"
+      });
+      return;
+    }
+    const coverCss = images[0] ? images[0].css : "";
 
     const insertListing = db.prepare(
       `INSERT INTO listings
@@ -922,7 +978,6 @@ function createApiRouter(db, options = {}) {
        VALUES
         (@id, @title, @category, @subtype, @price, @locality, @region, @country, @distance, @condition, @posted, @postedAt, @freshness, @aiPhoto, @image, @description, @seller, @sellerId, @sellerType, @trust, @sponsored, @status, @sourceUrl, @createdAt)`
     );
-    const insertImage = db.prepare("INSERT INTO listing_images (listing_id, position, css, ai_generated) VALUES (?, ?, ?, ?)");
     // Deployment-readiness audit finding: the listing INSERT and its image
     // INSERTs ran as separate, unguarded statements -- a crash mid-way left
     // a listing with zero/partial images. db.transaction(...) makes this one
@@ -930,7 +985,7 @@ function createApiRouter(db, options = {}) {
     // migrateInlineImagesToFiles() (scripts/db.js) already use.
     const createListing = db.transaction((listingFields) => {
       insertListing.run(listingFields);
-      images.forEach((image, index) => insertImage.run(id, index, image.css, image.aiGenerated ? 1 : 0));
+      images.forEach((image, index) => persistListingImageRow(id, index, image));
     });
 
     createListing({
@@ -981,7 +1036,7 @@ function createApiRouter(db, options = {}) {
   // request could simply set to someone else's real user id and pass the
   // same check. requireSession also means an anonymous guest can't reach
   // this at all.
-  router.patch("/listings/:id", requireSession, (req, res) => {
+  router.patch("/listings/:id", requireSession, async (req, res) => {
     const { requesterId, images: rawImages, ...columnFields } = req.body || {};
     void requesterId; // no longer trusted -- kept out of columnFields, never read
     const existing = db.prepare("SELECT * FROM listings WHERE id = ?").get(req.params.id);
@@ -1056,10 +1111,20 @@ function createApiRouter(db, options = {}) {
     // unlinked from disk so editing doesn't leave orphaned photos behind.
     if (Array.isArray(rawImages)) {
       const oldImages = db.prepare("SELECT css FROM listing_images WHERE listing_id = ?").all(req.params.id);
-      const newImages = rawImages.slice(0, MAX_LISTING_PHOTOS).map((image, index) => ({
-        css: saveImageIfInline(image.css, `${req.params.id}-${index}-${Date.now()}`),
-        aiGenerated: Boolean(image.aiGenerated)
-      }));
+      let newImages;
+      try {
+        newImages = await storeListingImages(
+          rawImages.slice(0, MAX_LISTING_PHOTOS),
+          req.params.id,
+          req.currentUser.id
+        );
+      } catch (error) {
+        res.status(400).json({
+          error: error.message || "The image could not be stored.",
+          code: error.code || "IMAGE_STORAGE_FAILED"
+        });
+        return;
+      }
       const newCssSet = new Set(newImages.map((image) => image.css));
       oldImages.forEach((old) => {
         if (!newCssSet.has(old.css)) deleteFileIfLocal(old.css);
@@ -1072,8 +1137,7 @@ function createApiRouter(db, options = {}) {
       // the DB writes below are what actually needs to be atomic.
       const replaceImages = db.transaction((imagesToInsert) => {
         db.prepare("DELETE FROM listing_images WHERE listing_id = ?").run(req.params.id);
-        const insertImage = db.prepare("INSERT INTO listing_images (listing_id, position, css, ai_generated) VALUES (?, ?, ?, ?)");
-        imagesToInsert.forEach((image, index) => insertImage.run(req.params.id, index, image.css, image.aiGenerated ? 1 : 0));
+        imagesToInsert.forEach((image, index) => persistListingImageRow(req.params.id, index, image));
       });
       replaceImages(newImages);
 

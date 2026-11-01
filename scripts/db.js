@@ -84,8 +84,9 @@ function seedIfEmpty(db) {
 // Bundled catalog products are published content rather than disposable demo
 // fixtures, so they are synchronized independently of shouldSeedDemoData().
 // INSERT OR IGNORE makes this safe on every startup: existing rows (including
-// a user's row with a colliding id) are never overwritten, and images are
-// inserted only when their parent catalog row was newly added.
+// a user's row with a colliding id) are never overwritten. Missing bundled
+// gallery positions are synchronized independently so an existing production
+// catalogue gains newly shipped product photos without duplicating them.
 function syncBundledCatalog(db) {
   const insertListing = db.prepare(`
     INSERT OR IGNORE INTO listings
@@ -95,6 +96,9 @@ function syncBundledCatalog(db) {
   `);
   const insertImage = db.prepare(`
     INSERT INTO listing_images (listing_id, position, css, ai_generated) VALUES (?, ?, ?, ?)
+  `);
+  const hasImageAtPosition = db.prepare(`
+    SELECT 1 FROM listing_images WHERE listing_id = ? AND position = ? LIMIT 1
   `);
 
   const sync = db.transaction(() => {
@@ -124,11 +128,12 @@ function syncBundledCatalog(db) {
         sourceUrl: listing.sourceUrl || null,
         createdAt: listing.postedAt
       });
-      if (result.changes === 1) {
-        listing.images.forEach((image, index) => {
+      void result;
+      listing.images.forEach((image, index) => {
+        if (!hasImageAtPosition.get(listing.id, index)) {
           insertImage.run(listing.id, index, image.css, image.aiGenerated ? 1 : 0);
-        });
-      }
+        }
+      });
     }
   });
   sync();
@@ -141,7 +146,7 @@ function syncBundledCatalog(db) {
 // a fresh or already-migrated database does nothing here. Seed listings'
 // gradients never match the inline pattern, so they pass through untouched.
 function migrateInlineImagesToFiles(db, uploadsDir) {
-  const { saveImageIfInline } = createImageStorage(uploadsDir);
+  const { saveImageIfInlineSync } = createImageStorage(uploadsDir);
   const inlineImageRows = db.prepare("SELECT id, listing_id, position, css FROM listing_images WHERE css LIKE 'url(data:%'").all();
   const inlineListingRows = db.prepare("SELECT id, image FROM listings WHERE image LIKE 'url(data:%'").all();
   if (inlineImageRows.length === 0 && inlineListingRows.length === 0) return;
@@ -151,13 +156,82 @@ function migrateInlineImagesToFiles(db, uploadsDir) {
 
   const migrate = db.transaction(() => {
     for (const row of inlineImageRows) {
-      updateImage.run(saveImageIfInline(row.css, `${row.listing_id}-${row.position}-migrated`), row.id);
+      updateImage.run(saveImageIfInlineSync(row.css, `${row.listing_id}-${row.position}-migrated`), row.id);
     }
     for (const row of inlineListingRows) {
-      updateListingCover.run(saveImageIfInline(row.image, `${row.id}-cover-migrated`), row.id);
+      updateListingCover.run(saveImageIfInlineSync(row.image, `${row.id}-cover-migrated`), row.id);
     }
   });
   migrate();
+}
+
+// Additive image-asset metadata migration. `listing_images` is the durable
+// image database: every uploaded photo keeps its owner, storage identity,
+// byte size, MIME type, checksum and (for decodable real images) dimensions.
+function migrateListingImageMetadataColumns(db, uploadsDir) {
+  const definitions = {
+    mime_type: "TEXT",
+    byte_size: "INTEGER",
+    width: "INTEGER",
+    height: "INTEGER",
+    sha256: "TEXT",
+    storage_key: "TEXT",
+    source_type: "TEXT NOT NULL DEFAULT 'unknown'",
+    uploaded_by: "TEXT",
+    created_at: "INTEGER"
+  };
+  const existing = new Set(db.prepare("PRAGMA table_info(listing_images)").all().map((column) => column.name));
+  for (const [name, definition] of Object.entries(definitions)) {
+    if (!existing.has(name)) db.exec(`ALTER TABLE listing_images ADD COLUMN ${name} ${definition}`);
+  }
+
+  db.prepare(`
+    UPDATE listing_images
+       SET source_type = CASE
+         WHEN ai_generated = 1 THEN 'ai'
+         WHEN css LIKE 'url(/uploads/%' THEN 'upload'
+         WHEN css LIKE 'url(http%' THEN 'external'
+         ELSE 'css'
+       END
+     WHERE source_type IS NULL OR source_type = 'unknown'
+  `).run();
+  db.prepare(`
+    UPDATE listing_images
+       SET uploaded_by = (SELECT seller_id FROM listings WHERE listings.id = listing_images.listing_id)
+     WHERE uploaded_by IS NULL AND source_type IN ('upload', 'ai')
+  `).run();
+
+  const storage = createImageStorage(uploadsDir);
+  const localRows = db.prepare(
+    "SELECT id, listing_id, position, css FROM listing_images WHERE css LIKE 'url(/uploads/%' AND (byte_size IS NULL OR sha256 IS NULL OR storage_key IS NULL OR width IS NULL OR height IS NULL OR byte_size >= 1000000)"
+  ).all();
+  const update = db.prepare(
+    "UPDATE listing_images SET css = ?, mime_type = ?, byte_size = ?, width = ?, height = ?, sha256 = ?, storage_key = ?, created_at = COALESCE(created_at, ?) WHERE id = ?"
+  );
+  for (const row of localRows) {
+    const match = /^url\(\/uploads\/([^)]+)\)/.exec(row.css || "");
+    if (!match) continue;
+    const storageKey = path.basename(match[1]);
+    const filePath = path.join(storage.uploadsDir, storageKey);
+    if (!fs.existsSync(filePath)) continue;
+    const metadata = storage.inspectAndOptimizeLocalFileSync(storageKey);
+    const suffixMatch = /\)(.*)$/.exec(row.css || "");
+    const nextCss = `url(/uploads/${metadata.storageKey})${suffixMatch ? suffixMatch[1] : ""}`;
+    update.run(
+      nextCss,
+      metadata.mimeType,
+      metadata.byteSize,
+      metadata.width,
+      metadata.height,
+      metadata.sha256,
+      metadata.storageKey,
+      Date.now(),
+      row.id
+    );
+    if (row.position === 0) {
+      db.prepare("UPDATE listings SET image = ? WHERE id = ?").run(nextCss, row.listing_id);
+    }
+  }
 }
 
 // NM-A13: defensive, idempotent migration for any database created before
@@ -405,6 +479,7 @@ function openDatabase(dbPath, options = {}) {
   // database would -- backfilling here, not before seeding, catches both.
   migrateListingBoostColumns(db);
   migrateInlineImagesToFiles(db, options.uploadsDir);
+  migrateListingImageMetadataColumns(db, options.uploadsDir);
 
   return db;
 }

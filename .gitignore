@@ -6,6 +6,8 @@ uploads/*
 
 # Installed dependencies
 node_modules/
+assets/product-images/source/
+assets/product-images/generated/*.png
 
 # Browser automation scratch data
 .playwright-mcp/

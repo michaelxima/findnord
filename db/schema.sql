@@ -113,6 +113,15 @@ CREATE TABLE IF NOT EXISTS listing_images (
   position INTEGER NOT NULL,
   css TEXT NOT NULL,
   ai_generated INTEGER NOT NULL DEFAULT 0,
+  mime_type TEXT,
+  byte_size INTEGER,
+  width INTEGER,
+  height INTEGER,
+  sha256 TEXT,
+  storage_key TEXT,
+  source_type TEXT NOT NULL DEFAULT 'unknown',
+  uploaded_by TEXT,
+  created_at INTEGER,
   FOREIGN KEY (listing_id) REFERENCES listings(id)
 );
 
