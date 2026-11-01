@@ -28,7 +28,7 @@ assert.match(html, /<shopify-store[^>]*store-domain="https:\/\/mikazan\.shop"/, 
 assert.equal((html.match(/<shopify-cart\b/g) || []).length, 1, "exactly one shared Shopify cart must exist");
 assert.match(js, /function shopifyProductHandle\(sourceUrl\)/, "Shopify URL classification must be centralized");
 assert.match(js, /\^https:\\\/\\\/mikazan\\\.shop\\\/products\\\//, "only an exact canonical Mikazan product URL may become an embedded purchase");
-assert.match(js, /shopify-attr--disabled="!product\.selectedOrFirstAvailableVariant\.availableForSale"/, "sold-out variants must disable Add to cart");
+assert.doesNotMatch(js, /shopify-attr--disabled/, "Shopify purchase UI must not use expression bindings that require unsafe-eval");
 assert.match(js, /getElementById\('shopify-cart'\)\.addLine\(event\)\.showModal\(\)/, "Add to cart must open the shared embedded cart");
 assert.match(js, /return listing\.sourceUrl[\s\S]*?<a class="source-cta"/, "non-Shopify source listings must retain their outbound CTA");
 
@@ -2074,6 +2074,7 @@ const driveTuneUrl = "https://mikazan.shop/products/kc-01-car-charger-with-one-t
 const embeddedPurchase = context.sourcePurchaseTemplate({ title: "DriveTune Car Charging Hub", sourceUrl: driveTuneUrl });
 assert.match(embeddedPurchase, /<shopify-context[^>]*handle="kc-01-car-charger-with-one-to-two-usb-ports-intelligent-digital-display-qc3-0-fast-charging-multifunctional-car-cigarette-lighter"/);
 assert.match(embeddedPurchase, />Add to cart<\/button>/);
+assert.doesNotMatch(embeddedPurchase, /shopify-attr--disabled/, "DriveTune purchase UI must render without an unsafe-eval expression binding");
 assert.doesNotMatch(embeddedPurchase, /source-cta/);
 assert.doesNotMatch(embeddedPurchase, /target="_blank"/);
 context.openListing("mikazan-drivetune");
@@ -2645,6 +2646,7 @@ assert.match(googleCsp, /script-src[^;]*https:\/\/cdn\.shopify\.com/, "CSP must 
 assert.match(googleCsp, /connect-src[^;]*https:\/\/mikazan\.shop/, "CSP must allow Storefront requests to Mikazan");
 assert.match(googleCsp, /form-action[^;]*https:\/\/mikazan\.shop/, "CSP must allow Shopify checkout navigation for Mikazan");
 assert.doesNotMatch(googleCsp, /https:\/\/\*\.(?:shopify|myshopify)/, "Shopify CSP allowances must not use wildcard hosts");
+assert.doesNotMatch(googleCsp, /script-src[^;]*'unsafe-eval'/, "Shopify integration must not weaken script-src with unsafe-eval");
 
 // A brand-new Google account creates a real user with a real session.
 const newGoogleToken = makeFakeGoogleIdToken({ payload: { sub: "google-sub-new", email: "newgoogleuser@example.com", name: "New Googler" } });

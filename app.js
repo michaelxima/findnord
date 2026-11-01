@@ -1934,7 +1934,7 @@ function sourcePurchaseTemplate(listing) {
     return `<shopify-context class="shopify-purchase" type="product" handle="${escapeHtml(handle)}">
       <template>
         <shopify-variant-selector></shopify-variant-selector>
-        <button type="button" class="shopify-add-button" onclick="document.getElementById('shopify-cart').addLine(event).showModal();" shopify-attr--disabled="!product.selectedOrFirstAvailableVariant.availableForSale" aria-label="${escapeHtml(t("shopify.addToCart"))}: ${escapeHtml(listing.title)}">${escapeHtml(t("shopify.addToCart"))}</button>
+        <button type="button" class="shopify-add-button" onclick="document.getElementById('shopify-cart').addLine(event).showModal();" aria-label="${escapeHtml(t("shopify.addToCart"))}: ${escapeHtml(listing.title)}">${escapeHtml(t("shopify.addToCart"))}</button>
       </template>
     </shopify-context>`;
   }
