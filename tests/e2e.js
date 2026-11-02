@@ -21,6 +21,30 @@ const dataServiceJs = fs.readFileSync(path.join(root, "data-service.js"), "utf8"
 const seedDataJs = fs.readFileSync(path.join(root, "db", "seed-data.js"), "utf8");
 const { categories: seedCategories, listings: seedListings } = require("../db/seed-data");
 
+// Homepage seller acquisition CTA: the promotion applies to LISTING FEES,
+// not to the products themselves, and routes through the existing Sell view.
+assert.match(html, /<aside class="seller-launch-cta" aria-labelledby="seller-launch-title">/);
+assert.match(html, /id="seller-launch-title">List your products free for six months<\/h2>/);
+assert.match(html, /pay no listing fee for six months/);
+assert.match(html, /id="seller-launch-button" data-view="sell-view">List your product free<\/button>/);
+assert.match(css, /\.seller-launch-cta\s*\{[\s\S]*?display: flex;[\s\S]*?border-radius: 14px;/);
+assert.match(css, /@media \(max-width: 620px\)[\s\S]*?\.seller-launch-cta\s*\{[\s\S]*?flex-direction: column;/);
+for (const language of ["en", "sv", "no", "da", "fi", "is"]) {
+  const block = js.match(new RegExp(`\\n  ${language}: \\{([\\s\\S]*?)(?=\\n  (?:en|sv|no|da|fi|is): \\{|\\n\\};)`));
+  assert.ok(block, `${language} translation dictionary must exist`);
+  for (const key of ["sellerLaunch.eyebrow", "sellerLaunch.title", "sellerLaunch.body", "sellerLaunch.button"]) {
+    assert.match(block[1], new RegExp(`"${key.replace(".", "\\.")}": "[^"]+"`), `${language} must translate ${key}`);
+  }
+}
+for (const [id, key] of [
+  ["seller-launch-eyebrow", "sellerLaunch.eyebrow"],
+  ["seller-launch-title", "sellerLaunch.title"],
+  ["seller-launch-body", "sellerLaunch.body"],
+  ["seller-launch-button", "sellerLaunch.button"]
+]) {
+  assert.match(js, new RegExp(`"${id}": "${key.replace(".", "\\.")}"`), `${id} must update on a live language switch`);
+}
+
 // Shopify purchase integration is deliberately limited to canonical Mikazan
 // product URLs; every other marketplace source keeps its outbound-link flow.
 assert.match(html, /https:\/\/cdn\.shopify\.com\/storefront\/web-components\.js/, "Shopify Storefront Web Components must load from the official CDN");

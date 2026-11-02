@@ -2307,6 +2307,64 @@ dd {
   margin: 0;
 }
 
+.seller-launch-cta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin: 18px 0;
+  padding: 22px 24px;
+  border: 1px solid color-mix(in srgb, var(--country-primary) 30%, var(--line));
+  border-radius: 14px;
+  background: linear-gradient(120deg, color-mix(in srgb, var(--country-primary) 12%, var(--paper)), var(--paper));
+}
+
+.seller-launch-copy {
+  min-width: 0;
+}
+
+.seller-launch-copy h2 {
+  margin: 3px 0 6px;
+  font-size: clamp(1.25rem, 3vw, 1.75rem);
+  line-height: 1.12;
+}
+
+.seller-launch-copy > p:last-child {
+  max-width: 680px;
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.seller-launch-button {
+  flex: 0 0 auto;
+  min-height: 44px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 8px;
+  color: #fff;
+  background: var(--country-primary);
+  font: inherit;
+  font-weight: 900;
+}
+
+.seller-launch-button:hover {
+  filter: brightness(0.94);
+}
+
+@media (max-width: 620px) {
+  .seller-launch-cta {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 16px;
+    padding: 18px;
+  }
+
+  .seller-launch-button {
+    width: 100%;
+  }
+}
+
 .active-filter-chip {
   display: inline-flex;
   align-items: center;
