@@ -142,13 +142,41 @@
 
         <div class="active-filter-chips" id="active-filter-chips" aria-label="Active filters"></div>
 
-        <aside class="seller-launch-cta" aria-labelledby="seller-launch-title">
-          <div class="seller-launch-copy">
-            <p class="eyebrow" id="seller-launch-eyebrow">Free seller launch</p>
-            <h2 id="seller-launch-title">List your products free for six months</h2>
-            <p id="seller-launch-body">Reach buyers across the Nordics. Create your listing today and pay no listing fee for six months.</p>
+        <aside class="seller-launch-carousel" id="seller-launch-carousel" role="region" aria-roledescription="carousel" aria-labelledby="seller-launch-eyebrow">
+          <p class="eyebrow" id="seller-launch-eyebrow">Free seller launch</p>
+          <div class="seller-launch-track">
+            <article class="seller-launch-slide active" data-seller-slide="0">
+              <div class="seller-launch-copy">
+                <h2 id="seller-launch-title-1">List your products free for six months</h2>
+                <p id="seller-launch-body-1">Reach buyers across the Nordics. Create your listing today and pay no listing fee for six months.</p>
+              </div>
+              <button type="button" class="seller-launch-button" id="seller-launch-button-1" data-view="sell-view">List your product free</button>
+            </article>
+            <article class="seller-launch-slide" data-seller-slide="1" hidden>
+              <div class="seller-launch-copy">
+                <h2 id="seller-launch-title-2">List free for six months. Reach more Nordic buyers.</h2>
+                <p id="seller-launch-body-2">Put your products in front of shoppers in Sweden and across the Nordics with no listing fee for six months.</p>
+              </div>
+              <button type="button" class="seller-launch-button" id="seller-launch-button-2" data-view="sell-view">List your product free</button>
+            </article>
+            <article class="seller-launch-slide" data-seller-slide="2" hidden>
+              <div class="seller-launch-copy">
+                <h2 id="seller-launch-title-3">Six months with no listing fee. Start selling today.</h2>
+                <p id="seller-launch-body-3">Add your first product in minutes and give buyers a clear way to discover it, completely free to list for six months.</p>
+              </div>
+              <button type="button" class="seller-launch-button" id="seller-launch-button-3" data-view="sell-view">List your product free</button>
+            </article>
           </div>
-          <button type="button" class="seller-launch-button" id="seller-launch-button" data-view="sell-view">List your product free</button>
+          <div class="seller-launch-controls">
+            <button type="button" class="seller-launch-arrow" id="seller-launch-prev" aria-label="Previous seller offer">‹</button>
+            <div class="seller-launch-dots" id="seller-launch-dots" role="group" aria-label="Choose seller offer">
+              <button type="button" class="seller-launch-dot active" data-seller-slide-to="0" aria-label="Show seller offer 1" aria-current="true"></button>
+              <button type="button" class="seller-launch-dot" data-seller-slide-to="1" aria-label="Show seller offer 2"></button>
+              <button type="button" class="seller-launch-dot" data-seller-slide-to="2" aria-label="Show seller offer 3"></button>
+            </div>
+            <button type="button" class="seller-launch-arrow" id="seller-launch-next" aria-label="Next seller offer">›</button>
+          </div>
+          <span class="sr-only" id="seller-launch-status" aria-live="polite">Seller offer 1 of 3</span>
         </aside>
 
         <section class="mikazan-showcase" id="mikazan-showcase" aria-labelledby="mikazan-showcase-title"></section>

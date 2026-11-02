@@ -21,26 +21,43 @@ const dataServiceJs = fs.readFileSync(path.join(root, "data-service.js"), "utf8"
 const seedDataJs = fs.readFileSync(path.join(root, "db", "seed-data.js"), "utf8");
 const { categories: seedCategories, listings: seedListings } = require("../db/seed-data");
 
-// Homepage seller acquisition CTA: the promotion applies to LISTING FEES,
-// not to the products themselves, and routes through the existing Sell view.
-assert.match(html, /<aside class="seller-launch-cta" aria-labelledby="seller-launch-title">/);
-assert.match(html, /id="seller-launch-title">List your products free for six months<\/h2>/);
-assert.match(html, /pay no listing fee for six months/);
-assert.match(html, /id="seller-launch-button" data-view="sell-view">List your product free<\/button>/);
-assert.match(css, /\.seller-launch-cta\s*\{[\s\S]*?display: flex;[\s\S]*?border-radius: 14px;/);
-assert.match(css, /@media \(max-width: 620px\)[\s\S]*?\.seller-launch-cta\s*\{[\s\S]*?flex-direction: column;/);
+// Homepage seller acquisition carousel: all three slides say LISTING is free
+// for six months (never that the products are free), and every action reuses
+// the existing Sell view.
+assert.match(html, /<aside class="seller-launch-carousel"[^>]*role="region"[^>]*aria-roledescription="carousel"/);
+assert.equal((html.match(/data-seller-slide="[0-2]"/g) || []).length, 3, "the seller offer must appear as exactly three carousel slides");
+assert.equal((html.match(/data-view="sell-view">List your product free<\/button>/g) || []).length, 3, "every carousel slide must route through the existing Sell view");
+assert.match(html, /List your products free for six months/);
+assert.match(html, /List free for six months\. Reach more Nordic buyers\./);
+assert.match(html, /Six months with no listing fee\. Start selling today\./);
+assert.equal((html.match(/six months/gi) || []).length >= 6, true, "every headline and body must repeat the six-month offer clearly");
+assert.match(html, /id="seller-launch-status" aria-live="polite"/);
+assert.equal((html.match(/data-seller-slide-to="[0-2]"/g) || []).length, 3, "manual dots must address every slide");
+assert.match(css, /\.seller-launch-copy h2\s*\{[\s\S]*?font-size: clamp\(1\.45rem,[\s\S]*?font-weight: 950;/, "the offer headline must be visually bold and prominent");
+assert.match(css, /@media \(prefers-reduced-motion: reduce\)[\s\S]*?animation: none;/, "motion-sensitive users must not receive slide animation");
+assert.match(css, /@media \(max-width: 620px\)[\s\S]*?\.seller-launch-slide\s*\{[\s\S]*?flex-direction: column;/);
+assert.match(js, /setTimeout\(\(\) => \{\s*showSellerLaunchSlide\(sellerLaunchSlideIndex \+ 1, false\);/, "the carousel must rotate automatically without announcing unsolicited changes");
+assert.match(js, /window\.matchMedia\("\(prefers-reduced-motion: reduce\)"\)\.matches/, "automatic rotation must respect reduced-motion preference");
+assert.match(js, /document\.hidden/, "automatic rotation must stop in a hidden tab");
+assert.match(js, /carousel\.addEventListener\("focusin"[\s\S]*?stopSellerLaunchRotation/, "focus interaction must pause automatic rotation");
 for (const language of ["en", "sv", "no", "da", "fi", "is"]) {
   const block = js.match(new RegExp(`\\n  ${language}: \\{([\\s\\S]*?)(?=\\n  (?:en|sv|no|da|fi|is): \\{|\\n\\};)`));
   assert.ok(block, `${language} translation dictionary must exist`);
-  for (const key of ["sellerLaunch.eyebrow", "sellerLaunch.title", "sellerLaunch.body", "sellerLaunch.button"]) {
+  for (const key of ["sellerLaunch.eyebrow", "sellerLaunch.title", "sellerLaunch.body", "sellerLaunch.button", "sellerLaunch.title2", "sellerLaunch.body2", "sellerLaunch.title3", "sellerLaunch.body3", "sellerLaunch.previous", "sellerLaunch.next", "sellerLaunch.choose", "sellerLaunch.show", "sellerLaunch.status"]) {
     assert.match(block[1], new RegExp(`"${key.replace(".", "\\.")}": "[^"]+"`), `${language} must translate ${key}`);
   }
 }
 for (const [id, key] of [
   ["seller-launch-eyebrow", "sellerLaunch.eyebrow"],
-  ["seller-launch-title", "sellerLaunch.title"],
-  ["seller-launch-body", "sellerLaunch.body"],
-  ["seller-launch-button", "sellerLaunch.button"]
+  ["seller-launch-title-1", "sellerLaunch.title"],
+  ["seller-launch-body-1", "sellerLaunch.body"],
+  ["seller-launch-button-1", "sellerLaunch.button"],
+  ["seller-launch-title-2", "sellerLaunch.title2"],
+  ["seller-launch-body-2", "sellerLaunch.body2"],
+  ["seller-launch-button-2", "sellerLaunch.button"],
+  ["seller-launch-title-3", "sellerLaunch.title3"],
+  ["seller-launch-body-3", "sellerLaunch.body3"],
+  ["seller-launch-button-3", "sellerLaunch.button"]
 ]) {
   assert.match(js, new RegExp(`"${id}": "${key.replace(".", "\\.")}"`), `${id} must update on a live language switch`);
 }

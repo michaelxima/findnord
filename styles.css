@@ -2307,16 +2307,40 @@ dd {
   margin: 0;
 }
 
-.seller-launch-cta {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 24px;
+.seller-launch-carousel {
+  position: relative;
   margin: 18px 0;
   padding: 22px 24px;
   border: 1px solid color-mix(in srgb, var(--country-primary) 30%, var(--line));
   border-radius: 14px;
   background: linear-gradient(120deg, color-mix(in srgb, var(--country-primary) 12%, var(--paper)), var(--paper));
+  overflow: hidden;
+}
+
+.seller-launch-carousel > .eyebrow {
+  margin-bottom: 6px;
+  font-weight: 900;
+}
+
+.seller-launch-track {
+  min-height: 108px;
+}
+
+.seller-launch-slide {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  animation: seller-launch-in 320ms ease-out;
+}
+
+.seller-launch-slide[hidden] {
+  display: none;
+}
+
+@keyframes seller-launch-in {
+  from { opacity: 0; transform: translateX(24px); }
+  to { opacity: 1; transform: translateX(0); }
 }
 
 .seller-launch-copy {
@@ -2325,8 +2349,11 @@ dd {
 
 .seller-launch-copy h2 {
   margin: 3px 0 6px;
-  font-size: clamp(1.25rem, 3vw, 1.75rem);
-  line-height: 1.12;
+  max-width: 760px;
+  font-size: clamp(1.45rem, 3.4vw, 2.15rem);
+  font-weight: 950;
+  line-height: 1.08;
+  letter-spacing: -0.025em;
 }
 
 .seller-launch-copy > p:last-child {
@@ -2352,12 +2379,65 @@ dd {
   filter: brightness(0.94);
 }
 
+.seller-launch-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.seller-launch-arrow {
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  color: var(--ink);
+  background: var(--paper);
+  font: inherit;
+  font-size: 1.35rem;
+  line-height: 1;
+}
+
+.seller-launch-dots {
+  display: flex;
+  gap: 8px;
+}
+
+.seller-launch-dot {
+  width: 10px;
+  height: 10px;
+  border: 0;
+  border-radius: 50%;
+  padding: 0;
+  background: color-mix(in srgb, var(--country-primary) 28%, var(--line));
+}
+
+.seller-launch-dot.active {
+  width: 28px;
+  border-radius: 999px;
+  background: var(--country-primary);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .seller-launch-slide {
+    animation: none;
+  }
+}
+
 @media (max-width: 620px) {
-  .seller-launch-cta {
+  .seller-launch-carousel {
+    padding: 18px;
+  }
+
+  .seller-launch-track {
+    min-height: 220px;
+  }
+
+  .seller-launch-slide {
     align-items: stretch;
     flex-direction: column;
     gap: 16px;
-    padding: 18px;
   }
 
   .seller-launch-button {

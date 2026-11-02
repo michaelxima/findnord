@@ -31,6 +31,15 @@ const translations = {
     "sellerLaunch.title": "List your products free for six months",
     "sellerLaunch.body": "Reach buyers across the Nordics. Create your listing today and pay no listing fee for six months.",
     "sellerLaunch.button": "List your product free",
+    "sellerLaunch.title2": "List free for six months. Reach more Nordic buyers.",
+    "sellerLaunch.body2": "Put your products in front of shoppers in Sweden and across the Nordics with no listing fee for six months.",
+    "sellerLaunch.title3": "Six months with no listing fee. Start selling today.",
+    "sellerLaunch.body3": "Add your first product in minutes and give buyers a clear way to discover it, completely free to list for six months.",
+    "sellerLaunch.previous": "Previous seller offer",
+    "sellerLaunch.next": "Next seller offer",
+    "sellerLaunch.choose": "Choose seller offer",
+    "sellerLaunch.show": "Show seller offer {number}",
+    "sellerLaunch.status": "Seller offer {current} of 3",
     "price.free": "Free",
     "price.perMonthSuffix": "/month",
     "price.placeholder": "Set a price",
@@ -348,6 +357,15 @@ const translations = {
     "sellerLaunch.title": "Annonsera dina produkter gratis i sex månader",
     "sellerLaunch.body": "Nå köpare i hela Norden. Skapa din annons idag och betala ingen annonsavgift på sex månader.",
     "sellerLaunch.button": "Annonsera din produkt gratis",
+    "sellerLaunch.title2": "Annonsera gratis i sex månader. Nå fler nordiska köpare.",
+    "sellerLaunch.body2": "Visa dina produkter för kunder i Sverige och hela Norden utan annonsavgift i sex månader.",
+    "sellerLaunch.title3": "Sex månader utan annonsavgift. Börja sälja idag.",
+    "sellerLaunch.body3": "Lägg upp din första produkt på några minuter och gör den lätt att hitta, helt gratis att annonsera i sex månader.",
+    "sellerLaunch.previous": "Föregående säljarerbjudande",
+    "sellerLaunch.next": "Nästa säljarerbjudande",
+    "sellerLaunch.choose": "Välj säljarerbjudande",
+    "sellerLaunch.show": "Visa säljarerbjudande {number}",
+    "sellerLaunch.status": "Säljarerbjudande {current} av 3",
     "price.free": "Gratis",
     "price.perMonthSuffix": "/månad",
     "price.placeholder": "Ange ett pris",
@@ -667,6 +685,15 @@ const translations = {
     "sellerLaunch.title": "Legg ut produktene dine gratis i seks måneder",
     "sellerLaunch.body": "Nå kjøpere i hele Norden. Opprett annonsen din i dag uten annonseavgift i seks måneder.",
     "sellerLaunch.button": "Legg ut produktet gratis",
+    "sellerLaunch.title2": "Legg ut gratis i seks måneder. Nå flere nordiske kjøpere.",
+    "sellerLaunch.body2": "Vis produktene dine til kunder i Norge og hele Norden uten annonseavgift i seks måneder.",
+    "sellerLaunch.title3": "Seks måneder uten annonseavgift. Begynn å selge i dag.",
+    "sellerLaunch.body3": "Legg ut ditt første produkt på få minutter og gjør det enkelt å finne, helt gratis å annonsere i seks måneder.",
+    "sellerLaunch.previous": "Forrige selgertilbud",
+    "sellerLaunch.next": "Neste selgertilbud",
+    "sellerLaunch.choose": "Velg selgertilbud",
+    "sellerLaunch.show": "Vis selgertilbud {number}",
+    "sellerLaunch.status": "Selgertilbud {current} av 3",
     "price.free": "Gratis",
     "price.perMonthSuffix": "/måned",
     "price.placeholder": "Angi en pris",
@@ -984,6 +1011,15 @@ const translations = {
     "sellerLaunch.title": "Opret dine produkter gratis i seks måneder",
     "sellerLaunch.body": "Nå ud til købere i hele Norden. Opret din annonce i dag uden annoncegebyr i seks måneder.",
     "sellerLaunch.button": "Opret dit produkt gratis",
+    "sellerLaunch.title2": "Opret gratis i seks måneder. Nå flere nordiske købere.",
+    "sellerLaunch.body2": "Vis dine produkter til kunder i Danmark og hele Norden uden annoncegebyr i seks måneder.",
+    "sellerLaunch.title3": "Seks måneder uden annoncegebyr. Begynd at sælge i dag.",
+    "sellerLaunch.body3": "Opret dit første produkt på få minutter og gør det nemt at finde, helt gratis at annoncere i seks måneder.",
+    "sellerLaunch.previous": "Forrige sælgertilbud",
+    "sellerLaunch.next": "Næste sælgertilbud",
+    "sellerLaunch.choose": "Vælg sælgertilbud",
+    "sellerLaunch.show": "Vis sælgertilbud {number}",
+    "sellerLaunch.status": "Sælgertilbud {current} af 3",
     "price.free": "Gratis",
     "price.perMonthSuffix": "/måned",
     "price.placeholder": "Angiv en pris",
@@ -1301,6 +1337,15 @@ const translations = {
     "sellerLaunch.title": "Ilmoita tuotteesi maksutta kuuden kuukauden ajan",
     "sellerLaunch.body": "Tavoita ostajia kaikkialla Pohjoismaissa. Luo ilmoitus tänään ilman ilmoitusmaksua kuuteen kuukauteen.",
     "sellerLaunch.button": "Ilmoita tuotteesi maksutta",
+    "sellerLaunch.title2": "Ilmoita maksutta kuusi kuukautta. Tavoita enemmän pohjoismaisia ostajia.",
+    "sellerLaunch.body2": "Näytä tuotteesi ostajille Suomessa ja kaikkialla Pohjoismaissa ilman ilmoitusmaksua kuuteen kuukauteen.",
+    "sellerLaunch.title3": "Kuusi kuukautta ilman ilmoitusmaksua. Aloita myynti tänään.",
+    "sellerLaunch.body3": "Lisää ensimmäinen tuotteesi muutamassa minuutissa ja auta ostajia löytämään se, täysin maksutta kuuden kuukauden ajan.",
+    "sellerLaunch.previous": "Edellinen myyjätarjous",
+    "sellerLaunch.next": "Seuraava myyjätarjous",
+    "sellerLaunch.choose": "Valitse myyjätarjous",
+    "sellerLaunch.show": "Näytä myyjätarjous {number}",
+    "sellerLaunch.status": "Myyjätarjous {current}/3",
     "price.free": "Ilmainen",
     "price.perMonthSuffix": "/kk",
     "price.placeholder": "Aseta hinta",
@@ -1618,6 +1663,15 @@ const translations = {
     "sellerLaunch.title": "Skráðu vörurnar þínar ókeypis í sex mánuði",
     "sellerLaunch.body": "Náðu til kaupenda um öll Norðurlöndin. Búðu til auglýsingu í dag án skráningargjalds í sex mánuði.",
     "sellerLaunch.button": "Skráðu vöruna ókeypis",
+    "sellerLaunch.title2": "Skráðu ókeypis í sex mánuði. Náðu til fleiri norrænna kaupenda.",
+    "sellerLaunch.body2": "Sýndu vörurnar þínar kaupendum á Íslandi og um öll Norðurlöndin án skráningargjalds í sex mánuði.",
+    "sellerLaunch.title3": "Sex mánuðir án skráningargjalds. Byrjaðu að selja í dag.",
+    "sellerLaunch.body3": "Bættu fyrstu vörunni þinni við á örfáum mínútum og auðveldaðu kaupendum að finna hana, alveg ókeypis í sex mánuði.",
+    "sellerLaunch.previous": "Fyrra seljendatilboð",
+    "sellerLaunch.next": "Næsta seljendatilboð",
+    "sellerLaunch.choose": "Veldu seljendatilboð",
+    "sellerLaunch.show": "Sýna seljendatilboð {number}",
+    "sellerLaunch.status": "Seljendatilboð {current} af 3",
     "price.free": "Frítt",
     "price.perMonthSuffix": "/mán.",
     "price.placeholder": "Settu verð",
@@ -2034,9 +2088,15 @@ function applyTranslations() {
     "brand-eyebrow": "brand.eyebrow",
     "browse-title": "browse.heading",
     "seller-launch-eyebrow": "sellerLaunch.eyebrow",
-    "seller-launch-title": "sellerLaunch.title",
-    "seller-launch-body": "sellerLaunch.body",
-    "seller-launch-button": "sellerLaunch.button",
+    "seller-launch-title-1": "sellerLaunch.title",
+    "seller-launch-body-1": "sellerLaunch.body",
+    "seller-launch-button-1": "sellerLaunch.button",
+    "seller-launch-title-2": "sellerLaunch.title2",
+    "seller-launch-body-2": "sellerLaunch.body2",
+    "seller-launch-button-2": "sellerLaunch.button",
+    "seller-launch-title-3": "sellerLaunch.title3",
+    "seller-launch-body-3": "sellerLaunch.body3",
+    "seller-launch-button-3": "sellerLaunch.button",
     "filter-button-label": "browse.filter",
     "search-label-text": "browse.searchLabel",
     "empty-heading": "empty.heading",
@@ -2273,8 +2333,95 @@ function applyTranslations() {
     if (key && label) label.textContent = t(key);
   });
 
+  localizeSellerLaunchCarousel();
   if (document.documentElement) document.documentElement.lang = currentLanguage;
   renderAccountPanel();
+}
+
+let sellerLaunchSlideIndex = 0;
+let sellerLaunchTimer = null;
+let sellerLaunchPaused = false;
+
+function sellerLaunchTemplate(key, token, value) {
+  return t(key).replace(`{${token}}`, String(value));
+}
+
+function localizeSellerLaunchCarousel() {
+  const previous = document.getElementById("seller-launch-prev");
+  const next = document.getElementById("seller-launch-next");
+  const dots = document.getElementById("seller-launch-dots");
+  if (previous) previous.setAttribute("aria-label", t("sellerLaunch.previous"));
+  if (next) next.setAttribute("aria-label", t("sellerLaunch.next"));
+  if (dots) dots.setAttribute("aria-label", t("sellerLaunch.choose"));
+  document.querySelectorAll("[data-seller-slide-to]").forEach((dot) => {
+    const number = Number(dot.dataset.sellerSlideTo) + 1;
+    dot.setAttribute("aria-label", sellerLaunchTemplate("sellerLaunch.show", "number", number));
+  });
+  const status = document.getElementById("seller-launch-status");
+  if (status) status.textContent = sellerLaunchTemplate("sellerLaunch.status", "current", sellerLaunchSlideIndex + 1);
+}
+
+function showSellerLaunchSlide(index, announce = true) {
+  const slides = Array.from(document.querySelectorAll("[data-seller-slide]"));
+  if (!slides.length) return;
+  sellerLaunchSlideIndex = (Number(index) + slides.length) % slides.length;
+  slides.forEach((slide, slideIndex) => {
+    const active = slideIndex === sellerLaunchSlideIndex;
+    slide.hidden = !active;
+    slide.classList.toggle("active", active);
+  });
+  document.querySelectorAll("[data-seller-slide-to]").forEach((dot, dotIndex) => {
+    const active = dotIndex === sellerLaunchSlideIndex;
+    dot.classList.toggle("active", active);
+    if (active) dot.setAttribute("aria-current", "true");
+    else dot.removeAttribute("aria-current");
+  });
+  const status = document.getElementById("seller-launch-status");
+  if (status) {
+    status.setAttribute("aria-live", announce ? "polite" : "off");
+    status.textContent = sellerLaunchTemplate("sellerLaunch.status", "current", sellerLaunchSlideIndex + 1);
+  }
+}
+
+function stopSellerLaunchRotation() {
+  if (sellerLaunchTimer) clearTimeout(sellerLaunchTimer);
+  sellerLaunchTimer = null;
+}
+
+function startSellerLaunchRotation() {
+  stopSellerLaunchRotation();
+  const reduceMotion = typeof window !== "undefined" && typeof window.matchMedia === "function" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (sellerLaunchPaused || reduceMotion || (typeof document !== "undefined" && document.hidden)) return;
+  sellerLaunchTimer = setTimeout(() => {
+    showSellerLaunchSlide(sellerLaunchSlideIndex + 1, false);
+    startSellerLaunchRotation();
+  }, 6500);
+}
+
+function initSellerLaunchCarousel() {
+  const carousel = document.getElementById("seller-launch-carousel");
+  if (!carousel) return;
+  showSellerLaunchSlide(0, false);
+  carousel.addEventListener("mouseenter", () => { sellerLaunchPaused = true; stopSellerLaunchRotation(); });
+  carousel.addEventListener("mouseleave", () => { sellerLaunchPaused = false; startSellerLaunchRotation(); });
+  carousel.addEventListener("focusin", () => { sellerLaunchPaused = true; stopSellerLaunchRotation(); });
+  carousel.addEventListener("focusout", (event) => {
+    if (carousel.contains(event.relatedTarget)) return;
+    sellerLaunchPaused = false;
+    startSellerLaunchRotation();
+  });
+  document.getElementById("seller-launch-prev")?.addEventListener("click", () => showSellerLaunchSlide(sellerLaunchSlideIndex - 1));
+  document.getElementById("seller-launch-next")?.addEventListener("click", () => showSellerLaunchSlide(sellerLaunchSlideIndex + 1));
+  document.querySelectorAll("[data-seller-slide-to]").forEach((dot) => {
+    dot.addEventListener("click", () => showSellerLaunchSlide(Number(dot.dataset.sellerSlideTo)));
+  });
+  if (typeof document.addEventListener === "function") {
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) stopSellerLaunchRotation();
+      else startSellerLaunchRotation();
+    });
+  }
+  startSellerLaunchRotation();
 }
 
 function setLanguage(lang) {
@@ -7543,6 +7690,7 @@ async function bootstrap() {
   initCookieBanner();
   bindEvents();
   applyTranslations();
+  initSellerLaunchCarousel();
   if (document.getElementById("language-select")) {
     document.getElementById("language-select").value = currentLanguage;
   }
